@@ -7,6 +7,7 @@ from app.api.routes import (
     instruments,
     login,
     private,
+    release,
     users,
     utils,
 )
@@ -20,6 +21,7 @@ api_router.include_router(audit.router)
 api_router.include_router(deposits.router)
 api_router.include_router(documents.router)
 api_router.include_router(instruments.router)
+api_router.include_router(release.router)
 
 
 if settings.FASTAPI_ENV == "development":

@@ -5,6 +5,24 @@ export type ClientOptions = {
 };
 
 /**
+ * Body_documents-upload_document
+ */
+export type Body_documents_upload_document = {
+    /**
+     * File
+     */
+    file: Blob | File;
+    /**
+     * Kind
+     */
+    kind?: string;
+    /**
+     * Instrument Id
+     */
+    instrument_id?: string | null;
+};
+
+/**
  * Body_login-login_access_token
  */
 export type Body_login_login_access_token = {
@@ -35,6 +53,114 @@ export type Body_login_login_access_token = {
 };
 
 /**
+ * CalculatorBreakdown
+ */
+export type CalculatorBreakdown = {
+    /**
+     * Programme
+     */
+    programme: string;
+    /**
+     * Amount Paise
+     */
+    amount_paise: number;
+};
+
+/**
+ * CalculatorResponse
+ */
+export type CalculatorResponse = {
+    /**
+     * Required Deposit Paise
+     */
+    required_deposit_paise: number;
+    /**
+     * Multiplier
+     */
+    multiplier: number;
+    /**
+     * Exempt
+     */
+    exempt: boolean;
+    /**
+     * Breakdown
+     */
+    breakdown: Array<CalculatorBreakdown>;
+    /**
+     * Rule Edition
+     */
+    rule_edition: string;
+    /**
+     * Rule Effective From
+     */
+    rule_effective_from: string;
+};
+
+/**
+ * ClockUpdate
+ */
+export type ClockUpdate = {
+    /**
+     * Offset Seconds
+     */
+    offset_seconds: number;
+};
+
+/**
+ * DocumentPublic
+ */
+export type DocumentPublic = {
+    /**
+     * Instrument Id
+     */
+    instrument_id: string;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Version
+     */
+    version?: number;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Mime
+     */
+    mime: string;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number;
+    /**
+     * Sha256
+     */
+    sha256: string;
+    /**
+     * Storage Key
+     */
+    storage_key: string;
+    /**
+     * Uploaded By
+     */
+    uploaded_by?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Uploaded At
+     */
+    uploaded_at: string;
+    /**
+     * Is Signed Dsc
+     */
+    is_signed_dsc?: boolean | null;
+};
+
+/**
  * HTTPValidationError
  */
 export type HTTPValidationError = {
@@ -42,6 +168,176 @@ export type HTTPValidationError = {
      * Detail
      */
     detail?: Array<ValidationError>;
+};
+
+/**
+ * InstrumentPublic
+ */
+export type InstrumentPublic = {
+    /**
+     * Institution Id
+     */
+    institution_id: string;
+    /**
+     * Region
+     */
+    region: string;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Ref No
+     */
+    ref_no: string;
+    /**
+     * Bank Code
+     */
+    bank_code: string;
+    /**
+     * Ifsc
+     */
+    ifsc: string;
+    /**
+     * Amount Paise
+     */
+    amount_paise: number;
+    /**
+     * Issue Date
+     */
+    issue_date: string;
+    /**
+     * Maturity Date
+     */
+    maturity_date: string;
+    /**
+     * Holders
+     */
+    holders?: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Lien Marked
+     */
+    lien_marked?: boolean;
+    /**
+     * Is Duplicate Receipt
+     */
+    is_duplicate_receipt?: boolean;
+    /**
+     * Lifecycle
+     */
+    lifecycle?: string;
+    /**
+     * Replaces Id
+     */
+    replaces_id?: string | null;
+    /**
+     * Created By
+     */
+    created_by?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Badge
+     */
+    badge?: string | null;
+    /**
+     * Next Action Code
+     */
+    next_action_code?: string | null;
+    /**
+     * Next Action Label
+     */
+    next_action_label?: string | null;
+};
+
+/**
+ * InstrumentSubmit
+ */
+export type InstrumentSubmit = {
+    /**
+     * Institution Id
+     */
+    institution_id?: string | null;
+    /**
+     * Region
+     */
+    region?: string | null;
+    /**
+     * Kind
+     */
+    kind?: string;
+    /**
+     * Ref No
+     */
+    ref_no: string;
+    /**
+     * Bank Code
+     */
+    bank_code: string;
+    /**
+     * Ifsc
+     */
+    ifsc: string;
+    /**
+     * Amount Paise
+     */
+    amount_paise: number;
+    /**
+     * Issue Date
+     */
+    issue_date: string;
+    /**
+     * Maturity Date
+     */
+    maturity_date: string;
+    /**
+     * Holders
+     */
+    holders?: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Lien Marked
+     */
+    lien_marked?: boolean;
+    /**
+     * Is Duplicate Receipt
+     */
+    is_duplicate_receipt?: boolean;
+    /**
+     * Replaces Id
+     */
+    replaces_id?: string | null;
+    /**
+     * Document Ids
+     */
+    document_ids?: Array<string>;
+};
+
+/**
+ * InstrumentsPublic
+ */
+export type InstrumentsPublic = {
+    /**
+     * Data
+     */
+    data: Array<InstrumentPublic>;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -88,6 +384,82 @@ export type PrivateUserCreate = {
      * Is Verified
      */
     is_verified?: boolean;
+};
+
+/**
+ * ReleaseRequestCreate
+ */
+export type ReleaseRequestCreate = {
+    /**
+     * Path
+     */
+    path: string;
+    /**
+     * Attestation No Complaints
+     */
+    attestation_no_complaints?: boolean;
+};
+
+/**
+ * ReleaseRequestPublic
+ */
+export type ReleaseRequestPublic = {
+    /**
+     * Instrument Id
+     */
+    instrument_id: string;
+    /**
+     * Path
+     */
+    path: string;
+    /**
+     * Checklist
+     */
+    checklist?: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Status
+     */
+    status?: string;
+    /**
+     * Requested By
+     */
+    requested_by: string;
+    /**
+     * Verified By
+     */
+    verified_by?: string | null;
+    /**
+     * Approved By
+     */
+    approved_by?: string | null;
+    /**
+     * Receipt Token
+     */
+    receipt_token?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * SimConfirmRequest
+ */
+export type SimConfirmRequest = {
+    /**
+     * Outcome
+     */
+    outcome?: string;
 };
 
 /**
@@ -290,6 +662,131 @@ export type ValidationError = {
     ctx?: {
         [key: string]: unknown;
     };
+};
+
+export type simulationGetClockData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sim/clock';
+};
+
+export type simulationGetClockResponses = {
+    /**
+     * Response Simulation-Get Clock
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type simulationGetClockResponse = simulationGetClockResponses[keyof simulationGetClockResponses];
+
+export type simulationUpdateClockData = {
+    body: ClockUpdate;
+    path?: never;
+    query?: never;
+    url: '/sim/clock';
+};
+
+export type simulationUpdateClockErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type simulationUpdateClockError = simulationUpdateClockErrors[keyof simulationUpdateClockErrors];
+
+export type simulationUpdateClockResponses = {
+    /**
+     * Response Simulation-Update Clock
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type simulationUpdateClockResponse = simulationUpdateClockResponses[keyof simulationUpdateClockResponses];
+
+export type bankRequestConfirmationData = {
+    body?: never;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/bank/request-confirmation/{instrument_id}';
+};
+
+export type bankRequestConfirmationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type bankRequestConfirmationError = bankRequestConfirmationErrors[keyof bankRequestConfirmationErrors];
+
+export type bankRequestConfirmationResponses = {
+    /**
+     * Response Bank-Request Confirmation
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type bankSimulateBankConfirmationData = {
+    body: SimConfirmRequest;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/sim/bank/confirm/{instrument_id}';
+};
+
+export type bankSimulateBankConfirmationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type bankSimulateBankConfirmationError = bankSimulateBankConfirmationErrors[keyof bankSimulateBankConfirmationErrors];
+
+export type bankSimulateBankConfirmationResponses = {
+    /**
+     * Response Bank-Simulate Bank Confirmation
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type simulationTriggerDailyWorkerData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sim/worker/run-daily';
+};
+
+export type simulationTriggerDailyWorkerResponses = {
+    /**
+     * Response Simulation-Trigger Daily Worker
+     *
+     * Successful Response
+     */
+    200: unknown;
 };
 
 export type loginLoginAccessTokenData = {
@@ -716,6 +1213,387 @@ export type auditVerifyAuditChainResponses = {
 };
 
 export type auditVerifyAuditChainResponse = auditVerifyAuditChainResponses[keyof auditVerifyAuditChainResponses];
+
+export type depositsCalculateDepositData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Programmes
+         *
+         * Comma-separated list of programme names
+         */
+        programmes: string;
+        /**
+         * Land Ownership
+         *
+         * 'owned' or 'leased'
+         */
+        land_ownership?: string;
+        /**
+         * Institution Type
+         *
+         * 'private' or 'government'
+         */
+        institution_type?: string;
+        /**
+         * As Of
+         *
+         * Date for dated rulebook lookup
+         */
+        as_of?: string | null;
+    };
+    url: '/api/v1/deposits/calculator';
+};
+
+export type depositsCalculateDepositErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type depositsCalculateDepositError = depositsCalculateDepositErrors[keyof depositsCalculateDepositErrors];
+
+export type depositsCalculateDepositResponses = {
+    /**
+     * Successful Response
+     */
+    200: CalculatorResponse;
+};
+
+export type depositsCalculateDepositResponse = depositsCalculateDepositResponses[keyof depositsCalculateDepositResponses];
+
+export type documentsUploadDocumentData = {
+    body: Body_documents_upload_document;
+    path?: never;
+    query?: never;
+    url: '/api/v1/documents/upload';
+};
+
+export type documentsUploadDocumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type documentsUploadDocumentError = documentsUploadDocumentErrors[keyof documentsUploadDocumentErrors];
+
+export type documentsUploadDocumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: DocumentPublic;
+};
+
+export type documentsUploadDocumentResponse = documentsUploadDocumentResponses[keyof documentsUploadDocumentResponses];
+
+export type documentsDownloadDocumentData = {
+    body?: never;
+    path: {
+        /**
+         * Document Id
+         */
+        document_id: string;
+    };
+    query?: never;
+    url: '/api/v1/documents/{document_id}';
+};
+
+export type documentsDownloadDocumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type documentsDownloadDocumentError = documentsDownloadDocumentErrors[keyof documentsDownloadDocumentErrors];
+
+export type documentsDownloadDocumentResponses = {
+    /**
+     * Response Documents-Download Document
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type instrumentsSubmitInstrumentData = {
+    body: InstrumentSubmit;
+    path?: never;
+    query?: never;
+    url: '/api/v1/instruments/submit';
+};
+
+export type instrumentsSubmitInstrumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type instrumentsSubmitInstrumentError = instrumentsSubmitInstrumentErrors[keyof instrumentsSubmitInstrumentErrors];
+
+export type instrumentsSubmitInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: InstrumentPublic;
+};
+
+export type instrumentsSubmitInstrumentResponse = instrumentsSubmitInstrumentResponses[keyof instrumentsSubmitInstrumentResponses];
+
+export type instrumentsListInstrumentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/instruments';
+};
+
+export type instrumentsListInstrumentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type instrumentsListInstrumentsError = instrumentsListInstrumentsErrors[keyof instrumentsListInstrumentsErrors];
+
+export type instrumentsListInstrumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: InstrumentsPublic;
+};
+
+export type instrumentsListInstrumentsResponse = instrumentsListInstrumentsResponses[keyof instrumentsListInstrumentsResponses];
+
+export type instrumentsGetInstrumentData = {
+    body?: never;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/instruments/{instrument_id}';
+};
+
+export type instrumentsGetInstrumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type instrumentsGetInstrumentError = instrumentsGetInstrumentErrors[keyof instrumentsGetInstrumentErrors];
+
+export type instrumentsGetInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: InstrumentPublic;
+};
+
+export type instrumentsGetInstrumentResponse = instrumentsGetInstrumentResponses[keyof instrumentsGetInstrumentResponses];
+
+export type releaseGetInstrumentReleaseData = {
+    body?: never;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/instruments/{instrument_id}/release';
+};
+
+export type releaseGetInstrumentReleaseErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseGetInstrumentReleaseError = releaseGetInstrumentReleaseErrors[keyof releaseGetInstrumentReleaseErrors];
+
+export type releaseGetInstrumentReleaseResponses = {
+    /**
+     * Response Release-Get Instrument Release
+     *
+     * Successful Response
+     */
+    200: ReleaseRequestPublic | null;
+};
+
+export type releaseGetInstrumentReleaseResponse = releaseGetInstrumentReleaseResponses[keyof releaseGetInstrumentReleaseResponses];
+
+export type releaseRequestReleaseData = {
+    body: ReleaseRequestCreate;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/instruments/{instrument_id}/release';
+};
+
+export type releaseRequestReleaseErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseRequestReleaseError = releaseRequestReleaseErrors[keyof releaseRequestReleaseErrors];
+
+export type releaseRequestReleaseResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseRequestPublic;
+};
+
+export type releaseRequestReleaseResponse = releaseRequestReleaseResponses[keyof releaseRequestReleaseResponses];
+
+export type releaseVerifyReleaseData = {
+    body?: never;
+    path: {
+        /**
+         * Release Id
+         */
+        release_id: string;
+    };
+    query?: never;
+    url: '/api/v1/release/{release_id}/verify';
+};
+
+export type releaseVerifyReleaseErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseVerifyReleaseError = releaseVerifyReleaseErrors[keyof releaseVerifyReleaseErrors];
+
+export type releaseVerifyReleaseResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseRequestPublic;
+};
+
+export type releaseVerifyReleaseResponse = releaseVerifyReleaseResponses[keyof releaseVerifyReleaseResponses];
+
+export type releaseApproveReleaseData = {
+    body?: never;
+    path: {
+        /**
+         * Release Id
+         */
+        release_id: string;
+    };
+    query?: never;
+    url: '/api/v1/release/{release_id}/approve';
+};
+
+export type releaseApproveReleaseErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseApproveReleaseError = releaseApproveReleaseErrors[keyof releaseApproveReleaseErrors];
+
+export type releaseApproveReleaseResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseRequestPublic;
+};
+
+export type releaseApproveReleaseResponse = releaseApproveReleaseResponses[keyof releaseApproveReleaseResponses];
+
+export type releaseRejectReleaseData = {
+    body?: never;
+    path: {
+        /**
+         * Release Id
+         */
+        release_id: string;
+    };
+    query: {
+        /**
+         * Reason
+         */
+        reason: string;
+    };
+    url: '/api/v1/release/{release_id}/reject';
+};
+
+export type releaseRejectReleaseErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseRejectReleaseError = releaseRejectReleaseErrors[keyof releaseRejectReleaseErrors];
+
+export type releaseRejectReleaseResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseRequestPublic;
+};
+
+export type releaseRejectReleaseResponse = releaseRejectReleaseResponses[keyof releaseRejectReleaseResponses];
+
+export type releaseVerifyReceiptEndpointData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Token
+         */
+        token: string;
+    };
+    url: '/api/v1/release/verify-receipt';
+};
+
+export type releaseVerifyReceiptEndpointErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseVerifyReceiptEndpointError = releaseVerifyReceiptEndpointErrors[keyof releaseVerifyReceiptEndpointErrors];
+
+export type releaseVerifyReceiptEndpointResponses = {
+    /**
+     * Response Release-Verify Receipt Endpoint
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

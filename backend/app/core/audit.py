@@ -72,3 +72,6 @@ def audit(
     if event_id is None:
         raise RuntimeError("audit_append returned null event id")
     return int(event_id)
+
+
+audit_append = audit
