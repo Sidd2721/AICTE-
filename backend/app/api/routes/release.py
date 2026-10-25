@@ -141,39 +141,7 @@ def verify_release(
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrument not found")
 
-    # Invariant checks: check open discrepancy block flags and badge
-    confs = session.exec(
-        select(Confirmation)
-        .where(Confirmation.instrument_id == instrument.id)
-        .where(col(Confirmation.revoked).is_(False))
-    ).all()
-    trust_confs = [
-        TrustConfirmation(
-            fields=c.fields or {},
-            method=c.method,
-            confirmed_at=c.confirmed_at or datetime.now(UTC),
-            expires_at=c.expires_at or datetime.now(UTC),
-            revoked=c.revoked,
-        )
-        for c in confs
-    ]
-    inst_badge = badge(
-        {
-            "ref_no": instrument.ref_no,
-            "bank_code": instrument.bank_code,
-            "amount_paise": instrument.amount_paise,
-            "maturity_date": str(instrument.maturity_date),
-        },
-        trust_confs,
-        datetime.now(UTC),
-    )
-    if inst_badge in ("stale", "changed"):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Cannot verify release: bank confirmation status is {inst_badge}",
-        )
-
-    # Check discrepancy flags
+    # Check discrepancy flags first
     waivers = session.exec(
         select(FlagWaiver).where(FlagWaiver.instrument_id == instrument.id)
     ).all()
@@ -205,6 +173,38 @@ def verify_release(
                     status_code=400,
                     detail=f"Cannot verify release: blocked by discrepancy {d.get('code')}: {d.get('label')}",
                 )
+
+    # Invariant checks: check open discrepancy block flags and badge
+    confs = session.exec(
+        select(Confirmation)
+        .where(Confirmation.instrument_id == instrument.id)
+        .where(col(Confirmation.revoked).is_(False))
+    ).all()
+    trust_confs = [
+        TrustConfirmation(
+            fields=c.fields or {},
+            method=c.method,
+            confirmed_at=c.confirmed_at or datetime.now(UTC),
+            expires_at=c.expires_at or datetime.now(UTC),
+            revoked=c.revoked,
+        )
+        for c in confs
+    ]
+    inst_badge = badge(
+        {
+            "ref_no": instrument.ref_no,
+            "bank_code": instrument.bank_code,
+            "amount_paise": instrument.amount_paise,
+            "maturity_date": str(instrument.maturity_date),
+        },
+        trust_confs,
+        datetime.now(UTC),
+    )
+    if inst_badge in ("stale", "changed"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot verify release: bank confirmation status is {inst_badge}",
+        )
 
     release_req.verified_by = current_user.id
     release_req.status = "verified"

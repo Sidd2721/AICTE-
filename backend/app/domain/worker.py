@@ -1,15 +1,18 @@
+from datetime import date
 from typing import Any
 
 from sqlalchemy import text
 from sqlmodel import Session, col, select
 
-from app.domain.clock import today
+from app.domain.clock import today as default_today
 from app.models import Instrument, Notice, Obligation
 
 OBLIGATIONS_ADVISORY_LOCK_ID = 847291
 
 
-def run_daily_obligations_job(session: Session) -> dict[str, Any]:
+def run_daily_obligations_job(
+    session: Session, current_date: date | None = None
+) -> dict[str, Any]:
     """Execute the daily obligations check under a PostgreSQL advisory lock (Invariant I10)."""
     # Attempt to acquire advisory lock
     lock_result = session.execute(
@@ -21,13 +24,14 @@ def run_daily_obligations_job(session: Session) -> dict[str, Any]:
         return {
             "lock_acquired": False,
             "reason": "Lock already held by another worker",
+            "scanned_instruments": 0,
             "obligations_processed": 0,
             "notices_created": 0,
         }
 
     obligations_created = 0
     notices_created = 0
-    current_date = today()
+    target_date = current_date or default_today()
 
     try:
         instruments = session.exec(
@@ -37,7 +41,7 @@ def run_daily_obligations_job(session: Session) -> dict[str, Any]:
         ).all()
 
         for inst in instruments:
-            days_to_maturity = (inst.maturity_date - current_date).days
+            days_to_maturity = (inst.maturity_date - target_date).days
 
             # 1. Renewal due within 90 days
             if 0 <= days_to_maturity <= 90:
@@ -105,6 +109,7 @@ def run_daily_obligations_job(session: Session) -> dict[str, Any]:
 
         return {
             "lock_acquired": True,
+            "scanned_instruments": len(instruments),
             "obligations_processed": obligations_created,
             "notices_created": notices_created,
         }
@@ -114,3 +119,8 @@ def run_daily_obligations_job(session: Session) -> dict[str, Any]:
             text("SELECT pg_advisory_unlock(:lock_id)"),
             params={"lock_id": OBLIGATIONS_ADVISORY_LOCK_ID},
         )
+
+
+def run_daily_worker(session: Session, today: date | None = None) -> dict[str, Any]:
+    """Alias for running daily obligations check with optional target date."""
+    return run_daily_obligations_job(session=session, current_date=today)

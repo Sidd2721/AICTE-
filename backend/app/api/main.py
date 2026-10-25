@@ -5,6 +5,7 @@ from app.api.routes import (
     dashboard,
     deposits,
     documents,
+    fraud_lab,
     instruments,
     login,
     private,
@@ -26,6 +27,7 @@ api_router.include_router(instruments.router)
 api_router.include_router(release.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(reports.router)
+api_router.include_router(fraud_lab.router)
 
 
 if settings.FASTAPI_ENV == "development":
