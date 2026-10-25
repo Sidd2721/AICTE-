@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - prod-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set strong password for production}
+      POSTGRES_DB: app
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FASTAPI_ENV: production
+      PROJECT_NAME: "FDR Portal (AICTE PS 26265)"
+      SECRET_KEY: ${SECRET_KEY:?Variable not set}
+      VAULT_KEY: ${VAULT_KEY:?Variable not set}
+      FIRST_SUPERUSER: ${FIRST_SUPERUSER:?Variable not set}
+      FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Variable not set}
+      DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      FASTAPI_ENV: production
+      DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
+    command: ["uv", "run", "python", "-m", "app.jobs.daily"]
+
+volumes:
+  prod-db-data:
