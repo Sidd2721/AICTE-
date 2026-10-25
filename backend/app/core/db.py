@@ -92,9 +92,24 @@ def init_db(session: Session) -> None:
                 role=role,
                 region=region,
             )
-            crud.create_user(session=session, user_create=u_in)
+            existing = crud.create_user(session=session, user_create=u_in)
         else:
             existing.role = role
             existing.region = region
+            session.add(existing)
+            session.commit()
+
+        if role == "institution" and not existing.institution_id:
+            from app.models import Institution
+
+            inst_obj = Institution(
+                name=full_name,
+                permanent_id=f"P-{email.split('@')[0].upper()}",
+                region=region or "NR",
+            )
+            session.add(inst_obj)
+            session.commit()
+            session.refresh(inst_obj)
+            existing.institution_id = inst_obj.id
             session.add(existing)
             session.commit()
