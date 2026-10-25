@@ -2,12 +2,14 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     audit,
+    dashboard,
     deposits,
     documents,
     instruments,
     login,
     private,
     release,
+    reports,
     users,
     utils,
 )
@@ -22,6 +24,8 @@ api_router.include_router(deposits.router)
 api_router.include_router(documents.router)
 api_router.include_router(instruments.router)
 api_router.include_router(release.router)
+api_router.include_router(dashboard.router)
+api_router.include_router(reports.router)
 
 
 if settings.FASTAPI_ENV == "development":

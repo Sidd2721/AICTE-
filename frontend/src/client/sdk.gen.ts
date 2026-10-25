@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { auditVerifyAuditChainData, auditVerifyAuditChainResponses, bankRequestConfirmationData, bankRequestConfirmationErrors, bankRequestConfirmationResponses, bankSimulateBankConfirmationData, bankSimulateBankConfirmationErrors, bankSimulateBankConfirmationResponses, depositsCalculateDepositData, depositsCalculateDepositErrors, depositsCalculateDepositResponses, documentsDownloadDocumentData, documentsDownloadDocumentErrors, documentsDownloadDocumentResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, instrumentsGetInstrumentData, instrumentsGetInstrumentErrors, instrumentsGetInstrumentResponses, instrumentsListInstrumentsData, instrumentsListInstrumentsErrors, instrumentsListInstrumentsResponses, instrumentsSubmitInstrumentData, instrumentsSubmitInstrumentErrors, instrumentsSubmitInstrumentResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, releaseApproveReleaseData, releaseApproveReleaseErrors, releaseApproveReleaseResponses, releaseGetInstrumentReleaseData, releaseGetInstrumentReleaseErrors, releaseGetInstrumentReleaseResponses, releaseRejectReleaseData, releaseRejectReleaseErrors, releaseRejectReleaseResponses, releaseRequestReleaseData, releaseRequestReleaseErrors, releaseRequestReleaseResponses, releaseVerifyReceiptEndpointData, releaseVerifyReceiptEndpointErrors, releaseVerifyReceiptEndpointResponses, releaseVerifyReleaseData, releaseVerifyReleaseErrors, releaseVerifyReleaseResponses, simulationGetClockData, simulationGetClockResponses, simulationTriggerDailyWorkerData, simulationTriggerDailyWorkerResponses, simulationUpdateClockData, simulationUpdateClockErrors, simulationUpdateClockResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { auditVerifyAuditChainData, auditVerifyAuditChainResponses, bankRequestConfirmationData, bankRequestConfirmationErrors, bankRequestConfirmationResponses, bankSimulateBankConfirmationData, bankSimulateBankConfirmationErrors, bankSimulateBankConfirmationResponses, dashboardGetDashboardCountersData, dashboardGetDashboardCountersResponses, dashboardGetNeedsActionQueueData, dashboardGetNeedsActionQueueResponses, dashboardSearchInstrumentsData, dashboardSearchInstrumentsErrors, dashboardSearchInstrumentsResponses, dashboardUpdateInstrumentMetadataData, dashboardUpdateInstrumentMetadataErrors, dashboardUpdateInstrumentMetadataResponses, depositsCalculateDepositData, depositsCalculateDepositErrors, depositsCalculateDepositResponses, documentsDownloadDocumentData, documentsDownloadDocumentErrors, documentsDownloadDocumentResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, instrumentsGetInstrumentData, instrumentsGetInstrumentErrors, instrumentsGetInstrumentResponses, instrumentsListInstrumentsData, instrumentsListInstrumentsErrors, instrumentsListInstrumentsResponses, instrumentsSubmitInstrumentData, instrumentsSubmitInstrumentErrors, instrumentsSubmitInstrumentResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, releaseApproveReleaseData, releaseApproveReleaseErrors, releaseApproveReleaseResponses, releaseGetInstrumentReleaseData, releaseGetInstrumentReleaseErrors, releaseGetInstrumentReleaseResponses, releaseRejectReleaseData, releaseRejectReleaseErrors, releaseRejectReleaseResponses, releaseRequestReleaseData, releaseRequestReleaseErrors, releaseRequestReleaseResponses, releaseVerifyReceiptEndpointData, releaseVerifyReceiptEndpointErrors, releaseVerifyReceiptEndpointResponses, releaseVerifyReleaseData, releaseVerifyReleaseErrors, releaseVerifyReleaseResponses, reportsReportCasesNeedingInterventionData, reportsReportCasesNeedingInterventionResponses, reportsReportMissingDocumentsData, reportsReportMissingDocumentsResponses, reportsReportPendingVerificationsData, reportsReportPendingVerificationsResponses, reportsReportUpcomingMaturitiesData, reportsReportUpcomingMaturitiesResponses, simulationGetClockData, simulationGetClockResponses, simulationTriggerDailyWorkerData, simulationTriggerDailyWorkerResponses, simulationUpdateClockData, simulationUpdateClockErrors, simulationUpdateClockResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -516,6 +516,126 @@ export class ReleaseService {
         return (options.client ?? client).get<releaseVerifyReceiptEndpointResponses, releaseVerifyReceiptEndpointErrors, ThrowOnError>({
             responseType: 'json',
             url: '/api/v1/release/verify-receipt',
+            ...options
+        });
+    }
+}
+
+export class DashboardService {
+    /**
+     * Get Dashboard Counters
+     *
+     * Return the statement's six primary counters via dashboard_bucket().
+     */
+    public static getDashboardCounters<ThrowOnError extends boolean = true>(options?: Options<dashboardGetDashboardCountersData, ThrowOnError>) {
+        return (options?.client ?? client).get<dashboardGetDashboardCountersResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/dashboard/counters',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Needs Action Queue
+     *
+     * Return items needing action today ordered by urgency, with single primary button.
+     */
+    public static getNeedsActionQueue<ThrowOnError extends boolean = true>(options?: Options<dashboardGetNeedsActionQueueData, ThrowOnError>) {
+        return (options?.client ?? client).get<dashboardGetNeedsActionQueueResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/dashboard/needs-action',
+            ...options
+        });
+    }
+    
+    /**
+     * Search Instruments
+     *
+     * Full-text and faceted search for instruments scoped by RLS.
+     */
+    public static searchInstruments<ThrowOnError extends boolean = true>(options?: Options<dashboardSearchInstrumentsData, ThrowOnError>) {
+        return (options?.client ?? client).get<dashboardSearchInstrumentsResponses, dashboardSearchInstrumentsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/dashboard/search',
+            ...options
+        });
+    }
+    
+    /**
+     * Update Instrument Metadata
+     *
+     * Permitted-field update matrix with mandatory audit event.
+     */
+    public static updateInstrumentMetadata<ThrowOnError extends boolean = true>(options: Options<dashboardUpdateInstrumentMetadataData, ThrowOnError>) {
+        return (options.client ?? client).patch<dashboardUpdateInstrumentMetadataResponses, dashboardUpdateInstrumentMetadataErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/dashboard/instruments/{instrument_id}/metadata',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class ReportsService {
+    /**
+     * Report Pending Verifications
+     *
+     * CSV report of FDRs currently in pending verification.
+     */
+    public static reportPendingVerifications<ThrowOnError extends boolean = true>(options?: Options<reportsReportPendingVerificationsData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsReportPendingVerificationsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/pending-verifications',
+            ...options
+        });
+    }
+    
+    /**
+     * Report Upcoming Maturities
+     *
+     * CSV report of FDRs maturing within 90 days.
+     */
+    public static reportUpcomingMaturities<ThrowOnError extends boolean = true>(options?: Options<reportsReportUpcomingMaturitiesData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsReportUpcomingMaturitiesResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/upcoming-maturities',
+            ...options
+        });
+    }
+    
+    /**
+     * Report Missing Documents
+     *
+     * CSV report of instruments missing mandatory deposit proof or fdr scan.
+     */
+    public static reportMissingDocuments<ThrowOnError extends boolean = true>(options?: Options<reportsReportMissingDocumentsData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsReportMissingDocumentsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/missing-documents',
+            ...options
+        });
+    }
+    
+    /**
+     * Report Cases Needing Intervention
+     *
+     * CSV report of cases with open overdue obligations or maturity past due.
+     */
+    public static reportCasesNeedingIntervention<ThrowOnError extends boolean = true>(options?: Options<reportsReportCasesNeedingInterventionData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsReportCasesNeedingInterventionResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/cases-needing-intervention',
             ...options
         });
     }
