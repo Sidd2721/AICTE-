@@ -102,14 +102,19 @@ def init_db(session: Session) -> None:
         if role == "institution" and not existing.institution_id:
             from app.models import Institution
 
-            inst_obj = Institution(
-                name=full_name,
-                permanent_id=f"P-{email.split('@')[0].upper()}",
-                region=region or "NR",
-            )
-            session.add(inst_obj)
-            session.commit()
-            session.refresh(inst_obj)
+            perm_id = f"P-{email.split('@')[0].upper()}"
+            inst_obj = session.exec(
+                select(Institution).where(Institution.permanent_id == perm_id)
+            ).first()
+            if not inst_obj:
+                inst_obj = Institution(
+                    name=full_name,
+                    permanent_id=perm_id,
+                    region=region or "NR",
+                )
+                session.add(inst_obj)
+                session.commit()
+                session.refresh(inst_obj)
             existing.institution_id = inst_obj.id
             session.add(existing)
             session.commit()
