@@ -1,0 +1,40 @@
+# Environment & secrets
+.env
+
+# Editor & IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Dependencies & Build
+node_modules/
+.venv/
+dist/
+build/
+__pycache__/
+*.pyc
+
+# Frontend
+backend/app/frontend/
+frontend/dist/
+
+# Test & Coverage
+.coverage
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Local tooling exclusion (also in .git/info/exclude)
+.agents/
+.gemini/
+.codebase-memory/
+graphify-out/
+AGENTS.md
+CLAUDE.md
+skills-lock.json
+.cbmignore
+.graphifyignore

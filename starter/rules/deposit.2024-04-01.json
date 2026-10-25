@@ -1,0 +1,13 @@
+{
+  "effective_from": "2024-04-01",
+  "edition": "APH 2024-25 to 2026-27",
+  "status": "DEMO",
+  "notes": "All amounts are DEMO values. Replace them with the official figures from the handbook PDF and set status to CONFIRMED. The 2x multiplier, the 10-year term and the government exemption come from third-party handbook copies: CONFIRM them in the official PDF.",
+  "deposit_term_years": 10,
+  "leased_private_multiplier": 2,
+  "government_exempt": true,
+  "programme_amounts_paise": {
+    "demo_level_a": 50000000,
+    "demo_level_b": 30000000
+  }
+}
