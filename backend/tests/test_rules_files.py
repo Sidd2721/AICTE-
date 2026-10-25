@@ -20,6 +20,8 @@ def test_deposit_sum_and_double_with_values() -> None:
     total = sum(amounts)
     assert required_deposit_paise(amounts, False, rule) == total
     assert required_deposit_paise(amounts, True, rule) == total * 2
+    assert required_deposit_paise(amounts, True, rule, is_government=True) == 0
+
 
 
 def test_release_paths_have_the_four_paths_and_every_item_has_a_source() -> None:
