@@ -43,6 +43,15 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+
+    from app.core.rls_context import set_rls_context
+
+    set_rls_context(
+        session,
+        role=user.role,
+        region=user.region or "",
+        institution=str(user.institution_id or ""),
+    )
     return user
 
 

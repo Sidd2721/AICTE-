@@ -39,19 +39,49 @@ def init_db(session: Session) -> None:
 
     # Seed users across 2 regions for dual-custody (maker!=checker) and isolation demos
     demo_users = [
-        ("officer.north@example.com", "North Regional Officer (Maker)", False),
-        ("checker.north@example.com", "North Regional Checker", False),
-        ("officer.west@example.com", "West Regional Officer (Maker)", False),
-        ("checker.west@example.com", "West Regional Checker", False),
-        ("inst.north1@example.com", "North Tech Institution 1", False),
-        ("inst.north2@example.com", "North Tech Institution 2", False),
-        ("inst.west@example.com", "West Polytechnic", False),
-        ("bureau@example.com", "Bureau Head (Approver)", False),
-        ("auditor@example.com", "Regulatory Auditor", False),
+        (
+            "officer.north@example.com",
+            "North Regional Officer (Maker)",
+            False,
+            "regional",
+            "NR",
+        ),
+        (
+            "checker.north@example.com",
+            "North Regional Checker",
+            False,
+            "regional",
+            "NR",
+        ),
+        (
+            "officer.west@example.com",
+            "West Regional Officer (Maker)",
+            False,
+            "regional",
+            "WR",
+        ),
+        ("checker.west@example.com", "West Regional Checker", False, "regional", "WR"),
+        (
+            "inst.north1@example.com",
+            "North Tech Institution 1",
+            False,
+            "institution",
+            "NR",
+        ),
+        (
+            "inst.north2@example.com",
+            "North Tech Institution 2",
+            False,
+            "institution",
+            "NR",
+        ),
+        ("inst.west@example.com", "West Polytechnic", False, "institution", "WR"),
+        ("bureau@example.com", "Bureau Head (Approver)", False, "bureau", None),
+        ("auditor@example.com", "Regulatory Auditor", False, "auditor", None),
     ]
 
     demo_password = settings.FIRST_SUPERUSER_PASSWORD
-    for email, full_name, is_super in demo_users:
+    for email, full_name, is_super, role, region in demo_users:
         existing = session.exec(select(User).where(User.email == email)).first()
         if not existing:
             u_in = UserCreate(
@@ -59,5 +89,12 @@ def init_db(session: Session) -> None:
                 password=demo_password,
                 is_superuser=is_super,
                 full_name=full_name,
+                role=role,
+                region=region,
             )
             crud.create_user(session=session, user_create=u_in)
+        else:
+            existing.role = role
+            existing.region = region
+            session.add(existing)
+            session.commit()

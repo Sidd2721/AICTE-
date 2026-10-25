@@ -139,6 +139,18 @@ export type UserCreate = {
      */
     full_name?: string | null;
     /**
+     * Role
+     */
+    role?: string;
+    /**
+     * Region
+     */
+    region?: string | null;
+    /**
+     * Institution Id
+     */
+    institution_id?: string | null;
+    /**
      * Password
      */
     password: string;
@@ -164,6 +176,18 @@ export type UserPublic = {
      * Full Name
      */
     full_name?: string | null;
+    /**
+     * Role
+     */
+    role?: string;
+    /**
+     * Region
+     */
+    region?: string | null;
+    /**
+     * Institution Id
+     */
+    institution_id?: string | null;
     /**
      * Id
      */
@@ -198,6 +222,18 @@ export type UserUpdate = {
      * Password
      */
     password?: string | null;
+    /**
+     * Role
+     */
+    role?: string | null;
+    /**
+     * Region
+     */
+    region?: string | null;
+    /**
+     * Institution Id
+     */
+    institution_id?: string | null;
 };
 
 /**
@@ -660,6 +696,26 @@ export type utilsHealthCheckResponses = {
 };
 
 export type utilsHealthCheckResponse = utilsHealthCheckResponses[keyof utilsHealthCheckResponses];
+
+export type auditVerifyAuditChainData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/audit/verify';
+};
+
+export type auditVerifyAuditChainResponses = {
+    /**
+     * Response Audit-Verify Audit Chain
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type auditVerifyAuditChainResponse = auditVerifyAuditChainResponses[keyof auditVerifyAuditChainResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;
