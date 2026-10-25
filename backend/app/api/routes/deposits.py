@@ -15,6 +15,20 @@ class CalculatorBreakdown(BaseModel):
     amount_paise: int
 
 
+class ProgrammeInfo(BaseModel):
+    name: str
+    amount_paise: int
+
+
+class ProgrammesResponse(BaseModel):
+    programmes: list[ProgrammeInfo]
+    deposit_term_years: int
+    leased_private_multiplier: int
+    government_exempt: bool
+    edition: str
+    effective_from: str
+
+
 class CalculatorResponse(BaseModel):
     required_deposit_paise: int
     multiplier: int
@@ -22,6 +36,32 @@ class CalculatorResponse(BaseModel):
     breakdown: list[CalculatorBreakdown]
     rule_edition: str
     rule_effective_from: str
+
+
+@router.get("/programmes", response_model=ProgrammesResponse)
+def get_programmes(
+    as_of: date | None = Query(None, description="Date for dated rulebook lookup"),
+) -> Any:
+    calc_date = as_of or today()
+    try:
+        rule = load_rule(None, "deposit", calc_date)
+    except LookupError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        ) from e
+
+    amounts: dict[str, int] = rule.get("programme_amounts_paise", {})
+    progs = [ProgrammeInfo(name=k, amount_paise=v) for k, v in amounts.items()]
+
+    return ProgrammesResponse(
+        programmes=progs,
+        deposit_term_years=rule.get("deposit_term_years", 10),
+        leased_private_multiplier=rule.get("leased_private_multiplier", 2),
+        government_exempt=rule.get("government_exempt", True),
+        edition=rule.get("edition", "APH 2024-25 to 2026-27"),
+        effective_from=rule.get("effective_from", "2024-04-01"),
+    )
 
 
 @router.get("/calculator", response_model=CalculatorResponse)

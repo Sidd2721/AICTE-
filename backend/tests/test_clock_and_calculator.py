@@ -25,14 +25,14 @@ def test_deposit_calculator_endpoint() -> None:
     res = client.get(
         "/api/v1/deposits/calculator",
         params={
-            "programmes": "demo_level_a,demo_level_b",
+            "programmes": "Engineering and Technology,Management",
             "land_ownership": "owned",
             "institution_type": "private",
         },
     )
     assert res.status_code == 200
     data = res.json()
-    assert data["required_deposit_paise"] == 80_000_000
+    assert data["required_deposit_paise"] == 500_000_000
     assert data["multiplier"] == 1
     assert data["exempt"] is False
     assert len(data["breakdown"]) == 2
@@ -41,14 +41,14 @@ def test_deposit_calculator_endpoint() -> None:
     res = client.get(
         "/api/v1/deposits/calculator",
         params={
-            "programmes": "demo_level_a,demo_level_b",
+            "programmes": "Engineering and Technology,Management",
             "land_ownership": "leased",
             "institution_type": "private",
         },
     )
     assert res.status_code == 200
     data = res.json()
-    assert data["required_deposit_paise"] == 160_000_000
+    assert data["required_deposit_paise"] == 1_000_000_000
     assert data["multiplier"] == 2
     assert data["exempt"] is False
 
@@ -56,7 +56,7 @@ def test_deposit_calculator_endpoint() -> None:
     res = client.get(
         "/api/v1/deposits/calculator",
         params={
-            "programmes": "demo_level_a,demo_level_b",
+            "programmes": "Engineering and Technology,Management",
             "land_ownership": "leased",
             "institution_type": "government",
         },

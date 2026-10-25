@@ -229,12 +229,30 @@ function Deposits() {
       },
     })
 
+  // Fetch Table 1.4 Programmes from Rule File via API
+  const { data: programmesData } = useQuery<{
+    programmes: Array<{ name: string; amount_paise: number }>
+    deposit_term_years: number
+    leased_private_multiplier: number
+    government_exempt: boolean
+    edition: string
+  }>({
+    queryKey: ["deposits-programmes"],
+    queryFn: async () => {
+      const res = await client.get<any>({
+        url: "/api/v1/deposits/programmes",
+      })
+      return res.data
+    },
+  })
+
   // 2. Submission Form State
   const [submitStep, setSubmitStep] = useState(1)
+  const [formProgramme, setFormProgramme] = useState("")
   const [formRefNo, setFormRefNo] = useState("")
   const [formBankCode, setFormBankCode] = useState("SBI")
   const [formIfsc, setFormIfsc] = useState("SBIN0001234")
-  const [formAmountRupees, setFormAmountRupees] = useState("5000000") // 50 Lakhs
+  const [formAmountRupees, setFormAmountRupees] = useState("3500000") // 35 Lakhs default
   const [formIssueDate, setFormIssueDate] = useState("2024-04-01")
   const [formMaturityDate, setFormMaturityDate] = useState("2034-04-01")
   const [formLienMarked, setFormLienMarked] = useState(true)
@@ -280,6 +298,7 @@ function Deposits() {
   const resetSubmitForm = () => {
     setSubmitStep(1)
     setFormRefNo("")
+    setFormProgramme("")
     setUploadedDocId(null)
   }
 
@@ -325,7 +344,9 @@ function Deposits() {
   }
 
   // 3. Calculator State
-  const [calcProgramme, setCalcProgramme] = useState("demo_level_a")
+  const [calcProgramme, setCalcProgramme] = useState(
+    "Engineering and Technology",
+  )
   const [calcOwnership, setCalcOwnership] = useState("owned")
   const [calcType, setCalcType] = useState("private")
   const [calcResult, setCalcResult] = useState<any>(null)
@@ -686,6 +707,35 @@ function Deposits() {
               </div>
 
               <div className="space-y-1">
+                <Label className="text-xs font-semibold">
+                  Select APH Table 1.4 Programme (from Rulebook)
+                </Label>
+                <Select
+                  value={formProgramme}
+                  onValueChange={(val) => {
+                    setFormProgramme(val)
+                    const found = programmesData?.programmes?.find(
+                      (p) => p.name === val,
+                    )
+                    if (found) {
+                      setFormAmountRupees((found.amount_paise / 100).toString())
+                    }
+                  }}
+                >
+                  <SelectTrigger className="text-xs h-8">
+                    <SelectValue placeholder="Select programme to auto-fill amount" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {programmesData?.programmes?.map((p) => (
+                      <SelectItem key={p.name} value={p.name}>
+                        {p.name} ({formatPaiseToRupees(p.amount_paise)})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
                 <Label htmlFor="amount" className="text-xs font-semibold">
                   Principal Amount (in ₹ Rupees) *
                 </Label>
@@ -964,19 +1014,18 @@ function Deposits() {
           <div className="space-y-3 py-2 text-xs">
             <div className="space-y-1">
               <Label className="text-xs font-semibold">
-                Technical Programme
+                Technical Programme (Table 1.4 Rulebook)
               </Label>
               <Select value={calcProgramme} onValueChange={setCalcProgramme}>
                 <SelectTrigger className="text-xs h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="demo_level_a">
-                    Engineering / Management (Demo Level A - ₹50L base)
-                  </SelectItem>
-                  <SelectItem value="demo_level_b">
-                    Diploma / Allied (Demo Level B - ₹30L base)
-                  </SelectItem>
+                  {programmesData?.programmes?.map((p) => (
+                    <SelectItem key={p.name} value={p.name}>
+                      {p.name} ({formatPaiseToRupees(p.amount_paise)} base)
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

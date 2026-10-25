@@ -7,7 +7,12 @@
   "leased_private_multiplier": 2,
   "government_exempt": true,
   "programme_amounts_paise": {
-    "demo_level_a": 50000000,
-    "demo_level_b": 30000000
+    "Engineering and Technology": 350000000,
+    "Planning": 150000000,
+    "Applied Arts and Crafts": 150000000,
+    "Design": 150000000,
+    "Hotel Management and Catering Technology": 150000000,
+    "Computer Applications": 150000000,
+    "Management": 150000000
   }
 }
