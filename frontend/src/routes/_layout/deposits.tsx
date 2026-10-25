@@ -205,6 +205,9 @@ function Deposits() {
   const [isCalcModalOpen, setIsCalcModalOpen] = useState(false)
   const [isSimModalOpen, setIsSimModalOpen] = useState(false)
   const [selectedInstForSim, setSelectedInstForSim] = useState<any>(null)
+  const [isGateResultModalOpen, setIsGateResultModalOpen] = useState(false)
+  const [activeGateReport, setActiveGateReport] = useState<any>(null)
+  const [isLoadingGateReport, setIsLoadingGateReport] = useState(false)
 
   // 1. Fetch Instruments via search
   const { data: searchData, isLoading: instrumentsLoading } =
@@ -379,6 +382,23 @@ function Deposits() {
   const [simScenario, setSimScenario] = useState("valid")
   const [isSimulating, setIsSimulating] = useState(false)
 
+  const handleInspectGate = async (inst: any) => {
+    setIsLoadingGateReport(true)
+    try {
+      const res = await client.get<any>({
+        url: `/api/v1/bank/verification-results/${inst.id}`,
+      })
+      setActiveGateReport(res.data)
+      setIsGateResultModalOpen(true)
+    } catch (e: any) {
+      toast.error("Failed to load verification report", {
+        description: e?.message || "Error fetching gate results",
+      })
+    } finally {
+      setIsLoadingGateReport(false)
+    }
+  }
+
   const handleRunBankSimulation = async () => {
     if (!selectedInstForSim) return
     setIsSimulating(true)
@@ -394,7 +414,7 @@ function Deposits() {
       const data = res.data as any
       const isConfirmed = data?.status === "confirmed"
       if (isConfirmed) {
-        toast.success("Bank Confirmation Passed (6-Point Gate)", {
+        toast.success("Bank Confirmation Passed (Verification Gate)", {
           description: `Bank verified FDR ${selectedInstForSim.ref_no}. Trust badge updated to CONFIRMED.`,
         })
       } else {
@@ -406,6 +426,11 @@ function Deposits() {
       queryClient.invalidateQueries({ queryKey: ["dashboard-counters"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard-needs-action"] })
       setIsSimModalOpen(false)
+      setActiveGateReport({
+        ...data,
+        ref_no: selectedInstForSim.ref_no,
+      })
+      setIsGateResultModalOpen(true)
     } catch (e: any) {
       toast.error("Bank simulator request failed", {
         description: e?.message || "Simulator error",
@@ -612,19 +637,32 @@ function Deposits() {
                         <LifecycleBadge lifecycle={inst.lifecycle} />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedInstForSim(inst)
-                            setIsSimModalOpen(true)
-                          }}
-                          className="text-xs h-7 px-2 font-medium gap-1"
-                          title="Simulate bank verification gate (I3)"
-                        >
-                          <ShieldCheck className="h-3 w-3 text-primary" />
-                          Simulate Gate
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleInspectGate(inst)}
+                            disabled={isLoadingGateReport}
+                            className="text-xs h-7 px-2 font-medium gap-1"
+                            title="Inspect real cryptographic gate & content checks"
+                          >
+                            <FileCheck className="h-3 w-3 text-muted-foreground" />
+                            Gate Results
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedInstForSim(inst)
+                              setIsSimModalOpen(true)
+                            }}
+                            className="text-xs h-7 px-2 font-medium gap-1"
+                            title="Simulate bank verification gate (I3)"
+                          >
+                            <ShieldCheck className="h-3 w-3 text-primary" />
+                            Simulate Gate
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1125,13 +1163,13 @@ function Deposits() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
               <DialogTitle className="text-base font-bold">
-                Bank Simulator — 6-Point Verification Gate
+                Bank Simulator — Invariant I3 Gate & Testing
               </DialogTitle>
             </div>
             <DialogDescription className="text-xs">
               Simulate electronic bank API response for FDR #
-              {selectedInstForSim?.ref_no}. Tests discrepancy detection in real
-              time.
+              {selectedInstForSim?.ref_no}. Evaluates signature gate and
+              discrepancy detection.
             </DialogDescription>
           </DialogHeader>
 
@@ -1161,7 +1199,7 @@ function Deposits() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="valid">
-                    ✓ Valid Match (All 6 criteria pass &rarr; CONFIRMED)
+                    ✓ Valid Match (All checks pass &rarr; CONFIRMED)
                   </SelectItem>
                   <SelectItem value="d1_amount">
                     ⚠ D1 Amount Mismatch (Bank reports different sum)
@@ -1181,8 +1219,8 @@ function Deposits() {
 
             <div className="rounded p-2 text-[11px] bg-primary/5 border border-primary/20 text-muted-foreground">
               Under <strong>Invariant I3</strong>, a bank reply passes only if
-              it is intact, valid, trusted, matches account, matches amount, and
-              confirms joint lien.
+              the signature gate holds and all confirmed fields match the
+              declared instrument.
             </div>
           </div>
 
@@ -1207,6 +1245,178 @@ function Deposits() {
                 <Shield className="h-3 w-3" />
               )}
               Execute Bank Gate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 4. Modal: Cryptographic Gate & Content Verification Results */}
+      <Dialog
+        open={isGateResultModalOpen}
+        onOpenChange={setIsGateResultModalOpen}
+      >
+        <DialogContent className="sm:max-w-[620px] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                <DialogTitle className="text-base font-bold">
+                  Verification Gate & Field Matching Report
+                </DialogTitle>
+              </div>
+              {activeGateReport?.trust_badge && (
+                <TrustBadge status={activeGateReport.trust_badge} />
+              )}
+            </div>
+            <DialogDescription className="text-xs">
+              Live verification gate output for FDR #
+              {activeGateReport?.ref_no || selectedInstForSim?.ref_no}.
+              Signature gate is evaluated independently from content comparison.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-xs">
+            {/* Group 1: Signature Checks (The Gate - 8 checks) */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-xs tracking-wide uppercase text-muted-foreground">
+                  1. Signature & Cryptographic Gate (8 Checks)
+                </h4>
+                <span className="text-[11px] text-muted-foreground font-mono">
+                  Invariant I3
+                </span>
+              </div>
+              <div className="rounded-md border divide-y bg-card">
+                {activeGateReport?.signature_gate?.map((chk: any) => (
+                  <div
+                    key={chk.id}
+                    className="flex items-center justify-between p-2 text-xs"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="font-medium flex items-center gap-1.5">
+                        {chk.status === "passed" ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                        ) : chk.status === "not_checked" ? (
+                          <Clock className="h-3.5 w-3.5 text-amber-500" />
+                        ) : (
+                          <XCircle className="h-3.5 w-3.5 text-rose-600" />
+                        )}
+                        <span>{chk.label}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        {chk.detail}
+                      </p>
+                    </div>
+                    <div>
+                      {chk.status === "passed" ? (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        >
+                          PASSED
+                        </Badge>
+                      ) : chk.status === "not_checked" ? (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300"
+                        >
+                          NOT CHECKED (Simulated CA)
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300"
+                        >
+                          FAILED
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Group 2: Content Checks (Claimed vs Bank Confirmed - 5 checks) */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-xs tracking-wide uppercase text-muted-foreground">
+                  2. Content Discrepancy Checks (Claimed vs Confirmed)
+                </h4>
+                <span className="text-[11px] text-muted-foreground font-mono">
+                  5 Field Checks
+                </span>
+              </div>
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50 text-[11px]">
+                      <TableHead className="h-7 font-semibold">Field</TableHead>
+                      <TableHead className="h-7 font-semibold">
+                        Declared
+                      </TableHead>
+                      <TableHead className="h-7 font-semibold">
+                        Bank Confirmed
+                      </TableHead>
+                      <TableHead className="h-7 font-semibold text-right">
+                        Result
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {activeGateReport?.content_checks?.map((chk: any) => {
+                      const formatVal = (val: any, id: string) => {
+                        if (val === null || val === undefined) return "—"
+                        if (id === "amount_paise")
+                          return formatPaiseToRupees(Number(val))
+                        if (typeof val === "boolean")
+                          return val ? "Confirmed (AICTE Lien)" : "No Lien"
+                        return String(val)
+                      }
+                      return (
+                        <TableRow key={chk.id} className="text-xs">
+                          <TableCell className="font-medium py-2">
+                            {chk.label}
+                          </TableCell>
+                          <TableCell className="font-mono text-[11px] text-muted-foreground py-2">
+                            {formatVal(chk.declared, chk.id)}
+                          </TableCell>
+                          <TableCell className="font-mono text-[11px] font-semibold py-2">
+                            {formatVal(chk.confirmed, chk.id)}
+                          </TableCell>
+                          <TableCell className="text-right py-2">
+                            {chk.passed ? (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-300"
+                              >
+                                MATCH
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] bg-rose-50 text-rose-700 border-rose-300"
+                              >
+                                MISMATCH
+                              </Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsGateResultModalOpen(false)}
+              className="text-xs"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
