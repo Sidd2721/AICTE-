@@ -1,6 +1,15 @@
 from fastapi import APIRouter
 
-from app.api.routes import audit, deposits, login, private, users, utils
+from app.api.routes import (
+    audit,
+    deposits,
+    documents,
+    instruments,
+    login,
+    private,
+    users,
+    utils,
+)
 from app.core.config import settings
 
 api_router = APIRouter()
@@ -9,6 +18,8 @@ api_router.include_router(users.router)
 api_router.include_router(utils.router)
 api_router.include_router(audit.router)
 api_router.include_router(deposits.router)
+api_router.include_router(documents.router)
+api_router.include_router(instruments.router)
 
 
 if settings.FASTAPI_ENV == "development":

@@ -38,3 +38,5 @@ CLAUDE.md
 skills-lock.json
 .cbmignore
 .graphifyignore
+backend/app/vault/
+
