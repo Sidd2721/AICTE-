@@ -137,6 +137,37 @@ class Instrument(InstrumentBase, table=True):
     )
 
 
+class InstrumentPublic(InstrumentBase):
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+    badge: str | None = None
+    next_action_code: str | None = None
+    next_action_label: str | None = None
+
+
+class InstrumentsPublic(SQLModel):
+    data: list[InstrumentPublic]
+    count: int
+
+
+class InstrumentSubmit(SQLModel):
+    institution_id: uuid.UUID | None = None
+    region: str | None = None
+    kind: str = "FDR"
+    ref_no: str
+    bank_code: str
+    ifsc: str
+    amount_paise: int
+    issue_date: date
+    maturity_date: date
+    holders: list[dict[str, Any]] = []
+    lien_marked: bool = False
+    is_duplicate_receipt: bool = False
+    replaces_id: uuid.UUID | None = None
+    document_ids: list[uuid.UUID] = []
+
+
 # ==========================================
 # 4. Document
 # ==========================================
@@ -173,6 +204,17 @@ class Document(DocumentBase, table=True):
             DateTime(timezone=True), nullable=False, default=get_datetime_utc
         ),
     )
+
+
+class DocumentPublic(DocumentBase):
+    id: uuid.UUID
+    uploaded_at: datetime
+    is_signed_dsc: bool | None = None
+
+
+class DocumentsPublic(SQLModel):
+    data: list[DocumentPublic]
+    count: int
 
 
 # ==========================================
