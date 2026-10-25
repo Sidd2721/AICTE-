@@ -17,9 +17,12 @@ def db() -> Generator[Session]:
     with Session(engine) as session:
         init_db(session)
         yield session
+        from sqlalchemy import text
+        session.execute(text("TRUNCATE case_note, flag_waiver, notice, obligation, confirmation, document, release_request, instrument CASCADE;"))
         statement = delete(User)
         session.execute(statement)
         session.commit()
+
 
 
 @pytest.fixture(scope="module")
