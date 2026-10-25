@@ -397,6 +397,17 @@ class ReleaseRequest(ReleaseRequestBase, table=True):
     )
 
 
+class ReleaseRequestCreate(SQLModel):
+    path: str
+    attestation_no_complaints: bool = False
+
+
+class ReleaseRequestPublic(ReleaseRequestBase):
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+
 # ==========================================
 # 11. Audit Event & Checkpoint
 # ==========================================

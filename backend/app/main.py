@@ -17,7 +17,8 @@ FRONTEND_DIR = Path(__file__).parent / "frontend"
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
-    return f"{route.tags[0]}-{route.name}"
+    tag = route.tags[0] if route.tags else "api"
+    return f"{tag}-{route.name}"
 
 
 @asynccontextmanager

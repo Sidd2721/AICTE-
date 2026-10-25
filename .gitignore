@@ -39,4 +39,6 @@ skills-lock.json
 .cbmignore
 .graphifyignore
 backend/app/vault/
+backend/app/keys/*.pem
+
 
