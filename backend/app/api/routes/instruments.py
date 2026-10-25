@@ -50,7 +50,7 @@ def _hydrate_instrument_meta(
             "ref_no": inst.ref_no,
             "bank_code": inst.bank_code,
             "amount_paise": inst.amount_paise,
-            "maturity_date": inst.maturity_date,
+            "maturity_date": str(inst.maturity_date),
         },
         trust_confs,
         now(),
