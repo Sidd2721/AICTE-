@@ -121,6 +121,12 @@ def simulate_bank_confirmation(
         session.refresh(conf)
 
     current_time = now()
+    if data.outcome == "source_unavailable":
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="source unavailable",
+        )
+
     if data.outcome == "rejected":
         conf.status = "rejected"
         session.add(conf)
@@ -196,3 +202,16 @@ def simulate_bank_confirmation(
         "discrepancies": discrepancies,
         "confirmed_fields": confirmed_fields,
     }
+
+
+@router.get("/sim/bank/status")
+def get_bank_sim_status() -> dict[str, Any]:
+    return {"status": "available", "source": "bank_simulator"}
+
+
+@router.get("/sim/bank/simulate-outage")
+def simulate_bank_outage() -> None:
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="source unavailable",
+    )
