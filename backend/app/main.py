@@ -8,7 +8,7 @@ from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
-from app.api.routes import bank, clock
+from app.api.routes import bank, clock, worker
 from app.core.config import settings
 from app.domain.clock import today
 from app.domain.rules import RULES_DIR, load_rule, startup_guard
@@ -53,7 +53,9 @@ app.add_middleware(
 
 app.include_router(clock.router)
 app.include_router(bank.router)
+app.include_router(worker.router)
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
 
 if FRONTEND_DIR.is_dir():
     app.frontend("/", directory=FRONTEND_DIR)
