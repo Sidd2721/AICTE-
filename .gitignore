@@ -40,5 +40,4 @@ skills-lock.json
 .graphifyignore
 backend/app/vault/
 backend/app/keys/*.pem
-
-
+.timebox
