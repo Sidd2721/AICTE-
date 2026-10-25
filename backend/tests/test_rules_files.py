@@ -49,3 +49,28 @@ def test_guard_blocks_demo_rules_outside_development() -> None:
         startup_guard(demo_docs, "production")
     confirmed_docs = [{**d, "status": "CONFIRMED"} for d in docs]
     startup_guard(confirmed_docs, "production")
+
+
+def test_table_1_4_programmes_in_rule_and_api() -> None:
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    res = client.get("/api/v1/deposits/programmes")
+    assert res.status_code == 200
+    data = res.json()
+    rule = load_rule(RULES, "deposit", date(2026, 11, 1))
+    rule_keys = set(rule["programme_amounts_paise"].keys())
+    api_keys = {p["name"] for p in data["programmes"]}
+    assert api_keys == rule_keys
+    expected_table_1_4 = {
+        "Engineering and Technology",
+        "Planning",
+        "Applied Arts and Crafts",
+        "Design",
+        "Hotel Management and Catering Technology",
+        "Computer Applications",
+        "Management",
+    }
+    assert rule_keys == expected_table_1_4
+    assert "Pharmacy" not in rule_keys
