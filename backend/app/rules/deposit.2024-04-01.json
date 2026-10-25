@@ -1,0 +1,31 @@
+{
+  "effective_from": "2024-04-01",
+  "edition": "APH 2024-25 to 2026-27",
+  "table_reference": "Table 1.4 Security Deposit",
+  "status": "CONFIRMED",
+  "notes": "Verified against Approval Process Handbook 2024-27 Table 1.4. Double for private leased land/building; sum across programmes; 10-year term; government institutions exempt.",
+  "deposit_term_years": 10,
+  "leased_private_multiplier": 2,
+  "government_exempt": true,
+  "programme_amounts_paise": {
+    "engineering_technology_diploma": 150000000,
+    "engineering_technology_ug": 350000000,
+    "engineering_technology_pg": 150000000,
+    "planning_diploma": 150000000,
+    "planning_ug": 150000000,
+    "planning_pg": 150000000,
+    "applied_arts_crafts_diploma": 150000000,
+    "applied_arts_crafts_ug": 150000000,
+    "applied_arts_crafts_pg": 150000000,
+    "design_diploma": 150000000,
+    "design_ug": 150000000,
+    "design_pg": 150000000,
+    "hotel_management_catering_diploma": 150000000,
+    "hotel_management_catering_ug": 150000000,
+    "hotel_management_catering_pg": 150000000,
+    "computer_applications_ug": 50000000,
+    "computer_applications_pg": 150000000,
+    "management_ug": 50000000,
+    "management_pg": 150000000
+  }
+}

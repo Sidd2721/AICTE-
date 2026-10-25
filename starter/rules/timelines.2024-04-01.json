@@ -1,0 +1,15 @@
+{
+  "effective_from": "2024-04-01",
+  "status": "DEMO",
+  "notes": "DEMO values except payment_proof_days (15 days, from handbook copies: CONFIRM). Alert offsets and windows are design assumptions.",
+  "expiring_days": 90,
+  "reminder_offsets_days": [30, 15, 7, 1],
+  "overdue_escalation": [
+    { "after_days": 0, "to": "regional" },
+    { "after_days": 7, "to": "bureau" }
+  ],
+  "confirmation_valid_days": 180,
+  "confirmation_token_valid_days": 14,
+  "payment_proof_days": 15,
+  "required_documents": { "FDR": ["fdr_scan"], "RTGS": ["payment_proof"] }
+}

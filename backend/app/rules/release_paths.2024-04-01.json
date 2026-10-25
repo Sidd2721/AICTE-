@@ -1,0 +1,39 @@
+{
+  "effective_from": "2024-04-01",
+  "status": "DEMO",
+  "notes": "Checklists are a starting point built from third-party handbook copies and AICTE's attachments page. Every item carries its source. CONFIRM each item and the order of approvals in the official handbook before real use.",
+  "paths": {
+    "term_completion": {
+      "checklist": [
+        { "id": "request_letter", "label": "Request letter", "needs_doc": true, "source": "handbook-copy" },
+        { "id": "affidavit_6", "label": "Affidavit 6 (release)", "needs_doc": true, "source": "aicte-attachments-page" },
+        { "id": "deposit_proof", "label": "Copy of the FDR or payment proof", "needs_doc": true, "source": "report-single-source" },
+        { "id": "regional_noc", "label": "Regional officer NOC", "needs_doc": false, "source": "unverified" }
+      ]
+    },
+    "closure": {
+      "checklist": [
+        { "id": "request_letter", "label": "Request letter", "needs_doc": true, "source": "handbook-copy" },
+        { "id": "affidavit_6", "label": "Affidavit 6 (release)", "needs_doc": true, "source": "aicte-attachments-page" },
+        { "id": "closure_certificate", "label": "Certificate from the affiliating university or board that no students remain", "needs_doc": true, "waived_if": "deposit_matured", "source": "handbook-copy" },
+        { "id": "regional_noc", "label": "Regional officer NOC", "needs_doc": false, "source": "unverified" }
+      ]
+    },
+    "merger": {
+      "checklist": [
+        { "id": "request_letter", "label": "Request letter", "needs_doc": true, "source": "handbook-copy" },
+        { "id": "affidavit_6", "label": "Affidavit 6 (release)", "needs_doc": true, "source": "aicte-attachments-page" },
+        { "id": "merger_proof", "label": "Proof of the approved merger", "needs_doc": true, "source": "unverified" },
+        { "id": "regional_noc", "label": "Regional officer NOC", "needs_doc": false, "source": "unverified" }
+      ]
+    },
+    "conversion": {
+      "checklist": [
+        { "id": "request_letter", "label": "Request letter", "needs_doc": true, "source": "handbook-copy" },
+        { "id": "affidavit_6", "label": "Affidavit 6 (release)", "needs_doc": true, "source": "aicte-attachments-page" },
+        { "id": "no_pending_complaints", "label": "No pending complaints or disciplinary proceedings", "needs_doc": false, "source": "handbook-copy" },
+        { "id": "regional_noc", "label": "Regional officer NOC", "needs_doc": false, "source": "unverified" }
+      ]
+    }
+  }
+}
