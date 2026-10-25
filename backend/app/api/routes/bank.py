@@ -9,6 +9,7 @@ from sqlmodel import col, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.audit import audit
+from app.domain.bank_gate import build_verification_gate_report
 from app.domain.clock import now
 from app.domain.discrepancy import evaluate_discrepancies
 from app.models import Confirmation, FlagWaiver, Instrument
@@ -196,12 +197,64 @@ def simulate_bank_confirmation(
         },
     )
 
+    inst_dict = {
+        "ref_no": instrument.ref_no,
+        "bank_code": instrument.bank_code,
+        "amount_paise": instrument.amount_paise,
+        "maturity_date": instrument.maturity_date.isoformat(),
+        "lien_marked": instrument.lien_marked,
+    }
+    gate_report = build_verification_gate_report(
+        instrument=inst_dict,
+        confirmed_fields=confirmed_fields,
+        gate_outcome="accepted",
+    )
+
     return {
         "confirmation_id": str(conf.id),
         "status": conf.status,
         "discrepancies": discrepancies,
         "confirmed_fields": confirmed_fields,
+        "signature_gate": gate_report["signature_gate"],
+        "content_checks": gate_report["content_checks"],
     }
+
+
+@router.get("/api/v1/bank/verification-results/{instrument_id}")
+def get_verification_results(
+    instrument_id: uuid.UUID,
+    session: SessionDep,
+    _current_user: CurrentUser,
+) -> Any:
+    instrument = session.get(Instrument, instrument_id)
+    if not instrument:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Instrument not found",
+        )
+
+    conf = session.exec(
+        select(Confirmation)
+        .where(Confirmation.instrument_id == instrument.id)
+        .where(col(Confirmation.revoked).is_(False))
+        .order_by(col(Confirmation.confirmed_at).desc())
+    ).first()
+
+    inst_dict = {
+        "ref_no": instrument.ref_no,
+        "bank_code": instrument.bank_code,
+        "amount_paise": instrument.amount_paise,
+        "maturity_date": instrument.maturity_date.isoformat(),
+        "lien_marked": instrument.lien_marked,
+    }
+
+    confirmed_fields = conf.fields if conf else None
+    gate_report = build_verification_gate_report(
+        instrument=inst_dict,
+        confirmed_fields=confirmed_fields,
+        gate_outcome="accepted" if (conf and conf.status == "confirmed") else "unverified",
+    )
+    return gate_report
 
 
 @router.get("/sim/bank/status")
