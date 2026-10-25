@@ -22,8 +22,14 @@ def badge(
     if not live:
         return "claimed"
     latest = max(live, key=lambda c: c.confirmed_at)
-    if any(instrument.get(k) != latest.fields.get(k) for k in CONFIRMED_FIELDS):
-        return "changed"  # edited after the bank confirmed
+    for k in CONFIRMED_FIELDS:
+        inst_v = instrument.get(k)
+        conf_v = latest.fields.get(k)
+        if k == "maturity_date":
+            if str(inst_v) != str(conf_v):
+                return "changed"
+        elif inst_v != conf_v:
+            return "changed"
     if now >= latest.expires_at:
         return "stale"
     return "confirmed"
