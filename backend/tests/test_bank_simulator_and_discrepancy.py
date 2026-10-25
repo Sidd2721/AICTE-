@@ -93,3 +93,53 @@ def test_bank_simulator_confirmation_flow(client: TestClient, superuser_token_he
     )
     assert inst_res.status_code == 200
     assert inst_res.json()["badge"] == "confirmed"
+
+
+def test_unified_verification_gate_results(client: TestClient, superuser_token_headers: dict[str, str]) -> None:
+    today_val = date.today()
+    maturity_val = today_val + timedelta(days=3650)
+    sub = client.post(
+        "/api/v1/instruments/submit",
+        headers=superuser_token_headers,
+        json={
+            "ref_no": "FDR-GATE-001",
+            "bank_code": "SBI",
+            "ifsc": "SBIN0001234",
+            "amount_paise": 25000000,
+            "issue_date": today_val.isoformat(),
+            "maturity_date": maturity_val.isoformat(),
+            "lien_marked": True,
+        },
+    )
+    assert sub.status_code == 200
+    inst_id = sub.json()["id"]
+
+    sim = client.post(
+        f"/sim/bank/confirm/{inst_id}",
+        headers=superuser_token_headers,
+        json={"outcome": "match"},
+    )
+    assert sim.status_code == 200
+    data = sim.json()
+    assert "signature_gate" in data
+    assert "content_checks" in data
+
+    sig_checks = data["signature_gate"]
+    assert len(sig_checks) == 8
+    revocation_check = next(c for c in sig_checks if c["id"] == "revocation")
+    assert revocation_check["status"] == "not_checked"
+    assert "simulated CA" in revocation_check["detail"]
+
+    content_checks = data["content_checks"]
+    assert len(content_checks) == 5
+    assert all(c["passed"] is True for c in content_checks)
+
+    # Dedicated endpoint for UI to read real results
+    v_res = client.get(
+        f"/api/v1/bank/verification-results/{inst_id}",
+        headers=superuser_token_headers,
+    )
+    assert v_res.status_code == 200
+    v_data = v_res.json()
+    assert v_data["signature_gate"] == sig_checks
+    assert v_data["content_checks"] == content_checks
