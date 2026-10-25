@@ -1595,6 +1595,185 @@ export type releaseVerifyReceiptEndpointResponses = {
     200: unknown;
 };
 
+export type dashboardGetDashboardCountersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/dashboard/counters';
+};
+
+export type dashboardGetDashboardCountersResponses = {
+    /**
+     * Response Dashboard-Get Dashboard Counters
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: number;
+    };
+};
+
+export type dashboardGetDashboardCountersResponse = dashboardGetDashboardCountersResponses[keyof dashboardGetDashboardCountersResponses];
+
+export type dashboardGetNeedsActionQueueData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/dashboard/needs-action';
+};
+
+export type dashboardGetNeedsActionQueueResponses = {
+    /**
+     * Response Dashboard-Get Needs Action Queue
+     *
+     * Successful Response
+     */
+    200: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type dashboardGetNeedsActionQueueResponse = dashboardGetNeedsActionQueueResponses[keyof dashboardGetNeedsActionQueueResponses];
+
+export type dashboardSearchInstrumentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         *
+         * Search query by reference or institution
+         */
+        q?: string | null;
+        /**
+         * Region
+         */
+        region?: string | null;
+        /**
+         * Lifecycle
+         */
+        lifecycle?: string | null;
+        /**
+         * Badge
+         */
+        badge?: string | null;
+    };
+    url: '/api/v1/dashboard/search';
+};
+
+export type dashboardSearchInstrumentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type dashboardSearchInstrumentsError = dashboardSearchInstrumentsErrors[keyof dashboardSearchInstrumentsErrors];
+
+export type dashboardSearchInstrumentsResponses = {
+    /**
+     * Response Dashboard-Search Instruments
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type dashboardSearchInstrumentsResponse = dashboardSearchInstrumentsResponses[keyof dashboardSearchInstrumentsResponses];
+
+export type dashboardUpdateInstrumentMetadataData = {
+    /**
+     * Data
+     */
+    body: {
+        [key: string]: unknown;
+    };
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/dashboard/instruments/{instrument_id}/metadata';
+};
+
+export type dashboardUpdateInstrumentMetadataErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type dashboardUpdateInstrumentMetadataError = dashboardUpdateInstrumentMetadataErrors[keyof dashboardUpdateInstrumentMetadataErrors];
+
+export type dashboardUpdateInstrumentMetadataResponses = {
+    /**
+     * Response Dashboard-Update Instrument Metadata
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type reportsReportPendingVerificationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/pending-verifications';
+};
+
+export type reportsReportPendingVerificationsResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type reportsReportUpcomingMaturitiesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/upcoming-maturities';
+};
+
+export type reportsReportUpcomingMaturitiesResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type reportsReportMissingDocumentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/missing-documents';
+};
+
+export type reportsReportMissingDocumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type reportsReportCasesNeedingInterventionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/cases-needing-intervention';
+};
+
+export type reportsReportCasesNeedingInterventionResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type privateCreateUserData = {
     body: PrivateUserCreate;
     path?: never;
