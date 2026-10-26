@@ -115,10 +115,14 @@ def run_daily_obligations_job(
         }
 
     finally:
-        session.execute(
-            text("SELECT pg_advisory_unlock(:lock_id)"),
-            params={"lock_id": OBLIGATIONS_ADVISORY_LOCK_ID},
-        )
+        try:
+            session.execute(
+                text("SELECT pg_advisory_unlock(:lock_id)"),
+                params={"lock_id": OBLIGATIONS_ADVISORY_LOCK_ID},
+            )
+            session.commit()
+        except Exception:
+            session.rollback()
 
 
 def run_daily_worker(session: Session, today: date | None = None) -> dict[str, Any]:

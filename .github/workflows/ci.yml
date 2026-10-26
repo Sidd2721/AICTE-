@@ -1,0 +1,118 @@
+name: CI - Full Gate Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  secrets-scan:
+    name: Secrets & Path Hygiene Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for tracked .env files
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$'; then
+            echo "ERROR: .env is tracked in git!"
+            exit 1
+          fi
+
+      - name: Check for absolute file URLs or local paths in docs
+        run: |
+          if git grep -nE 'file:///|C:\\Users|/Users/[a-z]+/|avadu' -- . ':!*.lock' ':!.gemini/*'; then
+            echo "ERROR: Found absolute file URLs or personal path leaks!"
+            exit 1
+          fi
+
+      - name: Check for raw private keys in tracked code
+        run: |
+          if git grep -nE 'BEGIN (RSA |EC |OPENSSH )PRIVATE KEY' -- . ':!backend/tests/*'; then
+            echo "ERROR: Found private key in repository outside test fixtures!"
+            exit 1
+          fi
+
+  full-gate:
+    name: Lint, Types, Tests & Build Gate
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.9.26"
+          enable-cache: true
+
+      - name: Set up Python 3.14
+        run: uv python install 3.14
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Database Roles & Least Privilege
+        run: |
+          export PGPASSWORD=testpassword
+          # Create migrator and app roles
+          psql -h localhost -U postgres -d app -f scripts/roles.sql
+          # Verify app role is NOSUPERUSER NOBYPASSRLS
+          psql -h localhost -U postgres -d app -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('migrator', 'app');"
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          uv sync --frozen
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          bun install --frozen-lockfile
+
+      - name: Run Backend Prestart & Migrations (as Migrator Role)
+        env:
+          DATABASE_URL: postgresql+psycopg://app:apppassword@localhost:5432/app
+          MIGRATION_DATABASE_URL: postgresql+psycopg://migrator:migratorpassword@localhost:5432/app
+          SECRET_KEY: testsecretkeyformodernsecurityinvariants32bytes
+          PROJECT_NAME: AICTE Security Deposit Portal
+          FIRST_SUPERUSER: admin@example.com
+          FIRST_SUPERUSER_PASSWORD: changethis
+          FASTAPI_ENV: development
+        run: |
+          cd backend
+          uv run alembic upgrade head
+          uv run python app/initial_data.py
+
+      - name: Verify Environment Contract
+        run: |
+          uv run python scripts/print_env_contract.py backend/app
+
+      - name: Run Full Gate (verify.sh)
+        env:
+          DATABASE_URL: postgresql+psycopg://app:apppassword@localhost:5432/app
+          MIGRATION_DATABASE_URL: postgresql+psycopg://migrator:migratorpassword@localhost:5432/app
+          SECRET_KEY: testsecretkeyformodernsecurityinvariants32bytes
+          PROJECT_NAME: AICTE Security Deposit Portal
+          FIRST_SUPERUSER: admin@example.com
+          FIRST_SUPERUSER_PASSWORD: changethis
+          FASTAPI_ENV: development
+        run: |
+          bash scripts/verify.sh

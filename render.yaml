@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: aicte-fdr-portal
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/utils/health-check/
+    envVars:
+      - key: FASTAPI_ENV
+        value: demo # Set to 'production' for strict production enforcement
+      - key: PROJECT_NAME
+        value: AICTE Security Deposit Portal
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: SECRET_KEY
+        sync: false # Set via Render dashboard (>= 32 chars)
+      - key: VAULT_KEY
+        sync: false # Set via Render dashboard (32-byte base64)
+      - key: FIRST_SUPERUSER
+        value: admin@example.com
+      - key: FIRST_SUPERUSER_PASSWORD
+        sync: false # Set via Render dashboard
+      - key: DATABASE_URL
+        sync: false # Neon direct connection string with user 'app' (NOSUPERUSER, NOBYPASSRLS)
+      - key: MIGRATION_DATABASE_URL
+        sync: false # Neon direct connection string with owner role (e.g., neondb_owner)
+      - key: FRONTEND_HOST
+        sync: false # Once deployed, set to your https://<app-name>.onrender.com

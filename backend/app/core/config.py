@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     FASTAPI_ENV: Literal["development", "demo", "production"] | None = "development"
 
     PROJECT_NAME: str
+    GIT_COMMIT: str | None = None
+    BUILT_AT: str | None = None
     SENTRY_DSN: HttpUrl | None = None
     DATABASE_URL: PostgresDsn
     MIGRATION_DATABASE_URL: PostgresDsn | None = None

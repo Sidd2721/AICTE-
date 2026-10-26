@@ -80,7 +80,7 @@ flowchart TD
 ### A. Regulatory Dashboard & Dynamic Calculation
 1. **Dynamic Table 1.4 Calculator**:
    - Computes statutory security deposit obligations according to the AICTE Approval Process Handbook (APH) without hardcoded numbers.
-   - Evaluates technical programmes (Engineering, Management, Pharmacy, Architecture, MCA), ownership categories (Private, Government, Leased Land), and institutional status.
+   - Evaluates technical programmes (Engineering, Management, Planning, Architecture, MCA), ownership categories (Private, Government, Leased Land), and institutional status.
    - Computes integer paise amounts (e.g., ₹ 35,00,000 = `350000000` paise).
 2. **Institutional Coverage Card**:
    - Compares total required deposit against active bank-confirmed deposits.

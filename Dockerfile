@@ -44,7 +44,7 @@ COPY backend/scripts /app/backend/scripts
 COPY --from=frontend-builder /app/backend/app/frontend /app/backend/app/frontend
 
 # Create and grant permissions on data and vault directories
-RUN mkdir -p /app/backend/vault && chown -R appuser:appgroup /app
+RUN mkdir -p /app/backend/vault && chmod +x /app/backend/scripts/*.sh && chown -R appuser:appgroup /app
 
 WORKDIR /app/backend
 EXPOSE 8000
@@ -54,4 +54,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 
 USER appuser
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["bash", "/app/backend/scripts/start.sh"]

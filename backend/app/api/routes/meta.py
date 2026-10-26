@@ -1,4 +1,3 @@
-import os
 import subprocess
 from datetime import UTC, datetime
 from typing import Any
@@ -23,7 +22,7 @@ class MetaResponse(BaseModel):
 
 
 def _get_commit_hash() -> str:
-    env_commit = os.getenv("GIT_COMMIT")
+    env_commit = settings.GIT_COMMIT
     if env_commit:
         return env_commit[:7]
     try:
@@ -54,5 +53,5 @@ def get_meta() -> Any:
         env_label=settings.FASTAPI_ENV or "development",
         rule_status=rule_status,
         commit=_get_commit_hash(),
-        built_at=os.getenv("BUILT_AT", SERVER_START_TIME),
+        built_at=settings.BUILT_AT or SERVER_START_TIME,
     )

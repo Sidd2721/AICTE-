@@ -55,7 +55,7 @@ To move from this validated prototype to national production deployment:
 ---
 
 ## 4. Open Questions Awaiting AICTE Confirmation
-Refer to [docs/OPEN-QUESTIONS.md](file:///c:/Users/avadu/26265/docs/OPEN-QUESTIONS.md) for full context:
+Refer to [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) for full context:
 - Clarification on exact multiplier for leased vs owned private properties (handbook citation: Clause 4.1).
 - Delegation of financial powers for release sanctioning (Regional Officer vs Bureau Head threshold limits).
 - Auto-renewal mandate conditions under Clause 8.2 when an institution fails to submit renewal within 30 days of maturity.
