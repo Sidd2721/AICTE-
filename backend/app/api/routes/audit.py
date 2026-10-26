@@ -1,4 +1,3 @@
-import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -86,7 +85,7 @@ def list_audit_events(
 def list_entity_audit_events(
     entity_id: str,
     session: SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentUser,  # noqa: ARG001 — authentication dependency (I10)
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
 ) -> dict[str, Any]:

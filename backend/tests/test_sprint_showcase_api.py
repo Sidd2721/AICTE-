@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.models import Instrument
@@ -37,7 +37,7 @@ def test_instrument_case_view_endpoint(
     client: TestClient, db: Session, superuser_token_headers: dict[str, str]
 ) -> None:
     headers = superuser_token_headers
-    inst = db.query(Instrument).first()
+    inst = db.exec(select(Instrument)).first()
     if not inst:
         return
     r = client.get(f"{settings.API_V1_STR}/instruments/{inst.id}/case", headers=headers)

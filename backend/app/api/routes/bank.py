@@ -252,7 +252,9 @@ def get_verification_results(
     gate_report = build_verification_gate_report(
         instrument=inst_dict,
         confirmed_fields=confirmed_fields,
-        gate_outcome="accepted" if (conf and conf.status == "confirmed") else "unverified",
+        gate_outcome="accepted"
+        if (conf and conf.status == "confirmed")
+        else "unverified",
     )
     return gate_report
 
