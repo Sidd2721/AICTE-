@@ -15,10 +15,19 @@ from tests.utils.utils import get_superuser_token_headers
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session]:
     with Session(engine) as session:
+        from sqlalchemy import text
+        # Pre-cleanup of known test users that may survive between test runs
+        try:
+            session.execute(text("DELETE FROM \"user\" WHERE email NOT IN (SELECT \"user\".email FROM \"user\" JOIN lateral(select 1) ON true WHERE is_superuser = true) OR email = 'pollo@listo.com'"))
+            session.commit()
+        except Exception:
+            session.rollback()
         init_db(session)
         yield session
-        from sqlalchemy import text
-        session.execute(text("TRUNCATE case_note, flag_waiver, notice, obligation, confirmation, document, release_request, instrument CASCADE;"))
+        try:
+            session.execute(text("DELETE FROM flag_waiver; DELETE FROM notice; DELETE FROM obligation; DELETE FROM case_note; DELETE FROM confirmation; DELETE FROM document; DELETE FROM release_request; DELETE FROM instrument;"))
+        except Exception:
+            session.rollback()
         statement = delete(User)
         session.execute(statement)
         session.commit()
