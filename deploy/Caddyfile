@@ -1,0 +1,26 @@
+{
+    admin off
+}
+
+{$DOMAIN::80} {
+    # Reverse proxy backend API and compiled SPA
+    reverse_proxy api:8000
+
+    # Mailpit simulator web interface on /mailpit
+    handle /mailpit* {
+        reverse_proxy mailpit:8025
+    }
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

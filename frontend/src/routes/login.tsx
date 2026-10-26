@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "@tanstack/react-query"
 import {
   createFileRoute,
   Link as RouterLink,
@@ -6,7 +7,6 @@ import {
 } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
 import type { Body_login_login_access_token as AccessToken } from "@/client"
 import { AuthLayout } from "@/components/Common/AuthLayout"
 import {
@@ -21,6 +21,25 @@ import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
+
+interface DemoPersona {
+  role: string
+  name: string
+  email: string
+  badge: string
+  color: string
+  password: string
+}
+
+const fetchDemoPersonas = async (): Promise<DemoPersona[]> => {
+  try {
+    const res = await fetch("/api/v1/login/demo-personas")
+    if (!res.ok) return []
+    return await res.json()
+  } catch {
+    return []
+  }
+}
 
 const formSchema = z.object({
   username: z.email({ message: "Invalid email address" }),
@@ -50,53 +69,14 @@ export const Route = createFileRoute("/login")({
   }),
 })
 
-const DEMO_PERSONAS = import.meta.env.DEV
-  ? [
-      {
-        role: "Institution",
-        name: "North Tech Inst.",
-        email: "inst.north1@example.com",
-        badge: "Maker",
-        color:
-          "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
-      },
-      {
-        role: "RO Maker",
-        name: "Officer North",
-        email: "officer.north@example.com",
-        badge: "Regional",
-        color:
-          "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
-      },
-      {
-        role: "RO Checker",
-        name: "Checker North",
-        email: "checker.north@example.com",
-        badge: "Checker",
-        color:
-          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-      },
-      {
-        role: "Bureau Head",
-        name: "Central Bureau",
-        email: "bureau@example.com",
-        badge: "Admin",
-        color:
-          "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
-      },
-      {
-        role: "Auditor",
-        name: "Reg. Auditor",
-        email: "auditor@example.com",
-        badge: "Read-Only",
-        color:
-          "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30",
-      },
-    ]
-  : []
-
 function Login() {
   const { loginMutation } = useAuth()
+  const { data: demoPersonas = [] } = useQuery({
+    queryKey: ["demo-personas"],
+    queryFn: fetchDemoPersonas,
+    staleTime: 1000 * 60 * 60,
+  })
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -112,12 +92,13 @@ function Login() {
     loginMutation.mutate(data)
   }
 
-  const fillDemoPersona = (email: string) => {
-    if (import.meta.env.DEV) {
-      form.setValue("username", email, { shouldValidate: true })
-      form.setValue("password", "changethis", { shouldValidate: true })
-      loginMutation.mutate({ username: email, password: "changethis" })
-    }
+  const fillDemoPersona = (persona: DemoPersona) => {
+    form.setValue("username", persona.email, { shouldValidate: true })
+    form.setValue("password", persona.password, { shouldValidate: true })
+    loginMutation.mutate({
+      username: persona.email,
+      password: persona.password,
+    })
   }
 
   return (
@@ -132,9 +113,25 @@ function Login() {
               AICTE Deposit &amp; FDR Portal
             </h1>
             <p className="text-xs text-muted-foreground">
-              Statutory verification, bank gate &amp; maker-checker release
+              Table 1.4 calculator (DEMO values) • SIMULATED bank • dual-custody
+              release
             </p>
           </div>
+
+          <RouterLink
+            to="/guide"
+            className="flex items-center justify-between p-3 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-xs text-primary font-medium shadow-2xs group"
+          >
+            <span className="flex items-center gap-2">
+              <span className="flex size-5 items-center justify-center rounded-full bg-primary/15 text-primary">
+                ✦
+              </span>
+              Take the 6-minute guided tour
+            </span>
+            <span className="text-[11px] text-muted-foreground group-hover:text-primary flex items-center gap-0.5">
+              Start Tour →
+            </span>
+          </RouterLink>
 
           <div className="grid gap-4">
             <FormField
@@ -191,35 +188,40 @@ function Login() {
             </LoadingButton>
           </div>
 
-          {/* Quick Demo Persona Switcher (Charter Requirement for 6-Minute Turnkey Evaluation) */}
-          {import.meta.env.DEV ? (
+          {/* Quick Demo Persona Switcher (Charter Requirement for Turnkey Evaluation) */}
+          {demoPersonas.length > 0 ? (
             <div className="mt-2 pt-4 border-t border-dashed">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Quick Demo Personas
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  1-Click Demo Evaluation Personas
                 </span>
-                <span className="text-[10px] text-muted-foreground font-mono">
-                  pw: changethis
+                <span className="text-[10px] text-muted-foreground font-mono bg-muted/60 px-2 py-0.5 rounded">
+                  Instant Sign-in
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {DEMO_PERSONAS.map((p) => (
+                {demoPersonas.map((p) => (
                   <button
                     key={p.email}
                     type="button"
-                    onClick={() => fillDemoPersona(p.email)}
-                    className="flex items-center justify-between p-2 rounded-lg border text-left text-xs hover:bg-accent/60 transition-colors"
+                    disabled={loginMutation.isPending}
+                    onClick={() => fillDemoPersona(p)}
+                    className="flex items-center justify-between p-2.5 rounded-lg border text-left text-xs hover:bg-accent/80 hover:border-primary/40 transition-all cursor-pointer shadow-xs disabled:opacity-50"
                   >
                     <div className="truncate pr-1">
-                      <div className="font-medium text-foreground">
+                      <div className="font-semibold text-foreground flex items-center gap-1">
                         {p.role}
+                        <span className="text-[10px] text-muted-foreground font-normal">
+                          ({p.name})
+                        </span>
                       </div>
-                      <div className="text-[10px] text-muted-foreground truncate">
+                      <div className="text-[10px] text-muted-foreground truncate font-mono">
                         {p.email}
                       </div>
                     </div>
                     <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded border shrink-0 font-medium ${p.color}`}
+                      className={`text-[10px] px-2 py-0.5 rounded border shrink-0 font-medium ${p.color}`}
                     >
                       {p.badge}
                     </span>

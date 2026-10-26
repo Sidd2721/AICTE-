@@ -75,7 +75,7 @@ class Settings(BaseSettings):
                 f'The value of {var_name} is "changethis", '
                 "for security, please change it, at least for deployments."
             )
-            if self.FASTAPI_ENV in ("development", "demo"):
+            if self.FASTAPI_ENV == "development":
                 warnings.warn(message, stacklevel=1)
             else:
                 raise ValueError(message)
@@ -83,7 +83,7 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        if self.FASTAPI_ENV not in ("development", "demo"):
+        if self.FASTAPI_ENV != "development":
             if len(self.SECRET_KEY.encode("utf-8")) < 32:
                 raise ValueError(
                     "SECRET_KEY must be at least 32 bytes outside development/demo"

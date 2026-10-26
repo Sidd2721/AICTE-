@@ -1,0 +1,125 @@
+{
+  "version": "1.0.0",
+  "title": "AICTE Security Deposit Portal - 6-Minute Guided Tour",
+  "description": "Step-by-step walkthrough of seven key security and compliance capabilities for regulatory evaluation.",
+  "steps": [
+    {
+      "id": "step-1",
+      "step_number": 1,
+      "title": "Institution: coverage card -> calculator -> submit FDR",
+      "persona": "Institution User (North Tech)",
+      "email": "inst.north1@example.com",
+      "route": "/deposits",
+      "goal": "Check mandatory security deposit requirements, calculate required amount, and submit a new fixed deposit record.",
+      "do": [
+        "Sign in as the Institution persona using the 1-click switcher.",
+        "Review the Coverage Card showing required versus confirmed deposits.",
+        "Open the calculator to compute required funds based on selected programmes.",
+        "Submit a new FDR with reference number, bank code, and 10-year maturity date."
+      ],
+      "expect": "A new instrument record appears with the Claimed badge, pending bank verification.",
+      "why": "Institutions can see exact required deposits computed directly from handbook rules without manual guesswork."
+    },
+    {
+      "id": "step-2",
+      "step_number": 2,
+      "title": "RO requests bank confirmation -> SIMULATED reply -> gate report",
+      "persona": "Regional Officer (North Region)",
+      "email": "officer.north@example.com",
+      "route": "/deposits",
+      "goal": "Request authoritative bank verification for a submitted deposit and inspect the cryptographic validation report.",
+      "do": [
+        "Switch to the Regional Officer persona.",
+        "Open the case page for the submitted instrument.",
+        "Click the single primary action button 'Request Bank Confirmation'.",
+        "View the 6-point cryptographic verification gate results."
+      ],
+      "expect": "All six checks pass; the status badge turns green to Confirmed (SIMULATED).",
+      "why": "No deposit is trusted on institution claims alone. Bank verification confirms validity cryptographically."
+    },
+    {
+      "id": "step-3",
+      "step_number": 3,
+      "title": "Break the gate: forged letter / appended page / replayed token",
+      "persona": "Regional Officer (North Region)",
+      "email": "officer.north@example.com",
+      "route": "/deposits",
+      "goal": "Test system defenses by attempting three common fraud attacks against the bank verification gate.",
+      "do": [
+        "In the Break-Me Workbench on the case page, select 'Forged Letter Attack'.",
+        "Test an 'Appended Bytes' attack where trailing pages were added.",
+        "Test a 'Replayed Token' attack using an already consumed verification challenge."
+      ],
+      "expect": "Every attack is immediately rejected with clear explanations and zero false passes.",
+      "why": "Standard PDF signers often miss appended pages. The portal enforces byte-prefix and boundary checks."
+    },
+    {
+      "id": "step-4",
+      "step_number": 4,
+      "title": "Amount mismatch -> flag with plain message -> waiver demands a reason",
+      "persona": "Regional Officer (North Region)",
+      "email": "officer.north@example.com",
+      "route": "/deposits",
+      "goal": "Detect an amount discrepancy between bank and institution claims and enforce accountability before waiver.",
+      "do": [
+        "Run an amount mismatch test where the bank confirms less than claimed.",
+        "Notice the plain-language warning explaining the shortfall.",
+        "Try waiving the flag with a blank reason to confirm validation blocks it.",
+        "Enter a detailed reason of at least 10 characters to record the waiver."
+      ],
+      "expect": "The waiver is accepted only with a written justification and permanently logged to audit.",
+      "why": "Officers cannot silently bypass discrepancies without creating an immutable paper trail."
+    },
+    {
+      "id": "step-5",
+      "step_number": 5,
+      "title": "Bureau advances the clock 30/60/90 days -> worker -> reminders",
+      "persona": "Bureau Approver (Central)",
+      "email": "bureau@example.com",
+      "route": "/dashboard",
+      "goal": "Fast-forward the virtual clock to test automated background reminders and escalation notices.",
+      "do": [
+        "Switch to the Bureau Approver persona.",
+        "Open the Time Machine dropdown in the header and advance +30 days.",
+        "Advance to +60 days to trigger escalation notices.",
+        "Advance to +90 days to verify overdue alerts and review emails in Mailpit."
+      ],
+      "expect": "Dashboard categories automatically update and reminder emails appear without manual tracking.",
+      "why": "Automates tracking for 10-year deposits so renewals and maturities are never forgotten."
+    },
+    {
+      "id": "step-6",
+      "step_number": 6,
+      "title": "Renewal: replacement FDR -> chain and coverage-gap check",
+      "persona": "Institution User (North Tech)",
+      "email": "inst.north1@example.com",
+      "route": "/deposits",
+      "goal": "Submit a replacement FDR linked to an expiring instrument and verify custody continuity.",
+      "do": [
+        "Switch back to Institution persona.",
+        "Submit a renewal FDR referencing the original instrument ID.",
+        "Open the case page to review the linked predecessor.",
+        "Check that coverage continuity is maintained without unmonitored gaps."
+      ],
+      "expect": "The old instrument links to the new one in a complete verifiable renewal chain.",
+      "why": "Prevents institutions from letting deposits lapse during renewal transitions."
+    },
+    {
+      "id": "step-7",
+      "step_number": 7,
+      "title": "Release: institution requests -> RO verifies -> same RO approve blocked -> bureau approves -> receipt -> offline verify",
+      "persona": "Institution & Bureau Personas",
+      "email": "bureau@example.com",
+      "route": "/deposits",
+      "goal": "Perform dual-custody authorized deposit release and verify cryptographic encashment receipt.",
+      "do": [
+        "As Institution, request term completion release.",
+        "As Regional Officer, verify the request (maker step).",
+        "Confirm that Regional Officer cannot approve (role check blocks it).",
+        "As Bureau Approver (checker), approve release and view cryptographic receipt."
+      ],
+      "expect": "Status becomes Released, receipt token is generated, and audit chain passes verification.",
+      "why": "No single officer can authorize the release of security deposits. Dual-custody stops insider fraud."
+    }
+  ]
+}

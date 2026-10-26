@@ -14,6 +14,7 @@ import {
 import { useState } from "react"
 
 import { client } from "@/client/client.gen"
+import { AboutThisPage } from "@/components/Common/AboutThisPage"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -70,6 +71,9 @@ function EvidenceView() {
           STATUS: DEMO • ALL BANK APIS SIMULATED
         </Badge>
       </div>
+
+      {/* About this screen guide (G3) */}
+      <AboutThisPage pageKey="evidence" />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-2 w-full max-w-md">

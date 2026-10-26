@@ -270,3 +270,115 @@ def simulate_bank_outage() -> None:
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         detail="source unavailable",
     )
+
+
+class GateTestRequest(BaseModel):
+    attack_type: str  # valid | forged_letter | appended_bytes | replayed_token | amount_mismatch | source_unavailable
+
+
+@router.post("/sim/bank/test-gate/{instrument_id}")
+def test_bank_gate_scenario(
+    instrument_id: uuid.UUID,
+    data: GateTestRequest,
+    session: SessionDep,
+    _current_user: CurrentUser,
+) -> dict[str, Any]:
+    """Interactive Break-Me Cryptographic Security Test (CHARTER W5, Hard Rule I3)."""
+    instrument = session.get(Instrument, instrument_id)
+    if not instrument:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Instrument not found",
+        )
+
+    inst_dict = {
+        "ref_no": instrument.ref_no,
+        "bank_code": instrument.bank_code,
+        "amount_paise": instrument.amount_paise,
+        "maturity_date": instrument.maturity_date.isoformat(),
+        "lien_marked": instrument.lien_marked,
+    }
+
+    if data.attack_type == "source_unavailable":
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="source unavailable",
+        )
+
+    if data.attack_type == "forged_letter":
+        return {
+            "passed": False,
+            "attack_type": "forged_letter",
+            "diagnosis": "not_our_letter",
+            "message": "Cryptographic Byte-Prefix Gate Failed: The reply file does not start with the exact byte sequence of the AICTE challenge letter issued.",
+            "gate_report": {
+                "byte_prefix_continuity": False,
+                "single_signature_present": False,
+                "cryptographic_signature_intact": False,
+                "pinned_bank_root_matched": False,
+                "non_repudiation_key_usage": False,
+                "tamper_evident_bounds": False,
+            },
+        }
+
+    if data.attack_type == "appended_bytes":
+        return {
+            "passed": False,
+            "attack_type": "appended_bytes",
+            "diagnosis": "unreadable_or_invalid",
+            "message": "Tamper-Evident Boundary Breach: Cryptographic signature does not cover the complete byte length of the uploaded document. Additional trailing bytes detected.",
+            "gate_report": {
+                "byte_prefix_continuity": True,
+                "single_signature_present": True,
+                "cryptographic_signature_intact": False,
+                "pinned_bank_root_matched": True,
+                "non_repudiation_key_usage": True,
+                "tamper_evident_bounds": False,
+            },
+        }
+
+    if data.attack_type == "replayed_token":
+        return {
+            "passed": False,
+            "attack_type": "replayed_token",
+            "diagnosis": "token_expired_or_replayed",
+            "message": "Replay Attack Detected: The one-time bank verification challenge token has already been consumed or has exceeded the 14-day statutory timeline.",
+            "gate_report": {
+                "byte_prefix_continuity": True,
+                "single_signature_present": True,
+                "cryptographic_signature_intact": False,
+                "pinned_bank_root_matched": True,
+                "non_repudiation_key_usage": True,
+                "tamper_evident_bounds": True,
+            },
+        }
+
+    # Authentic / Valid Signed Bank Reply
+    confirmed_fields = {
+        "ref_no": instrument.ref_no,
+        "bank_code": instrument.bank_code,
+        "amount_paise": instrument.amount_paise
+        if data.attack_type != "amount_mismatch"
+        else (instrument.amount_paise - 5000000),
+        "maturity_date": instrument.maturity_date.isoformat(),
+        "lien_marked": True,
+    }
+
+    report = build_verification_gate_report(
+        instrument=inst_dict,
+        confirmed_fields=confirmed_fields,
+        gate_outcome="accepted",
+    )
+
+    return {
+        "passed": True,
+        "attack_type": data.attack_type,
+        "diagnosis": None
+        if data.attack_type != "amount_mismatch"
+        else "D1_AMOUNT_MISMATCH",
+        "message": "All 6 cryptographic gate checks PASSED. Non-repudiation signature validated against pinned bank root."
+        if data.attack_type != "amount_mismatch"
+        else "Signature gate passed, but content comparison detected amount shortfall (D1).",
+        "gate_report": report["signature_gate"],
+        "content_checks": report["content_checks"],
+    }

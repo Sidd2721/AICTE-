@@ -9,11 +9,13 @@ import {
   History,
   Shield,
   ShieldAlert,
+  ShieldCheck,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
 import { client } from "@/client/client.gen"
+import { AboutThisPage } from "@/components/Common/AboutThisPage"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,6 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import useAuth from "@/hooks/useAuth"
 import { getMessage } from "@/lib/messages"
 
 export const Route = createFileRoute("/_layout/instruments/$id")({
@@ -57,9 +60,32 @@ function formatPaise(p: number | null | undefined): string {
 function InstrumentCaseView() {
   const { id } = Route.useParams() as { id: string }
   const queryClient = useQueryClient()
+  const { user: currentUser } = useAuth()
   const [waiverReason, setWaiverReason] = useState("")
   const [showWaiverDialog, setShowWaiverDialog] = useState(false)
   const [selectedFlag, setSelectedFlag] = useState<string | null>(null)
+  const [testResult, setTestResult] = useState<any>(null)
+
+  const testGateMutation = useMutation({
+    mutationFn: async (attack_type: string) => {
+      const res = await client.post<any>({
+        url: `/sim/bank/test-gate/${id}`,
+        body: { attack_type },
+      })
+      return res.data
+    },
+    onSuccess: (data) => {
+      setTestResult(data)
+      if (data.passed) {
+        toast.success(data.message)
+      } else {
+        toast.warning(`Gate Blocked: ${data.diagnosis}`)
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.detail || "Simulation Error")
+    },
+  })
 
   const { data: caseData, isLoading } = useQuery({
     queryKey: ["instrument-case", id],
@@ -86,6 +112,56 @@ function InstrumentCaseView() {
       queryClient.invalidateQueries({ queryKey: ["instrument-case", id] })
     },
     onError: (err: any) => toast.error(err?.detail || "Failed to waive flag"),
+  })
+
+  const requestReleaseMutation = useMutation({
+    mutationFn: async () => {
+      const res = await client.post({
+        url: `/api/v1/instruments/${id}/release`,
+        body: { reason: "Maturity completed. Return requested." },
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success("Release requested successfully")
+      queryClient.invalidateQueries({ queryKey: ["instrument-case", id] })
+    },
+    onError: (err: any) =>
+      toast.error(err?.detail || "Failed to request release"),
+  })
+
+  const verifyReleaseMutation = useMutation({
+    mutationFn: async (releaseId: string) => {
+      const res = await client.post({
+        url: `/api/v1/release/${releaseId}/verify`,
+        body: { checklist_notes: "Regional Officer verification completed" },
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success("Release verified by Regional Officer (Maker)")
+      queryClient.invalidateQueries({ queryKey: ["instrument-case", id] })
+    },
+    onError: (err: any) =>
+      toast.error(err?.detail || "Failed to verify release"),
+  })
+
+  const approveReleaseMutation = useMutation({
+    mutationFn: async (releaseId: string) => {
+      const res = await client.post({
+        url: `/api/v1/release/${releaseId}/approve`,
+        body: {
+          approval_notes: "Bureau Approver dual-control approval granted",
+        },
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success("Release approved by Bureau Approver (Checker)")
+      queryClient.invalidateQueries({ queryKey: ["instrument-case", id] })
+    },
+    onError: (err: any) =>
+      toast.error(err?.detail || "Failed to approve release"),
   })
 
   if (isLoading || !caseData) {
@@ -147,6 +223,18 @@ function InstrumentCaseView() {
     },
   ]
 
+  const handleNextAction = () => {
+    if (inst.next_action_code === "verify_release" && relReq?.id) {
+      verifyReleaseMutation.mutate(relReq.id)
+    } else if (inst.next_action_code === "approve_release" && relReq?.id) {
+      approveReleaseMutation.mutate(relReq.id)
+    } else if (inst.next_action_code === "request_release") {
+      requestReleaseMutation.mutate()
+    } else {
+      toast.info(`Next action: ${inst.next_action_label}`)
+    }
+  }
+
   return (
     <div className="space-y-6 pb-12">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
@@ -174,12 +262,25 @@ function InstrumentCaseView() {
             {badgeMsg.label}
           </Badge>
           {inst.next_action_label && inst.next_action_code !== "none" && (
-            <Button size="sm" className="font-semibold shadow-sm">
+            <Button
+              size="sm"
+              className="font-semibold shadow-sm"
+              onClick={handleNextAction}
+              disabled={
+                requestReleaseMutation.isPending ||
+                verifyReleaseMutation.isPending ||
+                approveReleaseMutation.isPending
+              }
+              title={`Next action: ${inst.next_action_label}`}
+            >
               {inst.next_action_label}
             </Button>
           )}
         </div>
       </div>
+
+      {/* About this screen guide (G3) */}
+      <AboutThisPage pageKey="case_page" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
@@ -268,30 +369,180 @@ function InstrumentCaseView() {
                 No open field discrepancies detected on this instrument.
               </p>
             ) : (
-              discrepancies.map((disc, idx) => (
-                <div
-                  key={idx}
-                  className="p-2.5 rounded border border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 text-xs space-y-1"
-                >
-                  <div className="font-semibold text-amber-900 dark:text-amber-200">
-                    {disc.field}: {disc.message}
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedFlag(disc.field)
-                      setShowWaiverDialog(true)
-                    }}
+              discrepancies.map((disc, idx) => {
+                const discCode = disc.code || disc.field || ""
+                const msg = getMessage(discCode)
+                return (
+                  <div
+                    key={idx}
+                    className="p-3 rounded border border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 text-xs space-y-2"
                   >
-                    Waive Flag with Note
-                  </Button>
-                </div>
-              ))
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-1">
+                        <div className="font-semibold text-amber-900 dark:text-amber-200">
+                          {msg.label}
+                        </div>
+                        <p className="text-muted-foreground">{msg.sentence}</p>
+                        <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                          Action: {msg.action}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        title="Official scrutiny reason mandatory before waiving"
+                        onClick={() => {
+                          setSelectedFlag(disc.field || disc.code)
+                          setShowWaiverDialog(true)
+                        }}
+                      >
+                        Waive Flag with Note
+                      </Button>
+                    </div>
+                    <details className="text-[11px] text-muted-foreground pt-1 border-t border-amber-200/40">
+                      <summary className="cursor-pointer hover:underline font-mono">
+                        Technical details ({disc.code || disc.field || "raw"})
+                      </summary>
+                      <pre className="mt-1 font-mono text-[10px] bg-background/50 p-2 rounded overflow-x-auto">
+                        {JSON.stringify(disc, null, 2)}
+                      </pre>
+                    </details>
+                  </div>
+                )
+              })
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Break-Me Cryptographic Security Workbench (Hard Rule I3 / CHARTER W5) */}
+      <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 shadow-xs">
+        <CardHeader className="pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Break-Me Cryptographic Security Workbench (CHARTER W5 / Hard Rule
+              I3)
+            </CardTitle>
+            <Badge
+              variant="outline"
+              className="text-[10px] uppercase font-bold border-primary/30 text-primary"
+            >
+              6-Point Gate Sandbox
+            </Badge>
+          </div>
+          <CardDescription>
+            Inject adversarial payloads to verify that the cryptographic bank
+            gate rejects forgeries, replayed tokens, and trailing byte
+            tampering.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs border-destructive/40 hover:bg-destructive/10 text-destructive justify-start h-auto py-2 flex-col items-start gap-0.5"
+              disabled={testGateMutation.isPending}
+              onClick={() => testGateMutation.mutate("forged_letter")}
+            >
+              <span className="font-semibold">Attack 1: Forged Challenge</span>
+              <span className="text-[10px] text-muted-foreground">
+                Byte prefix mismatch
+              </span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs border-amber-500/40 hover:bg-amber-500/10 text-amber-700 dark:text-amber-400 justify-start h-auto py-2 flex-col items-start gap-0.5"
+              disabled={testGateMutation.isPending}
+              onClick={() => testGateMutation.mutate("appended_bytes")}
+            >
+              <span className="font-semibold">Attack 2: Appended Bytes</span>
+              <span className="text-[10px] text-muted-foreground">
+                Trailing byte tampering
+              </span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs border-purple-500/40 hover:bg-purple-500/10 text-purple-700 dark:text-purple-400 justify-start h-auto py-2 flex-col items-start gap-0.5"
+              disabled={testGateMutation.isPending}
+              onClick={() => testGateMutation.mutate("replayed_token")}
+            >
+              <span className="font-semibold">Attack 3: Replayed Token</span>
+              <span className="text-[10px] text-muted-foreground">
+                Consumed / expired
+              </span>
+            </Button>
+            <Button
+              size="sm"
+              variant="default"
+              className="text-xs justify-start h-auto py-2 flex-col items-start gap-0.5"
+              disabled={testGateMutation.isPending}
+              onClick={() => testGateMutation.mutate("valid")}
+            >
+              <span className="font-semibold">Test 4: Genuine Reply</span>
+              <span className="text-[10px] opacity-90">
+                6/6 gate checks pass
+              </span>
+            </Button>
+          </div>
+
+          {testResult && (
+            <div
+              className={`p-3.5 rounded-lg border text-xs space-y-2 ${
+                testResult.passed
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-950 dark:text-emerald-200"
+                  : "border-destructive/40 bg-destructive/10 text-destructive-foreground"
+              }`}
+            >
+              <div className="flex items-center justify-between font-semibold">
+                <span className="flex items-center gap-1.5">
+                  {testResult.passed ? (
+                    <CheckCircle2 className="size-4 text-emerald-600" />
+                  ) : (
+                    <AlertCircle className="size-4 text-destructive" />
+                  )}
+                  {testResult.passed
+                    ? "Cryptographic Gate Verified — Valid Non-Repudiation"
+                    : `Attack Intercepted: [${testResult.diagnosis}]`}
+                </span>
+                <Badge
+                  variant={testResult.passed ? "default" : "destructive"}
+                  className="text-[10px]"
+                >
+                  {testResult.passed ? "VERIFIED" : "BLOCKED"}
+                </Badge>
+              </div>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                {testResult.message}
+              </p>
+              {testResult.gate_report && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1 font-mono text-[10px]">
+                  {Object.entries(testResult.gate_report).map(([key, val]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between px-2 py-1 bg-background/60 rounded border border-border/50"
+                    >
+                      <span className="truncate pr-1">{key}</span>
+                      <span
+                        className={
+                          val
+                            ? "text-emerald-600 font-bold"
+                            : "text-destructive font-bold"
+                        }
+                      >
+                        {val ? "✓ PASS" : "✗ FAIL"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
@@ -318,6 +569,71 @@ function InstrumentCaseView() {
                 {relReq?.approved_by || "Pending approval"}
               </div>
             </div>
+
+            {/* Dual-Control Release Actions */}
+            {!relReq && (
+              <Button
+                size="sm"
+                className="w-full"
+                disabled={
+                  currentUser?.role !== "institution" ||
+                  requestReleaseMutation.isPending
+                }
+                title={
+                  currentUser?.role !== "institution"
+                    ? "Dual-control: Only Institution persona can initiate release request"
+                    : "Request return of mature fixed deposit"
+                }
+                onClick={() => requestReleaseMutation.mutate()}
+              >
+                {requestReleaseMutation.isPending
+                  ? "Requesting..."
+                  : "Request Release (Institution)"}
+              </Button>
+            )}
+
+            {relReq && relReq.status === "submitted" && (
+              <Button
+                size="sm"
+                className="w-full"
+                disabled={
+                  currentUser?.role !== "regional" ||
+                  verifyReleaseMutation.isPending
+                }
+                title={
+                  currentUser?.role !== "regional"
+                    ? "Dual-control: Only Regional Officer (Maker) can verify release"
+                    : "Verify release checklist and forward to Bureau"
+                }
+                onClick={() => verifyReleaseMutation.mutate(relReq.id)}
+              >
+                {verifyReleaseMutation.isPending
+                  ? "Verifying..."
+                  : "Verify Release (Maker / Regional)"}
+              </Button>
+            )}
+
+            {relReq && relReq.status === "verified" && (
+              <Button
+                size="sm"
+                className="w-full"
+                disabled={
+                  currentUser?.role !== "bureau" ||
+                  approveReleaseMutation.isPending
+                }
+                title={
+                  currentUser?.role !== "bureau"
+                    ? "Dual-control: Only Bureau Approver (Checker) can approve release"
+                    : "Approve release and issue cryptographic encashment receipt"
+                }
+                onClick={() => approveReleaseMutation.mutate(relReq.id)}
+              >
+                {approveReleaseMutation.isPending
+                  ? "Approving..."
+                  : "Approve Release (Checker / Bureau)"}
+              </Button>
+            )}
+
             {relReq?.status === "released" && (
               <div className="p-3 border border-emerald-500/30 bg-emerald-500/10 rounded space-y-2">
                 <div className="font-semibold text-emerald-800 dark:text-emerald-200 flex items-center gap-1">

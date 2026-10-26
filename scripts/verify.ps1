@@ -92,6 +92,12 @@ Record-Check "OpenAPI Client Drift Check" {
     git diff --exit-code frontend/src/client
 }
 
+# 9. Guide / DEMO.md Drift
+Record-Check "Guide / DEMO.md Drift Check" {
+    uv run python scripts/generate_demo_md.py
+    git diff --exit-code DEMO.md
+}
+
 Write-Host "`n=========================================================" -ForegroundColor White
 Write-Host "             FULL GATE VERIFICATION SUMMARY" -ForegroundColor White
 Write-Host "=========================================================" -ForegroundColor White

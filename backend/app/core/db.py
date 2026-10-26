@@ -2,6 +2,7 @@ from sqlmodel import Session, create_engine, select
 
 from app import crud
 from app.core.config import settings
+from app.core.security import get_password_hash
 from app.models import User, UserCreate
 
 engine = create_engine(str(settings.DATABASE_URL), pool_pre_ping=True)
@@ -96,6 +97,7 @@ def init_db(session: Session) -> None:
         else:
             existing.role = role
             existing.region = region
+            existing.hashed_password = get_password_hash(demo_password)
             session.add(existing)
             session.commit()
 

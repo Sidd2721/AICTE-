@@ -11,8 +11,8 @@ def get_clock_offset() -> int:
 
 def set_clock_offset(seconds: int) -> int:
     global _offset_seconds
-    if settings.FASTAPI_ENV not in ("development", "test", None):
-        raise PermissionError("Clock manipulation forbidden outside development")
+    if settings.FASTAPI_ENV not in ("development", "test", "demo", None):
+        raise PermissionError("Clock manipulation forbidden outside development/demo")
     _offset_seconds = seconds
     return _offset_seconds
 
@@ -20,7 +20,7 @@ def set_clock_offset(seconds: int) -> int:
 def now() -> datetime:
     """Current simulated UTC datetime."""
     base = datetime.now(UTC)
-    if settings.FASTAPI_ENV in ("development", "test", None):
+    if settings.FASTAPI_ENV in ("development", "test", "demo", None):
         return base + timedelta(seconds=_offset_seconds)
     return base
 

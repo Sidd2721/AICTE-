@@ -14,7 +14,8 @@ from tests.utils.user import authentication_token_from_email
 
 
 @pytest.fixture(name="users_and_tokens")
-def fixture_users_and_tokens(client: TestClient, db: Session) -> dict[str, dict[str, str]]:
+def fixture_users_and_tokens() -> dict[str, dict[str, str]]:
+    from app.core.security import create_access_token
     with Session(engine) as session:
         # Get or verify the test users
         officer = session.exec(select(User).where(User.email == "officer.north@example.com")).first()
@@ -22,13 +23,13 @@ def fixture_users_and_tokens(client: TestClient, db: Session) -> dict[str, dict[
         auditor = session.exec(select(User).where(User.email == "auditor@example.com")).first()
         inst = session.exec(select(User).where(User.email == "inst.north1@example.com")).first()
 
-    assert officer and bureau and auditor and inst
-    return {
-        "regional": authentication_token_from_email(client=client, email="officer.north@example.com", db=db),
-        "bureau": authentication_token_from_email(client=client, email="bureau@example.com", db=db),
-        "auditor": authentication_token_from_email(client=client, email="auditor@example.com", db=db),
-        "institution": authentication_token_from_email(client=client, email="inst.north1@example.com", db=db),
-    }
+        assert officer and bureau and auditor and inst
+        return {
+            "regional": {"Authorization": f"Bearer {create_access_token(officer.id, timedelta(minutes=60))}"},
+            "bureau": {"Authorization": f"Bearer {create_access_token(bureau.id, timedelta(minutes=60))}"},
+            "auditor": {"Authorization": f"Bearer {create_access_token(auditor.id, timedelta(minutes=60))}"},
+            "institution": {"Authorization": f"Bearer {create_access_token(inst.id, timedelta(minutes=60))}"},
+        }
 
 
 def test_receipt_crypto_roundtrip_tamper_and_alg_none() -> None:
@@ -285,3 +286,103 @@ def test_maker_checker_same_user_approval_blocked(
     )
     assert res.status_code == 403
     assert "Maker cannot be checker" in res.text
+
+
+@pytest.mark.parametrize(
+    "role,action,expected_status",
+    [
+        ("institution", "request", 200),
+        ("regional", "request", 403),
+        ("bureau", "request", 403),
+        ("auditor", "request", 403),
+        ("institution", "verify", 403),
+        ("regional", "verify", 200),
+        ("bureau", "verify", 403),
+        ("auditor", "verify", 403),
+        ("institution", "approve", 403),
+        ("regional", "approve", 403),
+        ("bureau", "approve", 200),
+        ("auditor", "approve", 403),
+    ],
+)
+def test_release_matrix_roles_contract(
+    client: TestClient,
+    users_and_tokens: dict[str, dict[str, str]],
+    role: str,
+    action: str,
+    expected_status: int,
+) -> None:
+    with Session(engine) as session:
+        inst_user = session.exec(select(User).where(User.email == "inst.north1@example.com")).first()
+        officer_user = session.exec(select(User).where(User.email == "officer.north@example.com")).first()
+        assert inst_user and officer_user
+        inst = Instrument(
+            institution_id=inst_user.institution_id,
+            region="NR",
+            kind="FDR",
+            ref_no=f"MATR-{uuid.uuid4().hex[:6]}",
+            bank_code="SBIN",
+            ifsc="SBIN0001234",
+            amount_paise=150000000,
+            issue_date=date.today() - timedelta(days=3650),
+            maturity_date=date.today() - timedelta(days=5),
+            lien_marked=True,
+            lifecycle="matured",
+        )
+        session.add(inst)
+        session.commit()
+        session.refresh(inst)
+
+        conf = Confirmation(
+            instrument_id=inst.id,
+            status="confirmed",
+            method="signed_letter",
+            token_hash="dummy_hash",
+            token_expires_at=datetime.now(UTC) + timedelta(days=14),
+            confirmed_at=datetime.now(UTC),
+            expires_at=datetime.now(UTC) + timedelta(days=365),
+            fields={
+                "ref_no": inst.ref_no,
+                "bank_code": inst.bank_code,
+                "amount_paise": 150000000,
+                "maturity_date": str(inst.maturity_date),
+                "lien_marked": True,
+            },
+        )
+        session.add(conf)
+
+        rel = ReleaseRequest(
+            instrument_id=inst.id,
+            path="term_completion",
+            status="submitted" if action != "approve" else "verified",
+            requested_by=inst_user.id,
+            verified_by=officer_user.id if action == "approve" else None,
+        )
+        session.add(rel)
+        session.commit()
+        session.refresh(rel)
+        rel_id = rel.id
+        inst_id = inst.id
+
+    headers = users_and_tokens[role]
+    if action == "request":
+        res = client.post(
+            f"/api/v1/instruments/{inst_id}/release",
+            headers=headers,
+            json={"path": "term_completion"},
+        )
+    elif action == "verify":
+        res = client.patch(
+            f"/api/v1/release/{rel_id}/verify",
+            headers=headers,
+        )
+    elif action == "approve":
+        res = client.patch(
+            f"/api/v1/release/{rel_id}/approve",
+            headers=headers,
+        )
+
+    assert res.status_code == expected_status, (
+        f"Role {role} on {action} expected {expected_status}, got {res.status_code}: {res.text}"
+    )
+

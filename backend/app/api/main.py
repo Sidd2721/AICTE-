@@ -9,6 +9,7 @@ from app.api.routes import (
     fraud_lab,
     instruments,
     login,
+    meta,
     private,
     release,
     reports,
@@ -18,6 +19,7 @@ from app.api.routes import (
 from app.core.config import settings
 
 api_router = APIRouter()
+api_router.include_router(meta.router)
 api_router.include_router(login.router)
 api_router.include_router(users.router)
 api_router.include_router(utils.router)
@@ -32,5 +34,5 @@ api_router.include_router(fraud_lab.router)
 api_router.include_router(evidence.router)
 
 
-if settings.FASTAPI_ENV == "development":
+if settings.FASTAPI_ENV in ("development", "demo"):
     api_router.include_router(private.router)

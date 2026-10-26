@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router"
+import { ShieldCheck } from "lucide-react"
 
-import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import icon from "/assets/images/fastapi-icon.svg"
-import iconLight from "/assets/images/fastapi-icon-light.svg"
-import logo from "/assets/images/fastapi-logo.svg"
-import logoLight from "/assets/images/fastapi-logo-light.svg"
 
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
@@ -18,43 +14,53 @@ export function Logo({
   className,
   asLink = true,
 }: LogoProps) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === "dark"
+  const Emblem = (
+    <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-amber-600 via-orange-600 to-indigo-700 text-white shadow-sm ring-1 ring-white/20">
+      <ShieldCheck className="size-5 text-white" />
+    </div>
+  )
 
-  const fullLogo = isDark ? logoLight : logo
-  const iconLogo = isDark ? iconLight : icon
+  const Typography = (
+    <div className="flex flex-col text-left leading-tight">
+      <div className="flex items-center gap-1.5">
+        <span className="font-bold text-sm tracking-tight text-foreground font-sans">
+          AICTE
+        </span>
+        <span className="rounded-sm bg-primary/10 px-1 py-0.2 text-[10px] font-semibold text-primary uppercase tracking-wider">
+          FDR Portal
+        </span>
+      </div>
+      <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[150px]">
+        Security Deposit System
+      </span>
+    </div>
+  )
 
   const content =
     variant === "responsive" ? (
-      <>
-        <img
-          src={fullLogo}
-          alt="FastAPI"
-          className={cn(
-            "h-6 w-auto group-data-[collapsible=icon]:hidden",
-            className,
-          )}
-        />
-        <img
-          src={iconLogo}
-          alt="FastAPI"
-          className={cn(
-            "size-5 hidden group-data-[collapsible=icon]:block",
-            className,
-          )}
-        />
-      </>
+      <div className={cn("flex items-center gap-2.5", className)}>
+        {Emblem}
+        <div className="group-data-[collapsible=icon]:hidden">{Typography}</div>
+      </div>
+    ) : variant === "icon" ? (
+      <div className={className}>{Emblem}</div>
     ) : (
-      <img
-        src={variant === "full" ? fullLogo : iconLogo}
-        alt="FastAPI"
-        className={cn(variant === "full" ? "h-6 w-auto" : "size-5", className)}
-      />
+      <div className={cn("flex items-center gap-2.5", className)}>
+        {Emblem}
+        {Typography}
+      </div>
     )
 
   if (!asLink) {
     return content
   }
 
-  return <Link to="/">{content}</Link>
+  return (
+    <Link
+      to="/"
+      className="inline-flex items-center outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+    >
+      {content}
+    </Link>
+  )
 }

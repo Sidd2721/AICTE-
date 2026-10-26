@@ -49,13 +49,14 @@ def count(c: psycopg.Connection, sql: str) -> int:
 def setup_test_data() -> tuple[str, str, str, str, str, str, str]:
     """Seed test fixtures using the schema owner (migrator)."""
     m = psycopg.connect(MIG, autocommit=True)
+    m.execute("DELETE FROM release_request")
     m.execute("DELETE FROM flag_waiver")
     m.execute("DELETE FROM notice")
     m.execute("DELETE FROM obligation")
-    m.execute("DELETE FROM case_note WHERE body = 'n'")
-    m.execute("DELETE FROM confirmation WHERE instrument_id IN (SELECT id FROM instrument WHERE institution_id IN (SELECT id FROM institution WHERE permanent_id LIKE 'P1%' OR permanent_id LIKE 'P2%'))")
-    m.execute("DELETE FROM document WHERE instrument_id IN (SELECT id FROM instrument WHERE institution_id IN (SELECT id FROM institution WHERE permanent_id LIKE 'P1%' OR permanent_id LIKE 'P2%'))")
-    m.execute("DELETE FROM instrument WHERE institution_id IN (SELECT id FROM institution WHERE permanent_id LIKE 'P1%' OR permanent_id LIKE 'P2%') OR (ref_no = '1234' AND bank_code = 'SBIN')")
+    m.execute("DELETE FROM case_note")
+    m.execute("DELETE FROM confirmation")
+    m.execute("DELETE FROM document")
+    m.execute("DELETE FROM instrument")
     m.execute("DELETE FROM \"user\" WHERE email IN ('a@x', 'b@x', 'r@x')")
     m.execute("DELETE FROM institution WHERE permanent_id LIKE 'P1%' OR permanent_id LIKE 'P2%'")
 

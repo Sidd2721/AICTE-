@@ -23,6 +23,7 @@ import { toast } from "sonner"
 
 import { AuditService, DashboardService, SimulationService } from "@/client"
 import { client } from "@/client/client.gen"
+import { AboutThisPage } from "@/components/Common/AboutThisPage"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -294,6 +295,9 @@ function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* About this screen guide (G3) */}
+      <AboutThisPage pageKey="dashboard" />
 
       {/* KPI Stats Grid (6 Primary Regulator Buckets) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

@@ -28,6 +28,7 @@ import {
   InstrumentsService,
 } from "@/client"
 import { client } from "@/client/client.gen"
+import { AboutThisPage } from "@/components/Common/AboutThisPage"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -514,6 +515,9 @@ function Deposits() {
         </div>
       </div>
 
+      {/* About this screen guide (G3) */}
+      <AboutThisPage pageKey="calculator" />
+
       {/* S5: Institution Coverage Card */}
       {coverageData && (
         <Card className="border-border/60 shadow-sm bg-gradient-to-r from-primary/5 via-card to-card">
@@ -521,7 +525,7 @@ function Deposits() {
             <div>
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                Statutory Security Deposit Coverage —{" "}
+                Table 1.4 Deposit Coverage (DEMO values) —{" "}
                 {coverageData.institution_name || "Institution Obligation"}
               </CardTitle>
               <CardDescription className="text-xs">
@@ -538,7 +542,7 @@ function Deposits() {
               className="text-xs"
             >
               {coverageData.is_compliant
-                ? "Compliant (Fully Covered)"
+                ? "Fully Covered (DEMO values)"
                 : `Shortfall: ${formatPaiseToRupees(coverageData.shortfall_paise)}`}
             </Badge>
           </CardHeader>
@@ -546,7 +550,7 @@ function Deposits() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div className="p-2.5 bg-background/80 rounded border">
                 <div className="text-muted-foreground text-[11px]">
-                  Statutory Required
+                  Table 1.4 Required (DEMO)
                 </div>
                 <div className="text-base font-bold font-mono text-foreground mt-0.5">
                   {formatPaiseToRupees(coverageData.required_paise)}

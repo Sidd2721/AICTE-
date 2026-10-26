@@ -1,120 +1,161 @@
 # AICTE Security Deposit / FDR Portal — Live Demo Script
 
-**SIH PS 26265** | Branch: `sprint/mvp-showcase` | Tag: `mvp-showcase`
+**AICTE PS 26265** | Branch: `sprint/present-anywhere` | Tag: `sprint2-start`
 
-> **IMPORTANT**: All bank and email interactions are **SIMULATED** (transparently labelled). All institutions, deposit amounts, and reference numbers are **synthetic**. DSC receipts are unsigned test certificates, **not bank confirmations**. Rule values are marked **DEMO**, pending official handbook confirmation.
+> **IMPORTANT**: All bank and email interactions are **SIMULATED** (transparently labelled).
+> All institutions, deposit amounts, and reference numbers are **synthetic**.
+> DSC receipts prove document signer, **not bank confirmations**.
+> Rule values are marked **DEMO**, pending official handbook confirmation.
 
 ---
 
 ## Prerequisites
 
 ```powershell
-# 1. Preflight checks
+# 1. Preflight system health check
 uv run python scripts/doctor.py
 
-# 2. Reset DB, run migrations, seed, launch server, and execute all 7 steps:
-powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset
+# 2. Re-seed DB and run all 7 problem statement demo steps:
+pwsh scripts/run-demo.ps1 -Reset
 ```
 
-The demo server runs at **http://localhost:8000**. Default credentials are printed by `doctor.py`.
+The demo server runs at **http://localhost:8000**.
 
 ---
 
 ## STEP 1: Institution: coverage card -> calculator -> submit FDR
 
-**Actor:** Institution user (`inst.north1@example.com`)
-**Route:** `/` -> `/deposits` -> submit form
+**Actor:** Institution User (North Tech) (`inst.north1@example.com`)  
+**Route:** `/deposits`  
+**Goal:** Check mandatory security deposit requirements, calculate required amount, and submit a new fixed deposit record.
 
-1. Log in using the **1-click demo personas** on the login page.
-2. The dashboard shows the **Coverage Card**: Required (Table 1.4 APH) vs Confirmed-Active vs Claimed-Only vs Shortfall.
-3. Open the **coverage calculator**: programme type, intake, land ownership. Required deposit is computed from the dated rule JSON - no hand-typed values.
-4. Click **Submit FDR**. Status badge shows: **"Submitted by institution (not bank-confirmed)"**
+### Actions to Perform:
+1. Sign in as the Institution persona using the 1-click switcher.
+2. Review the Coverage Card showing required versus confirmed deposits.
+3. Open the calculator to compute required funds based on selected programmes.
+4. Submit a new FDR with reference number, bank code, and 10-year maturity date.
+
+**Expected Outcome:** A new instrument record appears with the Claimed badge, pending bank verification.
+
+**Why this matters:** Institutions can see exact required deposits computed directly from handbook rules without manual guesswork.
 
 ---
 
 ## STEP 2: RO requests bank confirmation -> SIMULATED reply -> gate report
 
-**Actor:** Regional Officer (`officer.north@example.com`)
-**Route:** `/instruments/<id>` Case page
+**Actor:** Regional Officer (North Region) (`officer.north@example.com`)  
+**Route:** `/deposits`  
+**Goal:** Request authoritative bank verification for a submitted deposit and inspect the cryptographic validation report.
 
-1. Open the instrument from Step 1.
-2. Click **"Request Bank Confirmation"** (primary button from `next_action()`).
-3. The SIMULATED bank simulator responds. The system runs the full gate (`check_bank_reply`): integrity hash, signature chain, duplicate-reply guard.
-4. Status badge: **"Confirmed by bank (SIMULATED)"**
+### Actions to Perform:
+1. Switch to the Regional Officer persona.
+2. Open the case page for the submitted instrument.
+3. Click the single primary action button 'Request Bank Confirmation'.
+4. View the 6-point cryptographic verification gate results.
+
+**Expected Outcome:** All six checks pass; the status badge turns green to Confirmed (SIMULATED).
+
+**Why this matters:** No deposit is trusted on institution claims alone. Bank verification confirms validity cryptographically.
 
 ---
 
 ## STEP 3: Break the gate: forged letter / appended page / replayed token
 
-Three attacks, each rejected with its specific reason:
+**Actor:** Regional Officer (North Region) (`officer.north@example.com`)  
+**Route:** `/deposits`  
+**Goal:** Test system defenses by attempting three common fraud attacks against the bank verification gate.
 
-| Attack | Rejection |
-|--------|-----------|
-| Forged letter | `INTEGRITY_FAIL: Document hash does not match signed value` |
-| Appended page | `INTEGRITY_FAIL: Content hash mismatch after byte-level verification` |
-| Replayed token | `REPLAY_REJECTED: Bank reference already confirmed for this instrument` |
+### Actions to Perform:
+1. In the Break-Me Workbench on the case page, select 'Forged Letter Attack'.
+2. Test an 'Appended Bytes' attack where trailing pages were added.
+3. Test a 'Replayed Token' attack using an already consumed verification challenge.
+
+**Expected Outcome:** Every attack is immediately rejected with clear explanations and zero false passes.
+
+**Why this matters:** Standard PDF signers often miss appended pages. The portal enforces byte-prefix and boundary checks.
 
 ---
 
 ## STEP 4: Amount mismatch -> flag with plain message -> waiver demands a reason
 
-1. Bank confirms a different amount than institution claimed.
-2. System raises a **DISCREPANCY flag** with plain message from `lib/messages.ts`.
-3. RO must enter a **mandatory written reason** to waive. Blank reason = HTTP 422.
-4. Waiver is logged to the immutable audit ledger.
+**Actor:** Regional Officer (North Region) (`officer.north@example.com`)  
+**Route:** `/deposits`  
+**Goal:** Detect an amount discrepancy between bank and institution claims and enforce accountability before waiver.
+
+### Actions to Perform:
+1. Run an amount mismatch test where the bank confirms less than claimed.
+2. Notice the plain-language warning explaining the shortfall.
+3. Try waiving the flag with a blank reason to confirm validation blocks it.
+4. Enter a detailed reason of at least 10 characters to record the waiver.
+
+**Expected Outcome:** The waiver is accepted only with a written justification and permanently logged to audit.
+
+**Why this matters:** Officers cannot silently bypass discrepancies without creating an immutable paper trail.
 
 ---
 
-## STEP 5: Bureau advances the clock 30/60/90 days -> worker -> reminders, escalation, needs-action reorders, mail in Mailpit
+## STEP 5: Bureau advances the clock 30/60/90 days -> worker -> reminders
 
-1. Bureau user advances the virtual clock by 30 days -> worker runs -> **Needs Action** panel reorders.
-2. 60 days total -> ESCALATED status appears. Reminder email in Mailpit (`http://localhost:8025`).
-3. 90 days total -> OVERDUE. Escalation emails dispatched.
+**Actor:** Bureau Approver (Central) (`bureau@example.com`)  
+**Route:** `/dashboard`  
+**Goal:** Fast-forward the virtual clock to test automated background reminders and escalation notices.
 
-> Thresholds (30/60/90) are read from `rules/timelines.json`, not hardcoded.
+### Actions to Perform:
+1. Switch to the Bureau Approver persona.
+2. Open the Time Machine dropdown in the header and advance +30 days.
+3. Advance to +60 days to trigger escalation notices.
+4. Advance to +90 days to verify overdue alerts and review emails in Mailpit.
+
+**Expected Outcome:** Dashboard categories automatically update and reminder emails appear without manual tracking.
+
+**Why this matters:** Automates tracking for 10-year deposits so renewals and maturities are never forgotten.
 
 ---
 
 ## STEP 6: Renewal: replacement FDR -> chain and coverage-gap check
 
-1. Submit a new FDR referencing the expiring FDR as predecessor.
-2. System validates: renewal chain validity + coverage-gap check.
-3. Case page shows **"Renewal chain"** link to predecessor.
+**Actor:** Institution User (North Tech) (`inst.north1@example.com`)  
+**Route:** `/deposits`  
+**Goal:** Submit a replacement FDR linked to an expiring instrument and verify custody continuity.
+
+### Actions to Perform:
+1. Switch back to Institution persona.
+2. Submit a renewal FDR referencing the original instrument ID.
+3. Open the case page to review the linked predecessor.
+4. Check that coverage continuity is maintained without unmonitored gaps.
+
+**Expected Outcome:** The old instrument links to the new one in a complete verifiable renewal chain.
+
+**Why this matters:** Prevents institutions from letting deposits lapse during renewal transitions.
 
 ---
 
-## STEP 7: Release: institution requests -> RO verifies -> same RO approve blocked -> bureau approves -> receipt -> offline verify -> /audit Verify chain -> /evidence
+## STEP 7: Release: institution requests -> RO verifies -> same RO approve blocked -> bureau approves -> receipt -> offline verify
 
-| Sub-step | Actor | Action | Result |
-|----------|-------|--------|--------|
-| 7a | Institution | Request Release | Status: RELEASE_REQUESTED |
-| 7b | RO (maker) | Verify Release | Status: RELEASE_VERIFIED |
-| 7c | Same RO (checker) | Try Approve | **BLOCKED: "The same person cannot both verify and approve"** |
-| 7d | Bureau (checker) | Approve Release | Status: RELEASED, receipt generated |
-| 7e | Anyone | Verify offline | `python scripts/verify_receipt.py receipt.json` -> VALID |
-| 7f | Auditor | Audit Verify Chain | `/audit` -> OK — N events hash-chain-intact |
-| 7g | Anyone | Evidence dashboard | `/evidence` -> 10/10 caps, 29/29 tests |
+**Actor:** Institution & Bureau Personas (`bureau@example.com`)  
+**Route:** `/deposits`  
+**Goal:** Perform dual-custody authorized deposit release and verify cryptographic encashment receipt.
 
----
+### Actions to Perform:
+1. As Institution, request term completion release.
+2. As Regional Officer, verify the request (maker step).
+3. Confirm that Regional Officer cannot approve (role check blocks it).
+4. As Bureau Approver (checker), approve release and view cryptographic receipt.
 
-## Demo Credentials
+**Expected Outcome:** Status becomes Released, receipt token is generated, and audit chain passes verification.
 
-| Role | Email | Password |
-|------|-------|----------|
-| Institution | inst.north1@example.com | changethis |
-| Regional Officer (Maker) | officer.north@example.com | changethis |
-| Regional Officer (Checker — blocked) | checker.north@example.com | changethis |
-| Bureau | bureau@example.com | changethis |
-| Auditor (read-only) | auditor@example.com | changethis |
+**Why this matters:** No single officer can authorize the release of security deposits. Dual-custody stops insider fraud.
 
 ---
 
-## What This Demo Does NOT Claim
+## Demo Credentials Matrix
 
-- No real bank verification (SIMULATED, transparently labelled)
-- Not WCAG-audited, not production-hardened, not certified
-- No real monetary flows (synthetic data only)
-- DSC receipts are unsigned test certificates, not bank confirmations
-- Fraud-lab numbers are labelled-synthetic
-- TIMING baseline is estimated, not measured in production
-- Rule values are DEMO-flagged, pending official handbook confirmation
+| Persona Role | Email | Region | Permission Scope | Password |
+| :--- | :--- | :--- | :--- | :--- |
+| **Institution** | `inst.north1@example.com` | NR | Submits FDR, requests release | `changethis` |
+| **Regional Officer** | `officer.north@example.com` | NR | Requests bank confirmation, verifies release | `changethis` |
+| **Regional Checker** | `checker.north@example.com` | NR | Regional inspection & notes | `changethis` |
+| **Bureau Head** | `bureau@example.com` | ALL | Approves release (checker), all reports | `changethis` |
+| **Auditor** | `auditor@example.com` | ALL | Read-only audit log & instruments | `changethis` |
+
+*(All demo personas are accessible via 1-click login buttons on `/login` and `/guide`)*

@@ -4,6 +4,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlmodel import SQLModel
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
@@ -170,3 +171,67 @@ def recover_password_html_content(email: str, session: SessionDep) -> Any:
     return HTMLResponse(
         content=email_data.html_content, headers={"subject:": email_data.subject}
     )
+
+
+class DemoPersona(SQLModel):
+    role: str
+    name: str
+    email: str
+    badge: str
+    color: str
+    password: str
+
+
+@router.get("/login/demo-personas", response_model=list[DemoPersona])
+def get_demo_personas() -> Any:
+    """
+    Returns pre-configured demo personas for evaluation.
+    Only available in development / demo mode. Blocked in production.
+    """
+    if settings.FASTAPI_ENV == "production":
+        raise HTTPException(
+            status_code=404, detail="Demo personas disabled in production"
+        )
+
+    return [
+        DemoPersona(
+            role="Institution",
+            name="North Tech Inst.",
+            email="inst.north1@example.com",
+            badge="Maker",
+            color="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
+            password=settings.FIRST_SUPERUSER_PASSWORD,
+        ),
+        DemoPersona(
+            role="RO Maker",
+            name="Officer North",
+            email="officer.north@example.com",
+            badge="Regional",
+            color="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
+            password=settings.FIRST_SUPERUSER_PASSWORD,
+        ),
+        DemoPersona(
+            role="RO Checker",
+            name="Checker North",
+            email="checker.north@example.com",
+            badge="Checker",
+            color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+            password=settings.FIRST_SUPERUSER_PASSWORD,
+        ),
+        DemoPersona(
+            role="Bureau Head",
+            name="Central Bureau",
+            email="bureau@example.com",
+            badge="Admin",
+            color="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
+            password=settings.FIRST_SUPERUSER_PASSWORD,
+        ),
+        DemoPersona(
+            role="Auditor",
+            name="Reg. Auditor",
+            email="auditor@example.com",
+            badge="Read-Only",
+            color="bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30",
+            password=settings.FIRST_SUPERUSER_PASSWORD,
+        ),
+    ]

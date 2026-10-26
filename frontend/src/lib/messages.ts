@@ -9,6 +9,13 @@ export const SYSTEM_MESSAGES: Record<
   { label: string; sentence: string; action: string }
 > = {
   // Discrepancy Codes
+  D1_AMOUNT_MISMATCH: {
+    label: "Deposit Amount Mismatch",
+    sentence:
+      "The bank-confirmed amount differs from the institution's submitted amount.",
+    action:
+      "Request an amended FDR certificate from the bank or submit a regional waiver with mandatory scrutiny rationale.",
+  },
   AMOUNT_MISMATCH: {
     label: "Amount Mismatch",
     sentence:
@@ -16,12 +23,40 @@ export const SYSTEM_MESSAGES: Record<
     action:
       "Request an amended FDR certificate from the bank or submit a regional waiver with mandatory scrutiny rationale.",
   },
+  D2_MATURITY_MISMATCH: {
+    label: "Maturity Date Mismatch",
+    sentence:
+      "The deposit maturity date confirmed by CBS differs from the submission record.",
+    action:
+      "Review bank confirmation advice and verify tenure calculation under the relevant handbook edition.",
+  },
   MATURITY_MISMATCH: {
     label: "Maturity Date Mismatch",
     sentence:
       "The deposit maturity date confirmed by CBS differs from the submission record.",
     action:
       "Review bank confirmation advice and verify tenure calculation under the relevant handbook edition.",
+  },
+  D3_REF_MISMATCH: {
+    label: "FDR Reference Number Mismatch",
+    sentence:
+      "The instrument reference number does not match CBS account records.",
+    action:
+      "Check physical certificate scan hash and re-verify bank deposit account identifier.",
+  },
+  D4_BANK_MISMATCH: {
+    label: "Bank Identifier Mismatch",
+    sentence:
+      "The bank identifier reported by CBS differs from the institution submission.",
+    action:
+      "Re-verify branch routing code or IFSC identifier before proceeding.",
+  },
+  D5_LIEN_NOT_MARKED: {
+    label: "AICTE Lien Not Marked",
+    sentence:
+      "AICTE is not recorded as joint holder with lien marked on the bank confirmation.",
+    action:
+      "Require institution to obtain an explicit AICTE joint lien endorsement from branch manager.",
   },
   INTEREST_RATE_MISMATCH: {
     label: "Interest Rate Discrepancy",
@@ -126,11 +161,14 @@ export const SYSTEM_MESSAGES: Record<
 }
 
 export function getMessage(code: string) {
-  return (
-    SYSTEM_MESSAGES[code] || {
-      label: code,
-      sentence: `System event: ${code}`,
-      action: "Review case audit history for further context.",
-    }
-  )
+  if (SYSTEM_MESSAGES[code]) return SYSTEM_MESSAGES[code]
+  const stripped = code.replace(/^D\d+_/, "")
+  if (SYSTEM_MESSAGES[stripped]) return SYSTEM_MESSAGES[stripped]
+  const upperField = `${code.toUpperCase()}_MISMATCH`
+  if (SYSTEM_MESSAGES[upperField]) return SYSTEM_MESSAGES[upperField]
+  return {
+    label: code,
+    sentence: `System event: ${code}`,
+    action: "Review case audit history for further context.",
+  }
 }

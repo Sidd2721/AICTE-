@@ -37,6 +37,12 @@ def request_release(
     session: SessionDep,
     current_user: CurrentUser,
 ) -> Any:
+    if current_user.role != "institution" and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only Institution users can request release of instruments",
+        )
+
     instrument = session.get(Instrument, instrument_id)
     if not instrument:
         raise HTTPException(status_code=404, detail="Instrument not found")
@@ -128,13 +134,10 @@ def verify_release(
     if not release_req:
         raise HTTPException(status_code=404, detail="Release request not found")
 
-    if (
-        current_user.role not in ("regional", "bureau")
-        and not current_user.is_superuser
-    ):
+    if current_user.role != "regional" and not current_user.is_superuser:
         raise HTTPException(
             status_code=403,
-            detail="Only Regional Officers or Bureau can verify release requests",
+            detail="Only Regional Officers can verify release requests",
         )
 
     instrument = session.get(Instrument, release_req.instrument_id)
@@ -236,17 +239,17 @@ def approve_release(
     if not release_req:
         raise HTTPException(status_code=404, detail="Release request not found")
 
+    if current_user.role != "bureau" and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only Bureau Head/Approver can approve release requests",
+        )
+
     # Invariant I8: Maker is NEVER checker
     if release_req.verified_by == current_user.id:
         raise HTTPException(
             status_code=403,
             detail="Maker cannot be checker: the officer who verified cannot approve release",
-        )
-
-    if current_user.role != "bureau" and not current_user.is_superuser:
-        raise HTTPException(
-            status_code=403,
-            detail="Only Bureau Head/Approver can approve release requests",
         )
 
     instrument = session.get(Instrument, release_req.instrument_id)

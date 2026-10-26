@@ -27,36 +27,25 @@ from app.domain.receipt import verify_release_receipt
 from app.domain.worker import run_daily_worker
 from app.main import app
 from app.models import Institution, Instrument, User
-from tests.utils.user import authentication_token_from_email
+from app.core.security import get_password_hash
+from tests.utils.user import user_authentication_headers
 
 
-def run_demo_steps() -> bool:
-    client = TestClient(app)
+def run_demo_steps(base_url: str | None = None) -> bool:
+    if base_url:
+        import httpx
+        client: Any = httpx.Client(base_url=base_url.rstrip("/"), timeout=15.0)
+    else:
+        client = TestClient(app)
 
-    with Session(engine) as session:
-        users_config = [
-            ("inst.north1@example.com", "institution", "NR"),
-            ("officer.north@example.com", "regional", "NR"),
-            ("checker.north@example.com", "regional", "NR"),
-            ("bureau@example.com", "bureau", "ALL"),
-            ("auditor@example.com", "auditor", "ALL"),
-        ]
-
-        tokens = {
-            "institution": authentication_token_from_email(client=client, email="inst.north1@example.com", db=session),
-            "regional": authentication_token_from_email(client=client, email="officer.north@example.com", db=session),
-            "checker": authentication_token_from_email(client=client, email="checker.north@example.com", db=session),
-            "bureau": authentication_token_from_email(client=client, email="bureau@example.com", db=session),
-            "auditor": authentication_token_from_email(client=client, email="auditor@example.com", db=session),
-        }
-
-        for email, role, region in users_config:
-            u = session.exec(select(User).where(User.email == email)).first()
-            if u:
-                u.role = role
-                u.region = region
-                session.add(u)
-        session.commit()
+    demo_password = "changethis"
+    tokens = {
+        "institution": user_authentication_headers(client=client, email="inst.north1@example.com", password=demo_password),
+        "regional": user_authentication_headers(client=client, email="officer.north@example.com", password=demo_password),
+        "checker": user_authentication_headers(client=client, email="checker.north@example.com", password=demo_password),
+        "bureau": user_authentication_headers(client=client, email="bureau@example.com", password=demo_password),
+        "auditor": user_authentication_headers(client=client, email="auditor@example.com", password=demo_password),
+    }
 
     # STEP 1
     title_1 = "Institution: coverage card -> calculator -> submit FDR"
@@ -229,21 +218,28 @@ def run_demo_steps() -> bool:
         assert rel_req_res.status_code == 200, rel_req_res.text
         rel_id = rel_req_res.json()["id"]
 
-        # Step 7b: RO verifies (maker)
+        # Step 7b: Bureau tries to verify -> BLOCKED by role (Only RO can verify)
+        bur_ver_res = client.patch(
+            f"{settings.API_V1_STR}/release/{rel_id}/verify",
+            headers=tokens["bureau"],
+        )
+        assert bur_ver_res.status_code == 403, "Bureau cannot verify release (Regional only)"
+
+        # Step 7c: RO verifies (maker)
         ver_res = client.patch(
             f"{settings.API_V1_STR}/release/{rel_id}/verify",
             headers=tokens["regional"],
         )
         assert ver_res.status_code == 200, ver_res.text
 
-        # Step 7c: Same RO approves (checker) -> BLOCKED by maker != checker
-        blocked_res = client.patch(
+        # Step 7d: Same RO tries to approve -> BLOCKED by role (Only Bureau can approve)
+        ro_app_res = client.patch(
             f"{settings.API_V1_STR}/release/{rel_id}/approve",
             headers=tokens["regional"],
         )
-        assert blocked_res.status_code in (400, 403), "Maker cannot be checker must block approval!"
+        assert ro_app_res.status_code == 403, "RO cannot approve release (Bureau only)"
 
-        # Step 7d: Bureau approves
+        # Step 7e: Bureau approves (checker)
         appr_res = client.patch(
             f"{settings.API_V1_STR}/release/{rel_id}/approve",
             headers=tokens["bureau"],
@@ -254,7 +250,7 @@ def run_demo_steps() -> bool:
             payload = verify_release_receipt(receipt_jwt)
             assert payload["action"] == "RELEASE_ENCASHMENT_AUTHORIZATION"
 
-        # Step 7e: Audit verify chain
+        # Step 7f: Audit verify chain
         audit_res = client.get(f"{settings.API_V1_STR}/audit/verify", headers=tokens["auditor"])
         assert audit_res.status_code == 200
         assert audit_res.json()["status"] == "clean"

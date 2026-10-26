@@ -12,6 +12,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { client } from "@/client/client.gen"
+import { AboutThisPage } from "@/components/Common/AboutThisPage"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -126,6 +127,9 @@ function ReportsView() {
           <Download className="h-4 w-4" /> Export Formula-Safe CSV
         </Button>
       </div>
+
+      {/* About this screen guide (G3) */}
+      <AboutThisPage pageKey="reports" />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
