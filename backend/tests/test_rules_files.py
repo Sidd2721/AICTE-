@@ -74,3 +74,66 @@ def test_table_1_4_programmes_in_rule_and_api() -> None:
     }
     assert rule_keys == expected_table_1_4
     assert "Pharmacy" not in rule_keys
+
+
+def test_coverage_government_exempt() -> None:
+    rule = load_rule(RULES, "deposit", date(2026, 11, 1))
+    from app.domain.rules import calculate_institution_coverage
+
+    amounts = [150000000, 35000000]
+    cov = calculate_institution_coverage(
+        programme_amounts_paise=amounts,
+        leased_private=True,
+        rule=rule,
+        is_government=True,
+        instruments=[{"amount_paise": 5000000, "badge": "confirmed", "lifecycle": "active"}],
+    )
+    assert cov["required_paise"] == 0
+    assert cov["shortfall_paise"] == 0
+    assert cov["confirmed_active_paise"] == 5000000
+
+
+def test_coverage_leased_land_2x() -> None:
+    rule = load_rule(RULES, "deposit", date(2026, 11, 1))
+    from app.domain.rules import calculate_institution_coverage
+
+    amounts = [100000000]  # 1 Cr base
+    cov = calculate_institution_coverage(
+        programme_amounts_paise=amounts,
+        leased_private=True,
+        rule=rule,
+        is_government=False,
+        instruments=[],
+    )
+    # Leased land multiplier is 2x => 2 Cr
+    assert cov["required_paise"] == 200000000
+    assert cov["shortfall_paise"] == 200000000
+    assert cov["confirmed_active_paise"] == 0
+
+
+def test_coverage_several_fdrs() -> None:
+    rule = load_rule(RULES, "deposit", date(2026, 11, 1))
+    from app.domain.rules import calculate_institution_coverage
+
+    amounts = [100000000]  # 1 Cr base
+    # Owned land => 1x => 1 Cr required
+    instruments = [
+        {"amount_paise": 40000000, "badge": "confirmed", "lifecycle": "active"},
+        {"amount_paise": 30000000, "badge": "claimed", "lifecycle": "pending"},
+        {"amount_paise": 20000000, "badge": "confirmed", "lifecycle": "released"},  # Not active
+        {"amount_paise": 25000000, "badge": "confirmed", "lifecycle": "active"},
+    ]
+    cov = calculate_institution_coverage(
+        programme_amounts_paise=amounts,
+        leased_private=False,
+        rule=rule,
+        is_government=False,
+        instruments=instruments,
+    )
+    assert cov["required_paise"] == 100000000
+    # confirmed active: 40000000 + 25000000 = 65000000
+    assert cov["confirmed_active_paise"] == 65000000
+    # claimed only: 30000000
+    assert cov["claimed_only_paise"] == 30000000
+    # shortfall: 100000000 - 65000000 = 35000000
+    assert cov["shortfall_paise"] == 35000000

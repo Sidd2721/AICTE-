@@ -33,6 +33,42 @@ def required_deposit_paise(
     return sum(programme_amounts_paise) * mult
 
 
+def calculate_institution_coverage(
+    programme_amounts_paise: list[int],
+    leased_private: bool,
+    rule: dict[str, Any],
+    is_government: bool,
+    instruments: list[dict[str, Any]],
+) -> dict[str, int]:
+    """Computes statutory required, confirmed-active, claimed-only, and shortfall in paise.
+    Shortfall = max(0, required - confirmed_active).
+    """
+    req = required_deposit_paise(
+        programme_amounts_paise=programme_amounts_paise,
+        leased_private=leased_private,
+        rule=rule,
+        is_government=is_government,
+    )
+    confirmed_active = 0
+    claimed_only = 0
+    for inst in instruments:
+        amt = int(inst.get("amount_paise", 0))
+        badge = str(inst.get("badge", "claimed")).lower()
+        lifecycle = str(inst.get("lifecycle", "pending")).lower()
+        if lifecycle in ("active", "pending"):
+            if badge == "confirmed":
+                confirmed_active += amt
+            else:
+                claimed_only += amt
+    shortfall = max(0, req - confirmed_active)
+    return {
+        "required_paise": req,
+        "confirmed_active_paise": confirmed_active,
+        "claimed_only_paise": claimed_only,
+        "shortfall_paise": shortfall,
+    }
+
+
 def startup_guard(rule_docs: list[dict[str, Any]], env: str | None) -> None:
     """Invariant I7: outside development/demo, refuse to start while any rule is not CONFIRMED."""
     if env in ("development", "demo"):
