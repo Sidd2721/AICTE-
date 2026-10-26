@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   AlertTriangle,
   ArrowRight,
@@ -244,6 +244,26 @@ function Deposits() {
     queryFn: async () => {
       const res = await client.get<any>({
         url: "/api/v1/deposits/programmes",
+      })
+      return res.data
+    },
+  })
+
+  // S5: Institution Security Deposit Coverage Query
+  const { data: coverageData } = useQuery<{
+    required_paise: number
+    confirmed_active_paise: number
+    claimed_only_paise: number
+    shortfall_paise: number
+    is_compliant: boolean
+    multiplier: number
+    is_government: boolean
+    institution_name?: string
+  }>({
+    queryKey: ["institution-coverage"],
+    queryFn: async () => {
+      const res = await client.get<any>({
+        url: "/api/v1/deposits/coverage",
       })
       return res.data
     },
@@ -494,6 +514,73 @@ function Deposits() {
         </div>
       </div>
 
+      {/* S5: Institution Coverage Card */}
+      {coverageData && (
+        <Card className="border-border/60 shadow-sm bg-gradient-to-r from-primary/5 via-card to-card">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Statutory Security Deposit Coverage —{" "}
+                {coverageData.institution_name || "Institution Obligation"}
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Computed per Table 1.4 APH ({coverageData.multiplier}x
+                multiplier •{" "}
+                {coverageData.is_government
+                  ? "Government Exempt"
+                  : "Private Institution"}
+                )
+              </CardDescription>
+            </div>
+            <Badge
+              variant={coverageData.is_compliant ? "default" : "destructive"}
+              className="text-xs"
+            >
+              {coverageData.is_compliant
+                ? "Compliant (Fully Covered)"
+                : `Shortfall: ${formatPaiseToRupees(coverageData.shortfall_paise)}`}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+              <div className="p-2.5 bg-background/80 rounded border">
+                <div className="text-muted-foreground text-[11px]">
+                  Statutory Required
+                </div>
+                <div className="text-base font-bold font-mono text-foreground mt-0.5">
+                  {formatPaiseToRupees(coverageData.required_paise)}
+                </div>
+              </div>
+              <div className="p-2.5 bg-background/80 rounded border">
+                <div className="text-emerald-600 dark:text-emerald-400 text-[11px]">
+                  Confirmed Active (CBS)
+                </div>
+                <div className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  {formatPaiseToRupees(coverageData.confirmed_active_paise)}
+                </div>
+              </div>
+              <div className="p-2.5 bg-background/80 rounded border">
+                <div className="text-amber-600 dark:text-amber-400 text-[11px]">
+                  Claimed Only (Unverified)
+                </div>
+                <div className="text-base font-bold font-mono text-amber-600 dark:text-amber-400 mt-0.5">
+                  {formatPaiseToRupees(coverageData.claimed_only_paise)}
+                </div>
+              </div>
+              <div className="p-2.5 bg-background/80 rounded border">
+                <div className="text-destructive text-[11px]">
+                  Statutory Shortfall
+                </div>
+                <div className="text-base font-bold font-mono text-destructive mt-0.5">
+                  {formatPaiseToRupees(coverageData.shortfall_paise)}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filter Toolbar */}
       <Card className="border-border/60 shadow-sm p-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
@@ -638,6 +725,20 @@ function Deposits() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            asChild
+                            className="text-xs h-7 px-2 font-medium gap-1 text-primary hover:text-primary"
+                            title="Open detailed case record, discrepancy analysis & release panel"
+                          >
+                            <Link
+                              to="/instruments/$id"
+                              params={{ id: inst.id }}
+                            >
+                              Case View
+                            </Link>
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"

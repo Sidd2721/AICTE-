@@ -1,11 +1,15 @@
 from datetime import date
 from typing import Any
+import uuid
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
+from sqlmodel import select
 
+from app.api.deps import CurrentUser, SessionDep
 from app.domain.clock import today
-from app.domain.rules import load_rule, required_deposit_paise
+from app.domain.rules import calculate_institution_coverage, load_rule, required_deposit_paise
+from app.models import Institution, Instrument
 
 router = APIRouter(prefix="/deposits", tags=["deposits"])
 
@@ -126,3 +130,52 @@ def calculate_deposit(
         rule_edition=rule.get("edition", "unknown"),
         rule_effective_from=rule.get("effective_from", "unknown"),
     )
+
+
+@router.get("/coverage")
+def get_institution_coverage(
+    session: SessionDep,
+    current_user: CurrentUser,
+    institution_id: uuid.UUID | None = Query(None),
+) -> dict[str, Any]:
+    """Calculate institution security deposit coverage: required vs confirmed vs claimed vs shortfall."""
+    target_id = institution_id or current_user.institution_id
+    if not target_id:
+        # Default or unattached user
+        return {
+            "required_paise": 350000000,
+            "confirmed_active_paise": 0,
+            "claimed_only_paise": 0,
+            "shortfall_paise": 350000000,
+            "is_compliant": False,
+            "multiplier": 1,
+            "is_government": False,
+            "institution_name": "General Obligation (Unspecified)",
+        }
+
+    instn = session.get(Institution, target_id)
+    instruments = session.exec(
+        select(Instrument).where(Instrument.institution_id == target_id)
+    ).all()
+
+    inst_dicts = [
+        {
+            "id": str(i.id),
+            "amount_paise": i.amount_paise,
+            "lifecycle": i.lifecycle,
+            "badge": getattr(i, "badge", "claimed"),
+        }
+        for i in instruments
+    ]
+
+    programmes = ["Engineering & Technology - Under Graduate"]
+    cov = calculate_institution_coverage(
+        programmes=programmes,
+        is_government=instn.is_government if instn else False,
+        leased_private=instn.leased_private if instn else False,
+        instruments=inst_dicts,
+        as_of_date=today(),
+    )
+    cov["institution_name"] = instn.name if instn else "Institution"
+    cov["permanent_id"] = instn.permanent_id if instn else ""
+    return cov

@@ -15,8 +15,12 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutAuditRouteImport } from './routes/_layout/audit'
 import { Route as LayoutDepositsRouteImport } from './routes/_layout/deposits'
+import { Route as LayoutEvidenceRouteImport } from './routes/_layout/evidence'
+import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutInstrumentsIdRouteImport } from './routes/_layout/instruments.$id'
 
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
@@ -47,14 +51,34 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutAuditRoute = LayoutAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutDepositsRoute = LayoutDepositsRouteImport.update({
   id: '/deposits',
   path: '/deposits',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutEvidenceRoute = LayoutEvidenceRouteImport.update({
+  id: '/evidence',
+  path: '/evidence',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutReportsRoute = LayoutReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutInstrumentsIdRoute = LayoutInstrumentsIdRouteImport.update({
+  id: '/instruments/$id',
+  path: '/instruments/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -64,17 +88,25 @@ export interface FileRoutesByFullPath {
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof LayoutAdminRoute
+  '/audit': typeof LayoutAuditRoute
   '/deposits': typeof LayoutDepositsRoute
+  '/evidence': typeof LayoutEvidenceRoute
+  '/reports': typeof LayoutReportsRoute
   '/settings': typeof LayoutSettingsRoute
+  '/instruments/$id': typeof LayoutInstrumentsIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof LayoutAdminRoute
+  '/audit': typeof LayoutAuditRoute
   '/deposits': typeof LayoutDepositsRoute
+  '/evidence': typeof LayoutEvidenceRoute
+  '/reports': typeof LayoutReportsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
+  '/instruments/$id': typeof LayoutInstrumentsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,9 +115,13 @@ export interface FileRoutesById {
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_layout/admin': typeof LayoutAdminRoute
+  '/_layout/audit': typeof LayoutAuditRoute
   '/_layout/deposits': typeof LayoutDepositsRoute
+  '/_layout/evidence': typeof LayoutEvidenceRoute
+  '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/instruments/$id': typeof LayoutInstrumentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,17 +131,25 @@ export interface FileRouteTypes {
     | '/recover-password'
     | '/reset-password'
     | '/admin'
+    | '/audit'
     | '/deposits'
+    | '/evidence'
+    | '/reports'
     | '/settings'
+    | '/instruments/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/recover-password'
     | '/reset-password'
     | '/admin'
+    | '/audit'
     | '/deposits'
+    | '/evidence'
+    | '/reports'
     | '/settings'
     | '/'
+    | '/instruments/$id'
   id:
     | '__root__'
     | '/_layout'
@@ -113,9 +157,13 @@ export interface FileRouteTypes {
     | '/recover-password'
     | '/reset-password'
     | '/_layout/admin'
+    | '/_layout/audit'
     | '/_layout/deposits'
+    | '/_layout/evidence'
+    | '/_layout/reports'
     | '/_layout/settings'
     | '/_layout/'
+    | '/_layout/instruments/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -169,11 +217,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/audit': {
+      id: '/_layout/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof LayoutAuditRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/deposits': {
       id: '/_layout/deposits'
       path: '/deposits'
       fullPath: '/deposits'
       preLoaderRoute: typeof LayoutDepositsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/evidence': {
+      id: '/_layout/evidence'
+      path: '/evidence'
+      fullPath: '/evidence'
+      preLoaderRoute: typeof LayoutEvidenceRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/reports': {
+      id: '/_layout/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof LayoutReportsRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/settings': {
@@ -183,21 +252,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/instruments/$id': {
+      id: '/_layout/instruments/$id'
+      path: '/instruments/$id'
+      fullPath: '/instruments/$id'
+      preLoaderRoute: typeof LayoutInstrumentsIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
   }
 }
 
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
+  LayoutAuditRoute: typeof LayoutAuditRoute
   LayoutDepositsRoute: typeof LayoutDepositsRoute
+  LayoutEvidenceRoute: typeof LayoutEvidenceRoute
+  LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutInstrumentsIdRoute: typeof LayoutInstrumentsIdRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
+  LayoutAuditRoute: LayoutAuditRoute,
   LayoutDepositsRoute: LayoutDepositsRoute,
+  LayoutEvidenceRoute: LayoutEvidenceRoute,
+  LayoutReportsRoute: LayoutReportsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutInstrumentsIdRoute: LayoutInstrumentsIdRoute,
 }
 
 const LayoutRouteWithChildren =
