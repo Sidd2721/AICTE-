@@ -5,6 +5,11 @@ Engineered with defense-in-depth: Python 3.14, PostgreSQL Row-Level Security (`N
 
 ---
 
+## Live Demo Guide
+See [DEMO.md](DEMO.md) for the complete 7-step evaluation walkthrough matching `run-demo.ps1`.
+
+---
+
 ## 3 Commands to Run
 
 ```powershell
@@ -14,26 +19,32 @@ python scripts/doctor.py
 # 2. One-Command Showcase Demo (clean DB reset, seed, and 7-step automated verification)
 powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset
 
-# 3. Quality Gate (136 tests, mypy, ruff, biome, prod build, leak check, capability map, openapi drift)
+# 3. Quality Gate (137 tests, mypy, ruff, biome, prod build, leak check, capability map, openapi drift)
 powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
 ```
 
 ---
 
 ## Limits of This Prototype
-- **Synthetic Data Only:** All institutions, deposit amounts, reference numbers, and user profiles are synthetic.
-- **Labelled Bank Simulators:** Real banking networks (SFMS/CBS) do not expose public sandboxes for hackathons; all bank confirmation flows operate through transparently labelled, cryptographically rigorous simulators.
-- **No Real Money Movement:** The portal orchestrates regulatory custody and legal release authorizations; funds remain in designated commercial banks under joint lien.
-- **Demo Mode Safeguards:** Rule configurations are marked `DEMO` and strictly block startup outside local development environments.
+- **DEMO Rule Values**: Rule values are marked `DEMO` pending official handbook confirmation; startup is blocked in production.
+- **SIMULATED Bank & Email**: Bank and email interactions are SIMULATED and transparently labelled.
+- **DSC Unsigned**: DSC receipts are unsigned test certificates, not bank confirmations.
+- **Synthetic Data & Metrics**: All institutions, deposit amounts, reference numbers, and metrics are synthetic.
+- **No Real Integration**: No live banking networks (SFMS/CBS) or external ERP connections.
+- **Single-Process Rate Limiter**: Rate limiting is designed for single-node / demonstration environments.
 
 ---
 
-## Intentionally Deferred Features (To Keep Assurance High)
-1. **Live SFMS / ISO 20022 Banking Gateway:** Replaced with cryptographic PyHanko signed letter verification gate (testing byte-tampering, invalid chains, and token replays).
-2. **Hardware USB Token PKCS#11 Integration:** Digital signatures simulated with X.509 CMS certificates; unverified documents clearly tagged *"unsigned, not a bank confirmation"*.
-3. **External Telecom SMS Gateway:** Replaced with transactional in-database notice queue and email dispatch logs.
-4. **Third-Party University Affiliation ERP Sync:** Institutional programme quotas and Table 1.4 thresholds are evaluated via deterministic regulatory rulebooks.
-5. **Real-Money Payment Gateway:** AICTE security deposits are fixed deposits pledged under joint lien, not cash payments into an AICTE clearing account.
+## Intentionally Deferred Features
+1. **Triage bins**
+2. **Wizard rewrite** (server-side draft, idempotency)
+3. **Dedicated metrics endpoint**
+4. **Fully responsive mobile layout**
+5. **Interactive onboarding tour**
+6. **Hindi (bilingual localization)**
+7. **Dark mode**
+8. **Notification bell UI**
+9. **PDF report generation** (CSV with formula-sanitization supported)
 
 ---
 
