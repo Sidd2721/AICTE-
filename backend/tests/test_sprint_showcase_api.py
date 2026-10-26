@@ -48,3 +48,14 @@ def test_instrument_case_view_endpoint(
     assert "discrepancies" in case_data
     assert "documents" in case_data
     assert "audit_timeline" in case_data
+
+
+def test_institution_coverage_endpoint(client: TestClient, superuser_token_headers: dict[str, str]) -> None:
+    headers = superuser_token_headers
+    r = client.get(f"{settings.API_V1_STR}/deposits/coverage", headers=headers)
+    assert r.status_code == 200
+    data = r.json()
+    assert "required_paise" in data
+    assert "confirmed_active_paise" in data
+    assert "claimed_only_paise" in data
+    assert "shortfall_paise" in data
