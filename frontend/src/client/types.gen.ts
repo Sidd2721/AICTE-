@@ -387,6 +387,50 @@ export type PrivateUserCreate = {
 };
 
 /**
+ * ProgrammeInfo
+ */
+export type ProgrammeInfo = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Amount Paise
+     */
+    amount_paise: number;
+};
+
+/**
+ * ProgrammesResponse
+ */
+export type ProgrammesResponse = {
+    /**
+     * Programmes
+     */
+    programmes: Array<ProgrammeInfo>;
+    /**
+     * Deposit Term Years
+     */
+    deposit_term_years: number;
+    /**
+     * Leased Private Multiplier
+     */
+    leased_private_multiplier: number;
+    /**
+     * Government Exempt
+     */
+    government_exempt: boolean;
+    /**
+     * Edition
+     */
+    edition: string;
+    /**
+     * Effective From
+     */
+    effective_from: string;
+};
+
+/**
  * ReleaseRequestCreate
  */
 export type ReleaseRequestCreate = {
@@ -768,6 +812,70 @@ export type bankSimulateBankConfirmationResponses = {
     /**
      * Response Bank-Simulate Bank Confirmation
      *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type bankGetVerificationResultsData = {
+    body?: never;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/bank/verification-results/{instrument_id}';
+};
+
+export type bankGetVerificationResultsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type bankGetVerificationResultsError = bankGetVerificationResultsErrors[keyof bankGetVerificationResultsErrors];
+
+export type bankGetVerificationResultsResponses = {
+    /**
+     * Response Bank-Get Verification Results
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type bankGetBankSimStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sim/bank/status';
+};
+
+export type bankGetBankSimStatusResponses = {
+    /**
+     * Response Bank-Get Bank Sim Status
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type bankGetBankSimStatusResponse = bankGetBankSimStatusResponses[keyof bankGetBankSimStatusResponses];
+
+export type bankSimulateBankOutageData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sim/bank/simulate-outage';
+};
+
+export type bankSimulateBankOutageResponses = {
+    /**
      * Successful Response
      */
     200: unknown;
@@ -1214,6 +1322,127 @@ export type auditVerifyAuditChainResponses = {
 
 export type auditVerifyAuditChainResponse = auditVerifyAuditChainResponses[keyof auditVerifyAuditChainResponses];
 
+export type auditListAuditEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Entity Id
+         */
+        entity_id?: string | null;
+        /**
+         * Entity
+         */
+        entity?: string | null;
+    };
+    url: '/api/v1/audit/events';
+};
+
+export type auditListAuditEventsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type auditListAuditEventsError = auditListAuditEventsErrors[keyof auditListAuditEventsErrors];
+
+export type auditListAuditEventsResponses = {
+    /**
+     * Response Audit-List Audit Events
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type auditListAuditEventsResponse = auditListAuditEventsResponses[keyof auditListAuditEventsResponses];
+
+export type auditListEntityAuditEventsData = {
+    body?: never;
+    path: {
+        /**
+         * Entity Id
+         */
+        entity_id: string;
+    };
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/audit/events/{entity_id}';
+};
+
+export type auditListEntityAuditEventsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type auditListEntityAuditEventsError = auditListEntityAuditEventsErrors[keyof auditListEntityAuditEventsErrors];
+
+export type auditListEntityAuditEventsResponses = {
+    /**
+     * Response Audit-List Entity Audit Events
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type auditListEntityAuditEventsResponse = auditListEntityAuditEventsResponses[keyof auditListEntityAuditEventsResponses];
+
+export type depositsGetProgrammesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * As Of
+         *
+         * Date for dated rulebook lookup
+         */
+        as_of?: string | null;
+    };
+    url: '/api/v1/deposits/programmes';
+};
+
+export type depositsGetProgrammesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type depositsGetProgrammesError = depositsGetProgrammesErrors[keyof depositsGetProgrammesErrors];
+
+export type depositsGetProgrammesResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProgrammesResponse;
+};
+
+export type depositsGetProgrammesResponse = depositsGetProgrammesResponses[keyof depositsGetProgrammesResponses];
+
 export type depositsCalculateDepositData = {
     body?: never;
     path?: never;
@@ -1407,6 +1636,36 @@ export type instrumentsGetInstrumentResponses = {
 };
 
 export type instrumentsGetInstrumentResponse = instrumentsGetInstrumentResponses[keyof instrumentsGetInstrumentResponses];
+
+export type instrumentsGetInstrumentCaseData = {
+    body?: never;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/instruments/{instrument_id}/case';
+};
+
+export type instrumentsGetInstrumentCaseErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type instrumentsGetInstrumentCaseError = instrumentsGetInstrumentCaseErrors[keyof instrumentsGetInstrumentCaseErrors];
+
+export type instrumentsGetInstrumentCaseResponses = {
+    /**
+     * Response Instruments-Get Instrument Case
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type releaseGetInstrumentReleaseData = {
     body?: never;
@@ -1773,6 +2032,162 @@ export type reportsReportCasesNeedingInterventionResponses = {
      */
     200: unknown;
 };
+
+export type reportsPreviewPendingVerificationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/reports/pending-verifications/preview';
+};
+
+export type reportsPreviewPendingVerificationsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsPreviewPendingVerificationsError = reportsPreviewPendingVerificationsErrors[keyof reportsPreviewPendingVerificationsErrors];
+
+export type reportsPreviewPendingVerificationsResponses = {
+    /**
+     * Response Reports-Preview Pending Verifications
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type reportsPreviewPendingVerificationsResponse = reportsPreviewPendingVerificationsResponses[keyof reportsPreviewPendingVerificationsResponses];
+
+export type reportsPreviewUpcomingMaturitiesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/reports/upcoming-maturities/preview';
+};
+
+export type reportsPreviewUpcomingMaturitiesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsPreviewUpcomingMaturitiesError = reportsPreviewUpcomingMaturitiesErrors[keyof reportsPreviewUpcomingMaturitiesErrors];
+
+export type reportsPreviewUpcomingMaturitiesResponses = {
+    /**
+     * Response Reports-Preview Upcoming Maturities
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type reportsPreviewUpcomingMaturitiesResponse = reportsPreviewUpcomingMaturitiesResponses[keyof reportsPreviewUpcomingMaturitiesResponses];
+
+export type reportsPreviewMissingDocumentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/reports/missing-documents/preview';
+};
+
+export type reportsPreviewMissingDocumentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsPreviewMissingDocumentsError = reportsPreviewMissingDocumentsErrors[keyof reportsPreviewMissingDocumentsErrors];
+
+export type reportsPreviewMissingDocumentsResponses = {
+    /**
+     * Response Reports-Preview Missing Documents
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type reportsPreviewMissingDocumentsResponse = reportsPreviewMissingDocumentsResponses[keyof reportsPreviewMissingDocumentsResponses];
+
+export type reportsPreviewCasesNeedingInterventionData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/reports/cases-needing-intervention/preview';
+};
+
+export type reportsPreviewCasesNeedingInterventionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsPreviewCasesNeedingInterventionError = reportsPreviewCasesNeedingInterventionErrors[keyof reportsPreviewCasesNeedingInterventionErrors];
+
+export type reportsPreviewCasesNeedingInterventionResponses = {
+    /**
+     * Response Reports-Preview Cases Needing Intervention
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type reportsPreviewCasesNeedingInterventionResponse = reportsPreviewCasesNeedingInterventionResponses[keyof reportsPreviewCasesNeedingInterventionResponses];
+
+export type fraudLabGetFraudLabMetricsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/fraud-lab/metrics';
+};
+
+export type fraudLabGetFraudLabMetricsResponses = {
+    /**
+     * Response Fraud-Lab-Get Fraud Lab Metrics
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type fraudLabGetFraudLabMetricsResponse = fraudLabGetFraudLabMetricsResponses[keyof fraudLabGetFraudLabMetricsResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;
