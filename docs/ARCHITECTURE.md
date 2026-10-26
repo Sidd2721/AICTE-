@@ -4,7 +4,9 @@ System design document detailing architectural layers, trust boundaries, cryptog
 
 ---
 
-## 1. High-Level Architecture Diagram
+## 1. Target Architecture Diagram
+
+The following is a target deployment shape. The checked-in demo uses the local FastAPI, PostgreSQL and labelled simulator path; reverse proxy, worker and managed-hosting choices require an operations decision.
 
 ```mermaid
 graph TD
@@ -19,7 +21,7 @@ graph TD
     end
 
     subgraph Integration Simulators
-        Backend -->|6-Point I3 Gate| BankSim[Bank Confirmation Simulator]
+        Backend -->|Full I3 Gate| BankSim[Bank Confirmation Simulator]
         Backend -->|Dated JSON Rules| RulesEngine[Rules Engine / Table 1.4]
     end
 ```
@@ -37,7 +39,7 @@ graph TD
    - Document encrypted with AES-256-GCM using unique per-file IV and instrument ID as Additional Authenticated Data (AAD).
    - Cross-record decryption attempts fail cryptographically.
 3. **Discrepancy Evaluation:**
-   - Bank responses pass the 6-point I3 gate (`starter/py/bank_gate.py`).
+    - Bank responses pass the full I3 gate report (`backend/app/domain/bank_gate.py`); simulated revocation is displayed as not checked.
    - Discrepancy engine evaluates D1 (Amount), D2 (Maturity), D3 (Ref), D4 (Bank), D5 (Lien), D6 (Duplicate).
    - Critical discrepancies block case release verification.
 4. **Dual-Custody Release:**
@@ -54,7 +56,7 @@ graph TD
 
 ## 3. Security & Privacy Summary
 
-### What IS Implemented & Certified by Design
+### What is implemented in this prototype (not certified)
 - **Integrity:** SHA-256 hash chained immutable audit ledger.
 - **Confidentiality:** AES-GCM encrypted vault with magic byte verification.
 - **Access Control:** Dual PostgreSQL roles (`migrator` vs `app` `NOSUPERUSER NOBYPASSRLS`).
@@ -65,4 +67,4 @@ graph TD
 ### What is NOT Certified (Prototype Limitations)
 - This is a research prototype evaluating AICTE Problem Statement PS 26265 with synthetic test data.
 - It has not received formal STQC / CERT-In third-party penetration certification.
-- Live bank core-banking system (CBS) adapters are simulators; real production rollout requires secure SFMS / API gateway integration with authorized schedule commercial banks.
+- Live bank core-banking system adapters are simulators; a production rollout requires a bank-approved API or messaging agreement and regulator approval.

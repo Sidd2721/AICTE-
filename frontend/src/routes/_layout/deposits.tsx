@@ -1202,7 +1202,7 @@ function Deposits() {
                       Private / Self-Financed
                     </SelectItem>
                     <SelectItem value="government">
-                      Government (100% Exempt)
+                      Government (Rule Exempt)
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -1261,7 +1261,7 @@ function Deposits() {
         </DialogContent>
       </Dialog>
 
-      {/* 3. Modal: Bank Simulator (6-Point Gate Testing) */}
+      {/* 3. Modal: Bank Simulator (Full Gate Testing) */}
       <Dialog open={isSimModalOpen} onOpenChange={setIsSimModalOpen}>
         <DialogContent className="sm:max-w-[460px]">
           <DialogHeader>

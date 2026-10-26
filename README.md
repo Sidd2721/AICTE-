@@ -10,9 +10,9 @@ Engineered with defense-in-depth: Python 3.14, PostgreSQL Row-Level Security (`N
 
 | Experience | How to Run | Description |
 | :--- | :--- | :--- |
-| **Instant Public Share (Track 1)** | `pwsh scripts/share.ps1` | Spawns a secure public HTTPS Cloudflare Tunnel (`https://*.trycloudflare.com`) to show evaluators immediately. |
+| **Instant Public Share (Track 1)** | `powershell -ExecutionPolicy Bypass -File scripts/share.ps1` | Spawns a secure public HTTPS Cloudflare Tunnel (`https://*.trycloudflare.com`) to show evaluators immediately. |
 | **Always-On VM Deployment (Track 2)** | `docker compose -f deploy/docker-compose.demo.yml up -d` | Self-contained production demo with Caddy automatic TLS, Mailpit simulator, and PostgreSQL RLS. |
-| **One-Command Local Showcase** | `pwsh scripts/run-demo.ps1 -Reset` | Resets database, seeds rich synthetic data, and plays all 7 problem-statement showcase scenarios. |
+| **One-Command Local Showcase** | `powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset` | Resets database, seeds rich synthetic data, and plays all 7 problem-statement showcase scenarios. |
 | **6-Minute Guided Tour** | Visit `http://localhost:8000/guide` | Interactive 7-step tour guide with plain-language walkthrough, persona switching, and glossary. |
 
 ---
@@ -36,14 +36,16 @@ Engineered with defense-in-depth: Python 3.14, PostgreSQL Row-Level Security (`N
 
 ---
 
-## Real-World Banking & Government Integration Points
+## Proposed Integrations (Design Only)
+
+These are ports for a future agreement, not live connections. Every current adapter is a labelled simulator.
 
 | Integration Point | Protocol / Standard | Production Role in AICTE Ecosystem |
 | :--- | :--- | :--- |
-| **Core Banking Systems (CBS) / SFMS** | ISO 20022 / SFMS MT760 (Bank Guarantee/FDR) | Authoritative bank confirmation of principal amount, tenure, interest rate, and lien marking. |
-| **DigiLocker Regulatory Vault** | W3C Verifiable Credentials / PDF-A Digital Signatures | Instant verification of physical FDR certificate scans directly from issuing bank depositories. |
-| **NeSL (National E-Governance Services)** | NeSL Digital Document Execution (DDE) APIs | Automated electronic lien registration and charge filing on bank deposit instruments. |
-| **AICTE e-Office / ERP Central** | OAuth 2.0 / SAML 2.0 Single Sign-On | Single sign-on and organizational role synchronization for Regional Officers and Bureau Approvers. |
+| **Bank confirmation** | Bank-hosted API over mutual TLS, or another agreed messaging channel | Return the same signed confirmation fields through a bank-approved adapter. |
+| **AICTE institution directory** | Versioned bulk API with scoped machine key | Synchronize Permanent Institute IDs, regions and rule-backed programmes. |
+| **AICTE identity** | OIDC single sign-on (target) | Map agreed claims to role, region and institution. |
+| **Notifications** | Government e-mail gateway (target) | Replace the local Mailpit simulator after an agreement. |
 
 ---
 
@@ -71,7 +73,7 @@ The portal is seeded with a dual-region, dual-custody maker-checker matrix:
 - **I3: Row Isolation**: Missing or invalid RLS context returns 0 rows (fail-closed).
 - **I4: Append-Only Audit**: Direct writes to `audit_event` are blocked by database triggers; only `audit_append()` is permitted.
 - **I5: Tamper-Evident Ledger**: The audit hash chain is cryptographically linked via SHA-256 (`audit_verify()`).
-- **I6: 6-Point Bank Gate**: Bank replies pass only through the full 6-point cryptographic verification gate.
+- **I6: Full Bank Gate**: Bank replies pass only through the full cryptographic verification gate.
 - **I7: Dated Rules Engine**: Rules are versioned JSON; files marked DEMO block startup in production.
 - **I8: Maker-Checker**: `verified_by <> approved_by` is strictly enforced in code and database triggers.
 - **I9: Human Authorization**: System recommendations are advisory; release tokens are issued only by authorized humans.
@@ -87,8 +89,8 @@ The portal is seeded with a dual-region, dual-custody maker-checker matrix:
 ## Verification & Quality Gate
 
 ```powershell
-# Run the complete quality gate (149 unit/integration tests, types, linter, prod build, leak check)
-pwsh scripts/verify.ps1
+# Run the complete quality gate (tests, types, linter, build, leak and claim checks)
+powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
 
 # Run the standalone deployed smoke suite
 uv run python scripts/smoke_deployed.py http://localhost:8000

@@ -10,7 +10,7 @@
 | :--- | :--- | :--- |
 | **Row-Level Security (RLS)** | **REAL** | PostgreSQL RLS policies enforce regional and institutional isolation at database engine level. |
 | **Database Role Isolation** | **REAL** | Runtime `app` role has `NOSUPERUSER` and `NOBYPASSRLS`. Tested in `test_m0_hardening.py`. |
-| **Bank Reply Gate** | **REAL** | Full 9-point cryptographic verification in `bank_gate.py` using `pyhanko`. Rejects altered bytes, wrong signers, expired certs. |
+| **Bank Reply Gate** | **REAL in the simulator** | The gate report covers the issued-byte prefix, one signature, validity, trust, whole-file coverage, pinned signer and key usage. Revocation is displayed as not checked in the simulated CA. |
 | **Immutable Audit Chain** | **REAL** | Append-only ledger with cryptographic SHA-256 chain hash; verified offline. |
 | **Maker-Checker Segregation** | **REAL** | Release requests cannot be approved by the same user who initiated them. Enforced at API & DB level. |
 | **Zero Float Arithmetic** | **REAL** | All financial sums stored and calculated strictly as integer paise. |
@@ -25,8 +25,8 @@ All simulators are clearly labelled in the user interface and codebase with `[SI
 1. **Synthetic Data Only:**
    - All FDR numbers, account numbers, and institution names are synthetic.
    - Real bank names (SBI, HDFC, PNB) and public IFSC prefixes are used solely for realistic routing demonstration.
-2. **Bank SFMS & API Channel Simulator:**
-   - In production, banks interface via SFMS (Structured Financial Messaging System) or authenticated API webhooks.
+2. **Bank API / Messaging Channel Simulator:**
+    - Candidate production transports include a bank-hosted API or another regulator-approved messaging channel; the choice is open.
    - In this prototype, bank confirmations are generated via an in-process simulator producing genuine PKI-signed PDF responses verified by the real cryptographic gate.
 3. **Time Machine Simulator:**
    - Allows evaluators to test time-based lifecycle events (+15 days approaching maturity, +30 days overdue, escalation) without waiting weeks.
@@ -42,7 +42,7 @@ All simulators are clearly labelled in the user interface and codebase with `[SI
 To move from this validated prototype to national production deployment:
 
 1. **Banking Infrastructure:**
-   - API specifications / SFMS interface gateway provided by participating commercial and public sector banks.
+    - API or messaging specifications provided by participating commercial and public sector banks.
    - Pinned root and intermediate CA certificates for authorized bank digital signature tokens.
 2. **Regulator Integration:**
    - Integration with AICTE's National Portal / Approval Process Bureau database (SAML 2.0 / OIDC single sign-on).

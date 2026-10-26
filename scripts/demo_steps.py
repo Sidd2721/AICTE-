@@ -153,7 +153,7 @@ def run_demo_steps(base_url: str | None = None) -> bool:
         return False
 
     # STEP 5
-    title_5 = "Bureau advances the clock 30/60/90 days -> worker -> reminders"
+    title_5 = "Bureau advances the clock through rule offsets -> worker -> reminders"
     try:
         if base_url:
             client.put("/sim/clock", headers=tokens["bureau"], json={"offset_seconds": 60 * 86400})

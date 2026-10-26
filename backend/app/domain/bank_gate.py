@@ -95,7 +95,7 @@ def build_verification_gate_report(
             "label": "Byte-Range Coverage",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "Signature covers 100% of document bytes"
+            "detail": "Signature covers the complete document"
             if sig_passed
             else "Incomplete coverage",
         },

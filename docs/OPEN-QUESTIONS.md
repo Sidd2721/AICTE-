@@ -30,6 +30,10 @@ Format: `OQ-NNN | Slice | Status | Question | Source hint`
 | OQ-018 | M4    | OPEN        | Regional officer NOC — is it required for release, and under which paths?                                         | BRIEF-PATCHES.md; COPY source only               |
 | OQ-019 | M1    | OPEN        | Which rate-limit library to use for login throttling? (Template has none)                                         | Ask before adding dependency                      |
 | OQ-020 | M3    | OPEN        | PDF library for confirmation letter generation — is `reportlab` acceptable or use another?                        | Ask before adding dependency                      |
+| OQ-025 | M9    | OPEN        | AICTE integration hosting, data residency, e-mail domain and retention policy                                  | AICTE IT decision required                       |
+| OQ-026 | M9    | OPEN        | Identity provider and claim mapping for OIDC role, region and institution                                     | AICTE IT decision required                       |
+| OQ-027 | M9    | OPEN        | Bank transport, mutual-TLS profile, certificate exchange and outage SLA                                      | Each participating bank                          |
+| OQ-028 | M9    | OPEN        | Whether any approved messaging rail applies to FDR confirmation, and under what legal agreement              | AICTE and banks; do not infer from bank-guarantee rails |
 
 ## Infrastructure / Deployment
 

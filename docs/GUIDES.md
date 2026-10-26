@@ -45,10 +45,10 @@ Role-based operational guides for the AICTE Security Deposit / FDR Portal protot
    - Filter verified release requests. Review Regional verification stamp.
    - Click *Authorize Release* to release instrument and sign RS256 JWT release receipt.
 2. **Bureau Analytics & Dashboard:**
-   - View real-time counters: Active Deposits, Expiring (30/60/90 days), Matured, Discrepancies Open, Released.
+    - View real-time counters: Active Deposits, Expiring under the dated rule window, Matured, Discrepancies Open, Released.
    - Download formula-neutralized CSV compliance reports (`csv_safe`).
 3. **Fraud Lab Monitoring:**
-   - Inspect synthetic benchmark metrics (TP=20, FP=0, FN=0, Accuracy=100%).
+    - Inspect synthetic benchmark metrics, including per-flag precision, recall, false positives and false negatives.
 
 ---
 
@@ -59,6 +59,6 @@ Role-based operational guides for the AICTE Security Deposit / FDR Portal protot
    - Banks receive secure confirmation token requests via API callback simulator.
 2. **Confirmation Response:**
    - Banks verify reference number, confirmed principal amount, maturity date, and AICTE joint lien marking.
-   - Responses signed and validated against 6-point I3 gate (`starter/py/bank_gate.py`).
+    - Responses are signed and validated against the full I3 gate report (`backend/app/domain/bank_gate.py`); simulated revocation is shown as not checked.
 3. **Outage Behavior:**
    - In the event of bank gateway timeout, system safely labels state *"source unavailable"* (HTTP 503) without corrupting institution records.

@@ -11,16 +11,16 @@
 | :--- | :--- | :--- | :--- |
 | **S1** | Submission & Vault: upload, magic byte check, integer paise | **DONE** | `uv run pytest backend/tests/test_vault_and_submission.py` (8 passed) |
 | **S2** | Bank Simulator & Discrepancies: 6 discrepancy codes D1-D6 | **DONE** | `uv run pytest backend/tests/test_bank_simulator_and_discrepancy.py` (9 passed) |
-| **S3** | Obligations & Daily Worker: T-90, T-60, T-30 reminders | **DONE** | `uv run pytest backend/tests/test_obligations_and_worker.py` (6 passed) |
+| **S3** | Obligations & Daily Worker: rule offsets T-30, T-15, T-7, T-1 | **DONE** | `uv run pytest backend/tests/test_obligations_and_worker.py` |
 | **S4** | Dual-Custody Release: maker != checker, receipt token | **DONE** | `uv run pytest backend/tests/test_release_maker_checker.py` (16 passed) |
 | **S5** | Dashboard & Reports: 4 CSV sanitized exports | **DONE** | `uv run pytest backend/tests/test_dashboard_and_reports.py` (8 passed) |
 | **S6** | Hardening & Security Headers: CSP, nosniff, rate limit | **DONE** | `uv run pytest backend/tests/test_m9_hardening_and_demo.py` (6 passed) |
-| **V1** | Full test suite gate | **DONE** | `cd backend && uv run pytest -q -rs` (149 passed, 0 skipped, 0 xfailed) |
+| **V1** | Full test suite gate | **DONE** | `cd backend && uv run pytest -q -rs` (current result is recorded by the gate output) |
 | **V2** | Clean setup bringup | **DONE** | `uv run python scripts/run-demo.py --no-launch` (clean DB + seed) |
 | **V3** | Seven-step problem statement demo | **DONE** | `uv run python scripts/demo_steps.py` (all 7 steps passed) |
 | **V4** | Zero external CDNs / offline audit | **DONE** | `uv run python scripts/check-offline.py` (0 external network calls) |
 | **V5** | Single worker memory budget | **DONE** | Backend: ~127 MB, PostgreSQL: ~64 MB |
-| **V6** | Doctor environment check | **DONE** | `uv run python scripts/doctor.py` (100% green) |
+| **V6** | Doctor environment check | **DONE** | `uv run python scripts/doctor.py` (all required checks green) |
 
 ---
 
@@ -91,7 +91,7 @@
 | **Dependencies (Py)** | 18 | 18 | 0 (No new deps) |
 | **Dependencies (JS)** | 33 | 33 | 0 (No new deps) |
 | **Frontend Dist Size** | 980 KB | 1025.7 KB | +45.7 KB |
-| **Backend Tests** | 137 | 163 | +26 tests |
+| **Backend Tests** | see prior gate artifact | current gate output | generated count, not hand-entered |
 | **Instrument List Max Queries**| 2 | 2 | 0 (O(1) queries) |
 
 ---
@@ -111,7 +111,7 @@
 ### Claims this MVP MAKES:
 - Strict tenant data isolation enforced by PostgreSQL Row Level Security (RLS) under non-superuser database connections.
 - Append-only tamper-evident audit ledger chained with SHA-256 hashes and enforced by database triggers.
-- Full 6-point cryptographic gate verifying byte prefix, single signature, intact digest, pinned bank root, and non-repudiation key usage.
+- Full cryptographic gate report verifying byte prefix, one signature, validity, trust, whole-file coverage, pinned signer and non-repudiation key usage; revocation is shown as not checked in the simulator.
 - Dual-custody separation of duties: maker cannot be checker for release encashments, backed by database CHECK constraints.
 - Money stored strictly as integer paise with no floating-point rounding errors.
 - Primary actions driven by server-side deterministic state machine (`next_action()`).

@@ -475,7 +475,7 @@ function InstrumentCaseView() {
               variant="outline"
               className="text-[10px] uppercase font-bold border-primary/30 text-primary"
             >
-              6-Point Gate Sandbox
+              Full Gate Sandbox
             </Badge>
           </div>
           <CardDescription>

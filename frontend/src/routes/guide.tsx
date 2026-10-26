@@ -71,7 +71,7 @@ const GUIDE_STEPS: GuideStep[] = [
       "Switch to the Regional Officer persona.",
       "Open the case page for the submitted instrument.",
       "Click the single primary action button 'Request Bank Confirmation'.",
-      "View the 6-point cryptographic verification gate results.",
+      "View the full cryptographic verification gate report.",
     ],
     expect:
       "All six checks pass; the status badge turns green to Confirmed (SIMULATED).",
@@ -116,7 +116,8 @@ const GUIDE_STEPS: GuideStep[] = [
   {
     id: "step-5",
     step_number: 5,
-    title: "Bureau advances the clock 30/60/90 days -> worker -> reminders",
+    title:
+      "Bureau advances the clock through rule offsets -> worker -> reminders",
     persona: "Bureau Approver (Central)",
     email: "bureau@example.com",
     route: "/dashboard",

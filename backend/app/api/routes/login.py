@@ -257,6 +257,7 @@ def demo_login(
     user = crud.get_user_by_email(session=session, email=data.email)
     if not user:
         from app.core.db import init_db
+
         init_db(session)
         user = crud.get_user_by_email(session=session, email=data.email)
     if not user or not user.is_active:
@@ -267,4 +268,3 @@ def demo_login(
             user.id, expires_delta=access_token_expires
         )
     )
-

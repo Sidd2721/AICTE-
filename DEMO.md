@@ -16,7 +16,7 @@
 uv run python scripts/doctor.py
 
 # 2. Re-seed DB and run all 7 problem statement demo steps:
-pwsh scripts/run-demo.ps1 -Reset
+powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset
 ```
 
 The demo server runs at **http://localhost:8000**.
@@ -51,9 +51,9 @@ The demo server runs at **http://localhost:8000**.
 1. Switch to the Regional Officer persona.
 2. Open the case page for the submitted instrument.
 3. Click the single primary action button 'Request Bank Confirmation'.
-4. View the 6-point cryptographic verification gate results.
+4. View the full cryptographic verification gate report.
 
-**Expected Outcome:** All six checks pass; the status badge turns green to Confirmed (SIMULATED).
+**Expected Outcome:** The enforced checks pass; simulated revocation is shown as not checked and the status badge turns green to Confirmed (SIMULATED).
 
 **Why this matters:** No deposit is trusted on institution claims alone. Bank verification confirms validity cryptographically.
 
@@ -94,7 +94,7 @@ The demo server runs at **http://localhost:8000**.
 
 ---
 
-## STEP 5: Bureau advances the clock 30/60/90 days -> worker -> reminders
+## STEP 5: Bureau advances the clock through rule offsets -> worker -> reminders
 
 **Actor:** Bureau Approver (Central) (`bureau@example.com`)  
 **Route:** `/dashboard`  

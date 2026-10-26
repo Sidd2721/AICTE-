@@ -9,7 +9,7 @@ Before starting, verify your environment with the Doctor command (CHARTER R2):
 
 **Windows (PowerShell):**
 ```powershell
-pwsh scripts/doctor.ps1
+powershell -ExecutionPolicy Bypass -File scripts/doctor.ps1
 ```
 
 **Linux / macOS / Git Bash:**
@@ -33,7 +33,7 @@ To bring up a running, fully-seeded demo stack with a single worker under 1.5 GB
 
 **Windows (PowerShell):**
 ```powershell
-pwsh scripts/run-demo.ps1
+powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1
 ```
 
 **Linux / macOS / Git Bash:**

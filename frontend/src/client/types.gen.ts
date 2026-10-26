@@ -53,6 +53,34 @@ export type Body_login_login_access_token = {
 };
 
 /**
+ * BulkUpsertResponse
+ */
+export type BulkUpsertResponse = {
+    /**
+     * Dry Run
+     */
+    dry_run: boolean;
+    /**
+     * Accepted
+     */
+    accepted: number;
+    /**
+     * Created
+     */
+    created?: number;
+    /**
+     * Updated
+     */
+    updated?: number;
+    /**
+     * Errors
+     */
+    errors?: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * CalculatorBreakdown
  */
 export type CalculatorBreakdown = {
@@ -218,6 +246,36 @@ export type HTTPValidationError = {
      * Detail
      */
     detail?: Array<ValidationError>;
+};
+
+/**
+ * InstitutionUpsert
+ */
+export type InstitutionUpsert = {
+    /**
+     * Permanent Id
+     */
+    permanent_id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Region
+     */
+    region: string;
+    /**
+     * Is Government
+     */
+    is_government?: boolean;
+    /**
+     * Leased Private
+     */
+    leased_private?: boolean;
+    /**
+     * Programmes
+     */
+    programmes?: Array<ProgrammeInput>;
 };
 
 /**
@@ -470,6 +528,20 @@ export type ProgrammeInfo = {
      * Amount Paise
      */
     amount_paise: number;
+};
+
+/**
+ * ProgrammeInput
+ */
+export type ProgrammeInput = {
+    /**
+     * Category
+     */
+    category: string;
+    /**
+     * Level
+     */
+    level: string;
 };
 
 /**
@@ -1798,6 +1870,12 @@ export type documentsDownloadDocumentResponses = {
 
 export type instrumentsSubmitInstrumentData = {
     body: InstrumentSubmit;
+    headers?: {
+        /**
+         * Idempotency-Key
+         */
+        'Idempotency-Key'?: string | null;
+    };
     path?: never;
     query?: never;
     url: '/api/v1/instruments/submit';
@@ -1833,6 +1911,10 @@ export type instrumentsListInstrumentsData = {
          * Limit
          */
         limit?: number;
+        /**
+         * After Id
+         */
+        after_id?: string | null;
     };
     url: '/api/v1/instruments';
 };
@@ -2546,6 +2628,89 @@ export type evidenceGetEvidenceSummaryResponses = {
 };
 
 export type evidenceGetEvidenceSummaryResponse = evidenceGetEvidenceSummaryResponses[keyof evidenceGetEvidenceSummaryResponses];
+
+export type integrationBulkUpsertInstitutionsData = {
+    /**
+     * Rows
+     */
+    body: Array<InstitutionUpsert>;
+    headers?: {
+        /**
+         * Idempotency-Key
+         */
+        'Idempotency-Key'?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Dry Run
+         */
+        dry_run?: boolean;
+    };
+    url: '/api/v1/integration/institutions:bulk-upsert';
+};
+
+export type integrationBulkUpsertInstitutionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationBulkUpsertInstitutionsError = integrationBulkUpsertInstitutionsErrors[keyof integrationBulkUpsertInstitutionsErrors];
+
+export type integrationBulkUpsertInstitutionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: BulkUpsertResponse;
+};
+
+export type integrationBulkUpsertInstitutionsResponse = integrationBulkUpsertInstitutionsResponses[keyof integrationBulkUpsertInstitutionsResponses];
+
+export type integrationCoverageStatusData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Permanent Id
+         */
+        permanent_id: string;
+    };
+    query?: never;
+    url: '/api/v1/integration/institutions/{permanent_id}/coverage-status';
+};
+
+export type integrationCoverageStatusErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationCoverageStatusError = integrationCoverageStatusErrors[keyof integrationCoverageStatusErrors];
+
+export type integrationCoverageStatusResponses = {
+    /**
+     * Response Integration-Coverage Status
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationCoverageStatusResponse = integrationCoverageStatusResponses[keyof integrationCoverageStatusResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

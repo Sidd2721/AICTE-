@@ -34,7 +34,7 @@ def generate_demo_md() -> None:
         "uv run python scripts/doctor.py",
         "",
         "# 2. Re-seed DB and run all 7 problem statement demo steps:",
-        "pwsh scripts/run-demo.ps1 -Reset",
+        "powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset",
         "```",
         "",
         "The demo server runs at **http://localhost:8000**.",

@@ -39,7 +39,7 @@ export const GLOSSARY_TERMS: Record<string, GlossaryTerm> = {
     id: "bank_gate",
     term: "Bank Verification Gate",
     plainSummary:
-      "A 6-point cryptographic byte-level inspection for authentic bank replies.",
+      "A full cryptographic byte-level inspection for authentic bank replies.",
     detail:
       "Full gate check: byte-prefix continuity of the issued challenge letter, exactly one digital signature, unbroken digest, pinned bank root certificate, and non-repudiation key usage.",
   },
@@ -55,7 +55,7 @@ export const GLOSSARY_TERMS: Record<string, GlossaryTerm> = {
     id: "escalation",
     term: "Escalation Ladder",
     plainSummary:
-      "Automated alerts triggered at T-90, T-60, and T-30 days before maturity.",
+      "Automated alerts triggered at the dated rule offsets T-30, T-15, T-7, and T-1 before maturity.",
     detail:
       "Background worker tracks deposit obligations against dated rule timelines, notifying regional officers and escalating un-renewed deposits to central bureau scrutiny.",
   },

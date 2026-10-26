@@ -1,8 +1,8 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select
+from fastapi import APIRouter, Header, HTTPException, Query, status
+from sqlmodel import col, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.audit import audit
@@ -10,6 +10,13 @@ from app.domain.clock import now
 from app.domain.next_action import next_action
 from app.domain.trust import Confirmation as TrustConfirmation
 from app.domain.trust import badge
+from app.integration.idempotency import (
+    IdempotencyConflict,
+    body_hash,
+    claim_request,
+    complete_request,
+    replay_response,
+)
 from app.models import (
     Confirmation,
     Document,
@@ -125,6 +132,7 @@ def submit_instrument(
     data: InstrumentSubmit,
     session: SessionDep,
     current_user: CurrentUser,
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
 ) -> Any:
     if data.amount_paise <= 0:
         raise HTTPException(
@@ -136,6 +144,25 @@ def submit_instrument(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Maturity date must be after issue date",
         )
+
+    idempotency_record = None
+    if idempotency_key:
+        try:
+            idempotency_record, is_new = claim_request(
+                session,
+                scope=f"instruments:submit:{current_user.id}",
+                key=idempotency_key,
+                request_hash=body_hash(data.model_dump(mode="json")),
+            )
+        except IdempotencyConflict as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        if not is_new:
+            replayed = replay_response(idempotency_record)
+            if replayed is None:
+                raise HTTPException(
+                    status_code=409, detail="request is already in progress"
+                )
+            return InstrumentPublic.model_validate(replayed)
 
     # Determine institution and region
     inst_id = data.institution_id or current_user.institution_id
@@ -205,15 +232,24 @@ def submit_instrument(
     role = current_user.role or (
         "institution" if current_user.institution_id else "regional"
     )
-    return _hydrate_instrument_meta(instrument, session, role)
+    result = _hydrate_instrument_meta(instrument, session, role)
+    if idempotency_record:
+        complete_request(
+            session,
+            idempotency_record,
+            status_code=200,
+            response=result.model_dump(mode="json"),
+        )
+    return result
 
 
 @router.get("", response_model=InstrumentsPublic)
 def list_instruments(
     session: SessionDep,
     current_user: CurrentUser,
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=100),
+    after_id: uuid.UUID | None = Query(None),
 ) -> Any:
     query = select(Instrument)
     if not current_user.is_superuser and current_user.role not in ("bureau", "auditor"):
@@ -224,7 +260,15 @@ def list_instruments(
         elif current_user.region:
             query = query.where(Instrument.region == current_user.region)
 
-    instruments = session.exec(query.offset(skip).limit(limit)).all()
+    if after_id:
+        query = query.where(Instrument.id > after_id)
+        instruments = session.exec(
+            query.order_by(col(Instrument.id)).limit(limit)
+        ).all()
+    else:
+        instruments = session.exec(
+            query.order_by(col(Instrument.id)).offset(skip).limit(limit)
+        ).all()
     role = current_user.role or (
         "institution" if current_user.institution_id else "regional"
     )
@@ -455,4 +499,3 @@ def accept_instrument(
     )
     role = current_user.role or "regional"
     return _hydrate_instrument_meta(instrument, session, role)
-

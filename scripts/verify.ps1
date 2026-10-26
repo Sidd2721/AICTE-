@@ -98,6 +98,15 @@ Record-Check "Guide / DEMO.md Drift Check" {
     git diff --exit-code DEMO.md
 }
 
+# 10. Claims and document references
+Record-Check "Honest Claims Lint" {
+    uv run python scripts/claims_lint.py
+}
+
+Record-Check "Document Script References" {
+    uv run python scripts/doc_refs.py
+}
+
 Write-Host "`n=========================================================" -ForegroundColor White
 Write-Host "             FULL GATE VERIFICATION SUMMARY" -ForegroundColor White
 Write-Host "=========================================================" -ForegroundColor White

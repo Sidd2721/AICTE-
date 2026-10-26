@@ -44,7 +44,7 @@ Demo Credentials (all passwords: `changethis`):
   - Open `/instruments/$id` (Case View).
   - Side-by-side view shows **Submitted** vs **Confirmed** fields.
   - Trigger bank confirmation inquiry via labelled simulator (`SIMULATED State Bank of India Gateway`).
-  - Signed bank reply passes the full 6-point cryptographic gate report (valid digital signature, non-repudiation key usage, byte-prefix continuity, matching trust root).
+  - Signed bank reply passes the full cryptographic gate report (valid digital signature, non-repudiation key usage, byte-prefix continuity, matching trust root).
   - Badge transitions to **Confirmed** (`confirmed` emerald badge).
 - **Terminal Execution:**
   ```text

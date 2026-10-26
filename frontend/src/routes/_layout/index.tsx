@@ -167,7 +167,7 @@ function Dashboard() {
     },
   })
 
-  // 5. Verify Cryptographic Merkle Chain
+  // 5. Verify cryptographic hash chain
   const handleVerifyAuditChain = async () => {
     try {
       setVerifyingAudit(true)
@@ -224,7 +224,7 @@ function Dashboard() {
             <p className="text-xs text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
               Every banking partner, FDR receipt, and financial transaction
               displayed in this portal is a labelled simulator. Protected by
-              AES-256-GCM encrypted vault, 6-point verification gate, four-eyes
+              AES-256-GCM encrypted vault, full verification gate, four-eyes
               Maker-Checker authorization, and tamper-evident SHA-256 audit
               chaining.
             </p>
@@ -261,7 +261,7 @@ function Dashboard() {
             onClick={handleVerifyAuditChain}
             disabled={verifyingAudit}
             className="text-xs gap-1.5"
-            title="Verify SHA-256 Merkle Hash Chain across all audit events"
+            title="Verify SHA-256 hash chain across all audit events"
           >
             {verifyingAudit ? (
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -566,7 +566,7 @@ function Dashboard() {
                         {fraudMetrics?.total_scenarios ?? 20}
                       </span>
                       <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-medium">
-                        100% Caught
+                        Synthetic cases detected
                       </span>
                     </div>
 
@@ -654,7 +654,7 @@ function Dashboard() {
               </p>
               <ul className="list-disc list-inside space-y-1 pl-1">
                 <li>
-                  Government institutions are <strong>100% exempt</strong>.
+                  Government institutions are exempt under the active rule file.
                 </li>
                 <li>
                   Leased land sites require a <strong>2x multiplier</strong>.

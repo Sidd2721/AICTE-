@@ -1,4 +1,4 @@
-# Accessibility Compliance & Findings (WCAG 2.1 AA) — FDR Portal
+# Accessibility Targets & Findings (WCAG 2.1 AA) — FDR Portal
 
 Review and verification of accessibility standards for the AICTE Security Deposit / FDR Portal prototype.
 
@@ -30,4 +30,4 @@ Review and verification of accessibility standards for the AICTE Security Deposi
 | **A11Y-04** | Discrepancy Alerts | 4.1.3 Status Messages | Discrepancy banners did not announce on dynamic render | Added `role="alert"` and `aria-live="assertive"` to alert container | **FIXED** |
 | **A11Y-05** | Form Validation | 3.3.1 Error Identification | Input error states only showed red border | Added descriptive error text below input with `aria-errormessage` binding | **FIXED** |
 
-**Conclusion:** All blocking accessibility items have been verified and remediated to meet WCAG 2.1 Level AA conformance.
+**Conclusion:** The listed blocking items were checked in the prototype review. The portal targets WCAG 2.1 AA; an independent accessibility audit remains open.

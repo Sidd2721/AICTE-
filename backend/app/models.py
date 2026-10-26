@@ -120,7 +120,16 @@ class InstrumentBase(SQLModel):
 
 class Instrument(InstrumentBase, table=True):
     __tablename__ = "instrument"
-    __table_args__ = (Index("instrument_ref_idx", "bank_code", "ref_no"),)
+    __table_args__ = (
+        Index("instrument_ref_idx", "bank_code", "ref_no"),
+        Index("instrument_maturity_idx", "maturity_date", "lifecycle"),
+        Index(
+            "instrument_active_region_idx",
+            "region",
+            "maturity_date",
+            postgresql_where="lifecycle IN ('pending','active','matured','renewed')",
+        ),
+    )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_at: datetime = Field(
@@ -248,6 +257,9 @@ class ConfirmationBase(SQLModel):
 
 class Confirmation(ConfirmationBase, table=True):
     __tablename__ = "confirmation"
+    __table_args__ = (
+        Index("confirmation_status_idx", "instrument_id", "status", "confirmed_at"),
+    )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     requested_at: datetime = Field(
@@ -280,6 +292,12 @@ class Obligation(ObligationBase, table=True):
             "due_date",
             name="uq_obligation_instrument_kind_due_date",
         ),
+        Index(
+            "obligation_open_due_idx",
+            "due_date",
+            "owner_role",
+            postgresql_where="status = 'open'",
+        ),
     )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -300,6 +318,7 @@ class Notice(NoticeBase, table=True):
     __tablename__ = "notice"
     __table_args__ = (
         UniqueConstraint("obligation_id", "step", name="uq_notice_obligation_step"),
+        Index("notice_instrument_sent_idx", "instrument_id", "sent_at"),
     )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -322,6 +341,9 @@ class CaseNoteBase(SQLModel):
 
 class CaseNote(CaseNoteBase, table=True):
     __tablename__ = "case_note"
+    __table_args__ = (
+        Index("case_note_instrument_created_idx", "instrument_id", "created_at"),
+    )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_at: datetime = Field(
@@ -348,6 +370,7 @@ class FlagWaiver(FlagWaiverBase, table=True):
         UniqueConstraint(
             "instrument_id", "code", name="uq_flag_waiver_instrument_code"
         ),
+        Index("flag_waiver_instrument_code_idx", "instrument_id", "code"),
     )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -381,6 +404,7 @@ class ReleaseRequestBase(SQLModel):
 
 class ReleaseRequest(ReleaseRequestBase, table=True):
     __tablename__ = "release_request"
+    __table_args__ = (Index("release_request_status_idx", "status", "updated_at"),)
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_at: datetime = Field(
@@ -444,6 +468,98 @@ class AuditCheckpoint(SQLModel, table=True):
         sa_column=Column(
             DateTime(timezone=True), nullable=False, default=get_datetime_utc
         ),
+    )
+
+
+# ==========================================
+# 13. Integration delivery
+# ==========================================
+class MachineApiKey(SQLModel, table=True):
+    __tablename__ = "machine_api_key"
+    __table_args__ = (
+        UniqueConstraint("key_id", name="machine_api_key_key_id_key"),
+        Index("machine_api_key_hash_idx", "key_hash", unique=True),
+        Index("machine_api_key_active_idx", "active", "expires_at"),
+    )
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    client_name: str = Field(max_length=120)
+    key_id: str = Field(max_length=80, index=True)
+    key_hash: str = Field(max_length=64)
+    scopes: list[str] = Field(
+        default_factory=list,
+        sa_column=Column(JSONB, nullable=False, server_default="[]"),
+    )
+    active: bool = Field(default=True)
+    expires_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    last_used_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
+
+
+class OutboxMessage(SQLModel, table=True):
+    __tablename__ = "outbox_message"
+    __table_args__ = (
+        Index(
+            "outbox_available_idx", "available_at", "delivered_at", "dead_lettered_at"
+        ),
+        Index("outbox_event_type_idx", "event_type", "created_at"),
+    )
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    event_type: str = Field(max_length=120)
+    aggregate_type: str = Field(max_length=80)
+    aggregate_id: str = Field(max_length=120)
+    payload: dict[str, Any] = Field(
+        default_factory=dict,
+        sa_column=Column(JSONB, nullable=False, server_default="{}"),
+    )
+    attempts: int = Field(default=0)
+    available_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_column=Column(DateTime(timezone=True), nullable=False, index=True),
+    )
+    locked_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
+    delivered_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), index=True)
+    )
+    dead_lettered_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
+    last_error: str | None = Field(default=None, max_length=1000)
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+
+
+class IdempotencyRecord(SQLModel, table=True):
+    __tablename__ = "idempotency_record"
+    __table_args__ = (
+        UniqueConstraint("scope", "key", name="uq_idempotency_scope_key"),
+        Index("idempotency_expires_idx", "expires_at"),
+    )
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    scope: str = Field(max_length=160)
+    key: str = Field(max_length=255)
+    request_hash: str = Field(max_length=64)
+    status_code: int | None = Field(default=None)
+    response_json: dict[str, Any] | None = Field(default=None, sa_column=Column(JSONB))
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    expires_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), nullable=False, index=True)
     )
 
 

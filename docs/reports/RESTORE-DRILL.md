@@ -14,7 +14,7 @@ docker exec -t 26265-db-1 pg_dump -U migrator -d app -Fc -f /tmp/backup_drill.du
 ```
 
 - **Archive File Size:** 384 KB
-- **Captured Tables:** 12 SQLModel tables (`user`, `institution`, `instrument`, `document`, `confirmation`, `flag_waiver`, `obligation`, `notice`, `release_request`, `case_note`, `audit_event`, `audit_chain_state`).
+- **Captured Tables:** application tables plus `machine_api_key`, `outbox_message`, `idempotency_record`, and the audit tables; the exact inventory is produced by `pg_dump`.
 - **Audit Ledger Row Count:** 1,248 events captured.
 
 ---
@@ -44,9 +44,9 @@ SELECT audit_verify();
 
 - **Expected Output:** `NULL` (indicating 0 broken links or tampered rows).
 - **Actual Output:** `NULL`
-- **Result:** **PASSED (100% Integrity)**
+- **Result:** **PASSED for this same-version rehearsal; integrity returned clean**
 
 ### Recovery Metrics
-- **Recovery Time Objective (RTO):** < 45 seconds.
-- **Recovery Point Objective (RPO):** Point-in-time of dump (zero data corruption).
+- **Recovery Time Objective (RTO):** not measured by this same-version rehearsal.
+- **Recovery Point Objective (RPO):** point-in-time of the dump; continuous archiving is still a production decision.
 - **Hash Chain Status:** Unbroken SHA-256 chain verified from genesis to latest head.

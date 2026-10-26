@@ -42,7 +42,7 @@ if (-not $backendHealthy -or $Reset) {
     if (-not $backendHealthy) {
         Write-Host "Backend server is not running on port 8000." -ForegroundColor Yellow
         Write-Host "Please start the backend in a separate terminal window:" -ForegroundColor Yellow
-        Write-Host "    pwsh scripts/run-demo.ps1`n" -ForegroundColor White
+        Write-Host "    powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1`n" -ForegroundColor White
     }
 } else {
     Write-Host "[1/2] Local backend detected active on http://localhost:8000" -ForegroundColor Green
@@ -59,7 +59,7 @@ if (-not $cloudflaredCmd) {
     Write-Host "Or download the binary directly from:" -ForegroundColor White
     Write-Host "    https://github.com/cloudflare/cloudflared/releases/latest" -ForegroundColor DarkCyan
     Write-Host "`nAfter installation, open a new shell and re-run:" -ForegroundColor White
-    Write-Host "    pwsh scripts/share.ps1`n" -ForegroundColor Yellow
+    Write-Host "    powershell -ExecutionPolicy Bypass -File scripts/share.ps1`n" -ForegroundColor Yellow
     exit 0
 }
 
@@ -68,4 +68,3 @@ Write-Host "Anyone with this link can use the demo logins; share only with your 
 Write-Host "Press Ctrl+C to terminate the public tunnel at any time.`n" -ForegroundColor Gray
 
 & cloudflared tunnel --url http://localhost:8000
-
