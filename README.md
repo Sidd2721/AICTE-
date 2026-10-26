@@ -18,16 +18,17 @@ Automates institutional security deposit obligations, independent cryptographic 
 - [2. The Two-Key Locker Analogy (Conceptual Overview)](#2-the-two-key-locker-analogy-conceptual-overview)
 - [3. Interactive Walkthrough Video & Player Guide](#3-interactive-walkthrough-video--player-guide)
 - [4. High-Level System Architecture & Layer Breakdown](#4-high-level-system-architecture--layer-breakdown)
-- [5. The 15 Non-Negotiable System Safety Invariants (I1–I15)](#5-the-15-non-negotiable-system-safety-invariants-i1i15)
-- [6. Comprehensive Feature Breakdown (The 10 Statement Capabilities)](#6-comprehensive-feature-breakdown-the-10-statement-capabilities)
-- [7. The 7 Core Demonstration Scenarios (Live Evaluation Script)](#7-the-7-core-demonstration-scenarios-live-evaluation-script)
-- [8. Contracted Personas & Credentials Matrix](#8-contracted-personas--credentials-matrix)
-- [9. Complete Master Presentation Pitch Deck (10-Slide PPT Blueprint)](#9-complete-master-presentation-pitch-deck-10-slide-ppt-blueprint)
-- [10. Enterprise Integration Blueprint (Production Architecture)](#10-enterprise-integration-blueprint-production-architecture)
-- [11. How to Run & Deploy (Local, Docker & Free Cloud)](#11-how-to-run--deploy-local-docker--free-cloud)
-- [12. Verification & Quality Gate (All Proving Commands)](#12-verification--quality-gate-all-proving-commands)
-- [13. Evaluator Q&A Defense & Skepticism Cheat Sheet](#13-evaluator-qa-defense--skepticism-cheat-sheet)
-- [14. Honest Prototype Limits & Non-Claims](#14-honest-prototype-limits--non-claims)
+- [5. Why This Solution Is Unique: Research & Architectural Differentiators](#5-why-this-solution-is-unique-research--architectural-differentiators)
+- [6. The 15 Non-Negotiable System Safety Invariants (I1–I15)](#6-the-15-non-negotiable-system-safety-invariants-i1i15)
+- [7. Comprehensive Feature Breakdown (The 10 Statement Capabilities)](#7-comprehensive-feature-breakdown-the-10-statement-capabilities)
+- [8. The 7 Core Demonstration Scenarios (Live Evaluation Script)](#8-the-7-core-demonstration-scenarios-live-evaluation-script)
+- [9. Contracted Personas & Credentials Matrix](#9-contracted-personas--credentials-matrix)
+- [10. Complete Master Presentation Pitch Deck (10-Slide PPT Blueprint)](#10-complete-master-presentation-pitch-deck-10-slide-ppt-blueprint)
+- [11. Enterprise Integration Blueprint (Production Architecture)](#11-enterprise-integration-blueprint-production-architecture)
+- [12. How to Run & Deploy (Local, Docker & Free Cloud)](#12-how-to-run--deploy-local-docker--free-cloud)
+- [13. Verification & Quality Gate (All Proving Commands)](#13-verification--quality-gate-all-proving-commands)
+- [14. Evaluator Q&A Defense & Skepticism Cheat Sheet](#14-evaluator-qa-defense--skepticism-cheat-sheet)
+- [15. Honest Prototype Limits & Non-Claims](#15-honest-prototype-limits--non-claims)
 
 ---
 
@@ -179,7 +180,26 @@ graph TD
 
 ---
 
-## 5. The 15 Non-Negotiable System Safety Invariants (I1–I15)
+## 5. Why This Solution Is Unique: Research & Architectural Differentiators
+
+For an exhaustive research synthesis and enterprise rollout blueprint, refer to [docs/UNIQUE_RESEARCH_AND_ENTERPRISE_ARCHITECTURE.md](docs/UNIQUE_RESEARCH_AND_ENTERPRISE_ARCHITECTURE.md).
+
+Most regulatory portals treat deposit tracking as a basic CRUD web application with file uploads. Our domain research across the AICTE Approval Process Handbook (2024–27), SFMS standards, and NeSL legal frameworks established that **security deposit monitoring is fundamentally a cryptographic trust and dual-custody governance problem**.
+
+| Capability Dimension | Standard Industry / Hackathon Approach | AICTE FDR Portal (Our Approach) | Why Our Approach Is Superior |
+| :--- | :--- | :--- | :--- |
+| **Trust Model** | Self-reported claims stored directly as "verified". | Dynamic 4-state trust engine: `claimed` -> `confirmed` -> `stale` -> `changed`. | Badges computed dynamically in memory; an institution's claim is never confused with independent bank proof (I1). |
+| **Bank Verification** | Manual paper letters or simple PDF viewer checks. | **6-Point Cryptographic Gate** evaluating raw PDF bytes via PKCS#7 validation. | Rejects forged bank seals, modified amounts, untrusted signers, and trailing appended pages (`SignatureCoverageLevel.ENTIRE_FILE`) (I3). |
+| **Governance & Authorization** | Any logged-in officer can click "Approve Release". | **Strict Maker-Checker Dual-Custody** enforced by PostgreSQL table `CHECK` constraints and service logic. | Regional Officer who verifies is physically blocked from approving (`verified_by <> approved_by`) (I8). |
+| **Audit & Anti-Tampering** | Standard database logs that can be updated or dropped. | **Append-Only SHA-256 Chained Ledger** where every row contains `SHA256(prev_hash + payload)`. | Database triggers permanently block `UPDATE`, `DELETE`, and `TRUNCATE`. Real-time verification via `SELECT audit_verify()` detects any disk tampering (I5). |
+| **Financial Accounting** | Standard IEEE 754 floating-point decimals (`float`). | **Integer Paise Accounting (`bigint`)** throughout entire stack. | 1 Lakh = 10,000,000 paise. Eliminates binary floating-point cumulative rounding errors across thousands of deposits (I6). |
+| **Regulatory Rulebook** | Hardcoded monetary constants embedded directly in code. | **Dated, Version-Controlled JSON Rulebook** loaded dynamically per academic year. | Regulatory updates in the AICTE Gazette are applied by dropping in a new dated JSON file without modifying backend code (I7, I12). |
+| **Document Vault Security** | Unencrypted files stored in public web folders. | **AES-256-GCM Authenticated Vault** with magic-byte checks and unique record AAD binding. | Pre-upload magic-byte inspection blocks executable exploits; unique `instrument_id` AAD prevents cross-record payload theft (I9). |
+| **User Interface Logic** | Client-side JavaScript state machines determining button visibility. | **Server-Driven Next-Action Determinism (`next_action()`)**. | Zero business state logic leaks into frontend. The server evaluates lifecycle, badge, and discrepancies to render the single primary action button (I14). |
+
+---
+
+## 6. The 15 Non-Negotiable System Safety Invariants (I1–I15)
 
 The entire platform is governed by 15 architectural invariants verified by automated mutation tests:
 
@@ -203,7 +223,7 @@ The entire platform is governed by 15 architectural invariants verified by autom
 
 ---
 
-## 6. Comprehensive Feature Breakdown (The 10 Statement Capabilities)
+## 7. Comprehensive Feature Breakdown (The 10 Statement Capabilities)
 
 ### 1. Dynamic Approval Process Handbook Rules Engine (Table 1.4)
 - **Problem Solved:** Handbook formulas evolve across academic editions. Hardcoded numbers break upon Gazette amendments.
@@ -269,7 +289,7 @@ Pure functional evaluation checking bank assertions against institutional claims
 
 ---
 
-## 7. The 7 Core Demonstration Scenarios (Live Evaluation Script)
+## 8. The 7 Core Demonstration Scenarios (Live Evaluation Script)
 
 Synchronized with [`DEMO.md`](DEMO.md) and [`docs/guide.json`](docs/guide.json):
 
@@ -349,7 +369,7 @@ Why this matters: Dual-custody stops rogue insider releases. Proof is verifiable
 
 ---
 
-## 8. Contracted Personas & Credentials Matrix
+## 9. Contracted Personas & Credentials Matrix
 
 | Persona Role | Contracted Email | Region Scope | Responsibilities | Default Password |
 | :--- | :--- | :--- | :--- | :--- |
@@ -364,7 +384,7 @@ Why this matters: Dual-custody stops rogue insider releases. Proof is verifiable
 
 ---
 
-## 9. Complete Master Presentation Pitch Deck (10-Slide PPT Blueprint)
+## 10. Complete Master Presentation Pitch Deck (10-Slide PPT Blueprint)
 
 ```
 ========================================================================================
@@ -494,7 +514,7 @@ sound digital system. The repository, tests, video walkthrough, and cloud deploy
 
 ---
 
-## 10. Enterprise Integration Blueprint (Production Architecture)
+## 11. Enterprise Integration Blueprint (Production Architecture)
 
 ```mermaid
 graph LR
@@ -551,7 +571,7 @@ graph LR
 
 ---
 
-## 11. How to Run & Deploy (Local, Docker & Free Cloud)
+## 12. How to Run & Deploy (Local, Docker & Free Cloud)
 
 ### Track 1: One-Command Local Showcase
 ```powershell
@@ -590,7 +610,7 @@ docker compose up --build
 
 ---
 
-## 12. Verification & Quality Gate (All Proving Commands)
+## 13. Verification & Quality Gate (All Proving Commands)
 
 Run the full verification suite before any release:
 
@@ -611,7 +631,7 @@ bash scripts/verify.sh
 
 ---
 
-## 13. Evaluator Q&A Defense & Skepticism Cheat Sheet
+## 14. Evaluator Q&A Defense & Skepticism Cheat Sheet
 
 #### Q1: "Are these live bank Core Banking Systems (CBS) integrations?"
 **Defense:** *"No. We adhere to honest disclosure: all bank endpoints in this prototype are labelled simulators. Live banking integrations require formal bilateral MOUs and RBI/IDRBT-approved SFMS gateways. What we have built and verified is the exact production cryptographic contract: our simulator signs genuine X.509 PKCS#7 PDFs, and our 6-point verification gate evaluates them at the raw byte level using the exact cryptography required in production."*
@@ -635,7 +655,7 @@ bash scripts/verify.sh
 
 ---
 
-## 14. Honest Prototype Limits & Non-Claims
+## 15. Honest Prototype Limits & Non-Claims
 
 - **DEMO Rule Values:** Table 1.4 Approval Process Handbook rules are marked `DEMO` pending official council gazette confirmation; startup is blocked outside development/demo.
 - **SIMULATED Bank & Email:** Bank confirmation APIs and email notices are SIMULATED and transparently labelled.
@@ -647,6 +667,7 @@ bash scripts/verify.sh
 
 ## Documentation Index
 
+- [docs/UNIQUE_RESEARCH_AND_ENTERPRISE_ARCHITECTURE.md](docs/UNIQUE_RESEARCH_AND_ENTERPRISE_ARCHITECTURE.md) — Comprehensive technical deep-dive into unique research, APH legal mandates, 15 invariants, enterprise integration specs, and national scalability.
 - [DEMO.md](DEMO.md) — 7-step live evaluation script synchronized with `docs/guide.json`.
 - [DEPLOY-GUIDE.md](DEPLOY-GUIDE.md) — Production deployment instructions for Render and Neon.
 - [REVIEW.md](REVIEW.md) — Architectural assessment, security findings, and resolution records.
