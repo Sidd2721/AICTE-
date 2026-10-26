@@ -1,6 +1,6 @@
+import uuid
 from datetime import date
 from typing import Any
-import uuid
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
@@ -8,7 +8,11 @@ from sqlmodel import select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.domain.clock import today
-from app.domain.rules import calculate_institution_coverage, load_rule, required_deposit_paise
+from app.domain.rules import (
+    calculate_institution_coverage,
+    load_rule,
+    required_deposit_paise,
+)
 from app.models import Institution, Instrument
 
 router = APIRouter(prefix="/deposits", tags=["deposits"])
@@ -168,14 +172,18 @@ def get_institution_coverage(
         for i in instruments
     ]
 
-    programmes = ["Engineering & Technology - Under Graduate"]
-    cov = calculate_institution_coverage(
-        programmes=programmes,
-        is_government=instn.is_government if instn else False,
-        leased_private=instn.leased_private if instn else False,
-        instruments=inst_dicts,
-        as_of_date=today(),
+    cov: dict[str, Any] = dict(
+        calculate_institution_coverage(
+            programme_amounts_paise=[350000000],
+            leased_private=instn.leased_private if instn else False,
+            rule=load_rule(None, "deposit", today()),
+            is_government=instn.is_government if instn else False,
+            instruments=inst_dicts,
+        )
     )
     cov["institution_name"] = instn.name if instn else "Institution"
     cov["permanent_id"] = instn.permanent_id if instn else ""
+    cov["is_compliant"] = cov["shortfall_paise"] == 0
+    cov["multiplier"] = 2 if (instn and instn.leased_private) else 1
+    cov["is_government"] = instn.is_government if instn else False
     return cov
