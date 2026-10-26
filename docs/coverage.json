@@ -1,0 +1,207 @@
+{
+  "generated_at": "2026-10-26T05:48:54.492978+00:00",
+  "total_capabilities": 10,
+  "capabilities_passed": 10,
+  "total_tests": 29,
+  "tests_passed": 29,
+  "tests_failed": 0,
+  "tests_missing": 0,
+  "capabilities": [
+    {
+      "id": "CAP-01",
+      "name": "Deposit Calculation & Statutory Rules",
+      "description": "Sum across programmes from Table 1.4 APH, 2x leased-land multiplier, government exemption, effective dating.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_rules_files.py::test_deposit_sum_and_double_with_values",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_rules_files.py::test_coverage_government_exempt",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_rules_files.py::test_coverage_leased_land_2x",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_rules_files.py::test_coverage_several_fdrs",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_clock_and_calculator.py::test_deposit_calculator_endpoint",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-02",
+      "name": "Instrument Registration & Vault Storage",
+      "description": "Submission flow for FDR & RTGS instruments with magic-bytes validation and AES-256-GCM vault encryption.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_vault_and_submission.py::test_vault_encryption_roundtrip",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_vault_and_submission.py::test_magic_bytes_sniffing",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_vault_and_submission.py::test_instrument_submit_and_list",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-03",
+      "name": "Cryptographic Bank Verification Gate",
+      "description": "Invariant I3 gate rejecting forged letters, appended pages, and untrusted or tampered digital signatures.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_bank_gate.py::test_1_valid_accepted",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_bank_gate.py::test_2a_tampered_inside_issued_part_rejected",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_bank_gate.py::test_6_bytes_appended_after_signing_rejected",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_bank_gate.py::test_7_unsigned_rejected",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-04",
+      "name": "Discrepancy & Fraud Identification",
+      "description": "D1-D6 discrepancy engine catching amount mismatches, lien omissions, premature liquidations, and missing docs.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_bank_simulator_and_discrepancy.py::test_discrepancy_engine_rules",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_m8_scenarios.py::test_scenario_5_discrepancy_identification",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-05",
+      "name": "Trust Badge & Provenance Lifecycle",
+      "description": "Deterministic badge calculation: Claimed (pending), Confirmed (valid), Stale (expired), Changed (discrepant).",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_trust_rules.py::test_claimed_when_none",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_trust_rules.py::test_confirmed",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_trust_rules.py::test_stale",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_trust_rules.py::test_changed_after_confirm",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-06",
+      "name": "Obligations & Automated Escalation Engine",
+      "description": "Daily worker with PostgreSQL advisory locking, idempotent step-based reminders, and multi-tier escalation.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_obligations_and_worker.py::test_daily_worker_advisory_lock_and_obligation_generation",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_m8_scenarios.py::test_scenario_3_approaching_maturity_alerts",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-07",
+      "name": "Renewal Linking & Coverage Gap Tracking",
+      "description": "Audit-linked renewal chains with D7 coverage-gap detection when renewal date lags old instrument maturity.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_m8_scenarios.py::test_scenario_4_renewal_linking",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-08",
+      "name": "Maker-Checker Authorised Release",
+      "description": "Dual-custody release: RO verifies (maker), Bureau approves (checker), verifier != approver, RSA release receipt.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_release_maker_checker.py::test_receipt_crypto_roundtrip_tamper_and_alg_none",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_release_maker_checker.py::test_release_maker_checker_flow_and_dual_custody",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_m8_scenarios.py::test_scenario_6_authorised_release_maker_checker",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-09",
+      "name": "Tamper-Evident Hash-Chained Audit Ledger",
+      "description": "Append-only SHA-256 hash-chained audit trail preventing row updates, deletions, or history truncation.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_audit.py::test_audit_append_and_verify",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_audit.py::test_audit_verify_endpoint",
+          "status": "PASSED"
+        }
+      ]
+    },
+    {
+      "id": "CAP-10",
+      "name": "Regulatory Intelligence & Compliance Reporting",
+      "description": "Dashboard bucket counters, formula-safe CSV reports, and JSON report preview endpoints under RLS isolation.",
+      "status": "PASSED",
+      "tests": [
+        {
+          "test_id": "tests/test_dashboard_and_reports.py::test_dashboard_api_counters_and_search",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_dashboard_and_reports.py::test_csv_reports_generation_and_formula_guard",
+          "status": "PASSED"
+        },
+        {
+          "test_id": "tests/test_sprint_showcase_api.py::test_reports_preview_endpoints",
+          "status": "PASSED"
+        }
+      ]
+    }
+  ]
+}
