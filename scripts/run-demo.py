@@ -119,7 +119,7 @@ def main() -> int:
     # 4. Deterministic Seed
     log("Step 4: Seeding deterministic dual-custody matrix...")
     env = os.environ.copy()
-    env["FASTAPI_ENV"] = "demo"
+    env.setdefault("FASTAPI_ENV", "development")
     subprocess.run([uv_bin, "run", "python", "-m", "app.initial_data"], cwd=BACKEND, env=env, check=True)
     log_ok("Initial dual-custody seed data applied.")
 
