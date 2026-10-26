@@ -213,7 +213,7 @@ class SmokeTester:
             ("institution", "/api/v1/deposits/coverage", "Institutional coverage card"),
             ("regional", "/api/v1/dashboard/counters", "Regional regulatory dashboard counters"),
             ("bureau", "/api/v1/audit/verify", "Bureau cryptographic audit ledger chain"),
-            ("auditor", "/api/v1/audit/?limit=10", "Auditor immutable audit log history"),
+            ("auditor", "/api/v1/audit/events?limit=10", "Auditor immutable audit log history"),
         ]
         for role, endpoint, desc in landing_checks:
             tok = tokens.get(role)
