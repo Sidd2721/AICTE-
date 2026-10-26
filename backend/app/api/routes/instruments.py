@@ -250,3 +250,152 @@ def get_instrument(
         "institution" if current_user.institution_id else "regional"
     )
     return _hydrate_instrument_meta(instrument, session, role)
+
+
+@router.get("/{instrument_id}/case")
+def get_instrument_case(
+    instrument_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """Aggregate case view: instrument + bank confirmations + discrepancies + documents +
+    flags + release request + per-instrument audit trail — saves 5+ separate requests."""
+    from datetime import UTC, datetime
+
+    from sqlmodel import col
+
+    from app.domain.discrepancy import evaluate_discrepancies
+    from app.models import AuditEvent, CaseNote, Confirmation, Document, FlagWaiver, Institution, ReleaseRequest
+
+    instrument = session.get(Instrument, instrument_id)
+    if not instrument:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instrument not found")
+
+    role = current_user.role or ("institution" if current_user.institution_id else "regional")
+    hydrated = _hydrate_instrument_meta(instrument, session, role)
+
+    # Confirmations
+    confs = session.exec(
+        select(Confirmation).where(Confirmation.instrument_id == instrument_id)
+    ).all()
+    latest_conf = None
+    if confs:
+        latest_conf = max(confs, key=lambda c: c.requested_at)
+
+    # Discrepancies
+    discrepancies: list[dict] = []
+    if latest_conf and latest_conf.status == "confirmed" and latest_conf.fields:
+        inst_dict = {
+            "ref_no": instrument.ref_no,
+            "bank_code": instrument.bank_code,
+            "amount_paise": instrument.amount_paise,
+            "maturity_date": str(instrument.maturity_date),
+            "lien_marked": instrument.lien_marked,
+        }
+        discrepancies = evaluate_discrepancies(inst_dict, latest_conf.fields)
+
+    # Documents
+    docs = session.exec(select(Document).where(Document.instrument_id == instrument_id)).all()
+
+    # Flags / waivers
+    waivers = session.exec(select(FlagWaiver).where(FlagWaiver.instrument_id == instrument_id)).all()
+
+    # Case notes
+    notes = session.exec(select(CaseNote).where(CaseNote.instrument_id == instrument_id)).all()
+
+    # Release request
+    release_req = session.exec(
+        select(ReleaseRequest)
+        .where(ReleaseRequest.instrument_id == instrument_id)
+        .order_by(col(ReleaseRequest.created_at).desc())
+    ).first()
+
+    # Per-instrument audit timeline (instrument + document + confirmation + release events)
+    audit_events = session.exec(
+        select(AuditEvent)
+        .where(AuditEvent.entity_id == str(instrument_id))
+        .order_by(col(AuditEvent.id).desc())
+        .limit(50)
+    ).all()
+
+    # Institution info
+    institution = session.get(Institution, instrument.institution_id)
+
+    return {
+        "instrument": hydrated.model_dump(),
+        "institution": {
+            "id": str(institution.id) if institution else None,
+            "name": institution.name if institution else None,
+            "permanent_id": institution.permanent_id if institution else None,
+            "region": institution.region if institution else None,
+            "is_government": institution.is_government if institution else None,
+            "leased_private": institution.leased_private if institution else None,
+        },
+        "confirmations": [
+            {
+                "id": str(c.id),
+                "status": c.status,
+                "method": c.method,
+                "requested_at": c.requested_at.isoformat(),
+                "confirmed_at": c.confirmed_at.isoformat() if c.confirmed_at else None,
+                "expires_at": c.expires_at.isoformat() if c.expires_at else None,
+                "fields": c.fields,
+                "revoked": c.revoked,
+            }
+            for c in confs
+        ],
+        "discrepancies": discrepancies,
+        "documents": [
+            {
+                "id": str(d.id),
+                "kind": d.kind,
+                "filename": d.filename,
+                "sha256": d.sha256,
+                "size_bytes": d.size_bytes,
+                "uploaded_by": str(d.uploaded_by) if d.uploaded_by else None,
+                "uploaded_at": d.uploaded_at.isoformat(),
+            }
+            for d in docs
+        ],
+        "waivers": [
+            {
+                "id": str(w.id),
+                "code": w.code,
+                "reason": w.reason,
+                "waived_by": str(w.waived_by),
+                "created_at": w.created_at.isoformat(),
+            }
+            for w in waivers
+        ],
+        "notes": [
+            {
+                "id": str(n.id),
+                "body": n.body,
+                "author_id": str(n.author_id),
+                "created_at": n.created_at.isoformat(),
+            }
+            for n in notes
+        ],
+        "release_request": {
+            "id": str(release_req.id),
+            "status": release_req.status,
+            "path": release_req.path,
+            "checklist": release_req.checklist,
+            "requested_by": str(release_req.requested_by),
+            "verified_by": str(release_req.verified_by) if release_req.verified_by else None,
+            "approved_by": str(release_req.approved_by) if release_req.approved_by else None,
+            "receipt_token": release_req.receipt_token,
+            "created_at": release_req.created_at.isoformat(),
+            "updated_at": release_req.updated_at.isoformat(),
+        } if release_req else None,
+        "audit_timeline": [
+            {
+                "id": e.id,
+                "ts": e.ts.isoformat(),
+                "action": e.action,
+                "entity": e.entity,
+                "actor_id": str(e.actor_id) if e.actor_id else None,
+            }
+            for e in audit_events
+        ],
+    }
