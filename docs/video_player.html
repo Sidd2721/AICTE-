@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AICTE FDR Portal — Complete Demo Walkthrough</title>
+  <title>AICTE FDR Portal — Complete Interactive Demo & Explainer</title>
   <style>
     :root {
       --bg: #0f172a;
       --card-bg: #1e293b;
       --border: #334155;
       --accent: #38bdf8;
+      --gold: #fbbf24;
+      --emerald: #10b981;
       --text: #f8fafc;
       --text-muted: #94a3b8;
     }
@@ -22,7 +24,7 @@
       line-height: 1.5;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 0 auto;
     }
     header {
@@ -32,6 +34,8 @@
       align-items: center;
       border-bottom: 1px solid var(--border);
       padding-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 16px;
     }
     .badge {
       display: inline-block;
@@ -43,7 +47,7 @@
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     h1 {
       margin: 0;
@@ -73,10 +77,10 @@
     }
     .main-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 2.1fr 1fr;
       gap: 24px;
     }
-    @media (max-width: 900px) {
+    @media (max-width: 960px) {
       .main-grid {
         grid-template-columns: 1fr;
       }
@@ -85,7 +89,7 @@
       background: #000;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
       border: 1px solid var(--border);
     }
     video {
@@ -104,12 +108,14 @@
       font-size: 18px;
       border-bottom: 1px solid var(--border);
       padding-bottom: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .chapters-list {
       list-style: none;
       padding: 0;
       margin: 0;
+      max-height: 520px;
+      overflow-y: auto;
     }
     .chapter-item {
       padding: 10px 12px;
@@ -118,18 +124,40 @@
       margin-bottom: 6px;
       transition: background 0.15s;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
+      flex-direction: column;
+      gap: 2px;
+      border: 1px solid transparent;
     }
     .chapter-item:hover {
       background: #334155;
+      border-color: var(--accent);
+    }
+    .chapter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      font-weight: 600;
     }
     .chapter-time {
       font-family: monospace;
       color: var(--accent);
       font-weight: bold;
-      font-size: 13px;
+      font-size: 12px;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .chapter-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .small-part-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      color: var(--gold);
+      font-weight: 700;
+      margin-top: 2px;
     }
     .summary-section {
       margin-top: 24px;
@@ -169,14 +197,14 @@
   <div class="container">
     <header>
       <div>
-        <span class="badge">AICTE PS 26265 Regulatory Portal</span>
-        <h1>Complete Live Demonstration Video</h1>
-        <p class="subtitle">Automated Security Deposit Oversight, Cryptographic Bank Confirmation & Dual-Custody Release</p>
+        <span class="badge">AICTE PS 26265 Regulatory System</span>
+        <h1>Complete Interactive Demo Walkthrough Video</h1>
+        <p class="subtitle">Complete Working Walkthrough with Interactive Mouse Actions and Detailed Small-Part Explanations</p>
       </div>
       <div>
         <a href="demo_video.mp4" download class="btn-download">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Download MP4 (2.0 MB)
+          Download Master MP4 (3.4 MB)
         </a>
       </div>
     </header>
@@ -190,43 +218,103 @@
       </div>
 
       <div class="card">
-        <h2>Demo Scene Markers</h2>
+        <h2>Interactive Scene Markers</h2>
         <ul class="chapters-list">
           <li class="chapter-item" onclick="seek(0)">
-            <span>1. 1-Click Evaluation Login</span>
-            <span class="chapter-time">0:00</span>
+            <div class="chapter-header">
+              <span>1. 1-Click Persona Login</span>
+              <span class="chapter-time">0:00</span>
+            </div>
+            <div class="chapter-desc">Passwordless authentication for 4 regulatory roles.</div>
+            <span class="small-part-tag">🔍 Fail-closed 404 guard in production</span>
           </li>
           <li class="chapter-item" onclick="seek(6)">
-            <span>2. 6-Minute Interactive Guide</span>
-            <span class="chapter-time">0:06</span>
+            <div class="chapter-header">
+              <span>2. 6-Minute Guided Tour</span>
+              <span class="chapter-time">0:06</span>
+            </div>
+            <div class="chapter-desc">Walkthrough of 7 core statutory scenarios from guide.json.</div>
+            <span class="small-part-tag">🔍 In-app regulatory glossary tooltips</span>
           </li>
           <li class="chapter-item" onclick="seek(15)">
-            <span>3. Dynamic Table 1.4 Calculator</span>
-            <span class="chapter-time">0:15</span>
+            <div class="chapter-header">
+              <span>3. Dynamic Table 1.4 Calculator</span>
+              <span class="chapter-time">0:15</span>
+            </div>
+            <div class="chapter-desc">Zero hardcoded constants; loads dated JSON rules.</div>
+            <span class="small-part-tag">🔍 Integer paise accounting (₹35L = 35Cr paise)</span>
           </li>
-          <li class="chapter-item" onclick="seek(24)">
-            <span>4. Regional Officer Dashboard</span>
-            <span class="chapter-time">0:24</span>
+          <li class="chapter-item" onclick="seek(25)">
+            <div class="chapter-header">
+              <span>4. Submitting New FDR & Vault</span>
+              <span class="chapter-time">0:25</span>
+            </div>
+            <div class="chapter-desc">File scan upload with %PDF-1.4 header validation.</div>
+            <span class="small-part-tag">🔍 Status marked "Submitted (Claimed)"</span>
           </li>
-          <li class="chapter-item" onclick="seek(33)">
-            <span>5. 6-Point Cryptographic Gate</span>
-            <span class="chapter-time">0:33</span>
+          <li class="chapter-item" onclick="seek(34)">
+            <div class="chapter-header">
+              <span>5. Regional Regulatory Dashboard</span>
+              <span class="chapter-time">0:34</span>
+            </div>
+            <div class="chapter-desc">Regional jurisdiction tracking, T-90/60/30 expiry radar.</div>
+            <span class="small-part-tag">🔍 Multi-tenant PostgreSQL Row-Level Security</span>
           </li>
           <li class="chapter-item" onclick="seek(43)">
-            <span>6. Dual-Custody Release (Maker)</span>
-            <span class="chapter-time">0:43</span>
+            <div class="chapter-header">
+              <span>6. 6-Point Cryptographic Bank Gate</span>
+              <span class="chapter-time">0:43</span>
+            </div>
+            <div class="chapter-desc">CBS confirmation passing prefix, signature & Root CA.</div>
+            <span class="small-part-tag">🔍 Server-driven next_action() button</span>
           </li>
-          <li class="chapter-item" onclick="seek(49)">
-            <span>7. Bureau Approver (Checker)</span>
-            <span class="chapter-time">0:49</span>
+          <li class="chapter-item" onclick="seek(52)">
+            <div class="chapter-header">
+              <span>7. Scrutiny Discrepancy & Waivers</span>
+              <span class="chapter-time">0:52</span>
+            </div>
+            <div class="chapter-desc">D1 amount mismatch defense halts progress.</div>
+            <span class="small-part-tag">🔍 Mandatory written justification for waivers</span>
           </li>
-          <li class="chapter-item" onclick="seek(55)">
-            <span>8. SHA-256 Audit Ledger</span>
-            <span class="chapter-time">0:55</span>
+          <li class="chapter-item" onclick="seek(60)">
+            <div class="chapter-header">
+              <span>8. Break-Me Security Workbench</span>
+              <span class="chapter-time">1:00</span>
+            </div>
+            <div class="chapter-desc">Adversarial attacks: forged letterhead & replayed nonces.</div>
+            <span class="small-part-tag">🔍 Cryptographic single-use nonce & byte coverage</span>
           </li>
-          <li class="chapter-item" onclick="seek(62)">
-            <span>9. Evidence Map & Invariants</span>
-            <span class="chapter-time">1:02</span>
+          <li class="chapter-item" onclick="seek(70)">
+            <div class="chapter-header">
+              <span>9. Dual-Custody Release (Maker)</span>
+              <span class="chapter-time">1:10</span>
+            </div>
+            <div class="chapter-desc">Regional Officer verifies dossier checklist.</div>
+            <span class="small-part-tag">🔍 DB CHECK blocks same-person approval</span>
+          </li>
+          <li class="chapter-item" onclick="seek(77)">
+            <div class="chapter-header">
+              <span>10. Bureau Approver (Checker)</span>
+              <span class="chapter-time">1:17</span>
+            </div>
+            <div class="chapter-desc">Bureau turns the second key to finalize release.</div>
+            <span class="small-part-tag">🔍 Digitally signed encashment JWT receipt</span>
+          </li>
+          <li class="chapter-item" onclick="seek(84)">
+            <div class="chapter-header">
+              <span>11. SHA-256 Audit Ledger</span>
+              <span class="chapter-time">1:24</span>
+            </div>
+            <div class="chapter-desc">Immutable append-only table chained via SHA-256.</div>
+            <span class="small-part-tag">🔍 entry_hash links to prev_hash; DB trigger blocks deletes</span>
+          </li>
+          <li class="chapter-item" onclick="seek(93)">
+            <div class="chapter-header">
+              <span>12. Evidence Map & Invariants</span>
+              <span class="chapter-time">1:33</span>
+            </div>
+            <div class="chapter-desc">15 statutory safety invariants proven with tests.</div>
+            <span class="small-part-tag">🔍 172 tests passing & zero external CDNs</span>
           </li>
         </ul>
       </div>
