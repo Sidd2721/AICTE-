@@ -238,3 +238,50 @@ def test_closure_matured_waiver_and_conversion_attestation(client: TestClient, u
     items = {item["id"]: item for item in data["checklist"]}
     assert "closure_certificate" in items
     assert items["closure_certificate"].get("waived") is True
+
+
+def test_maker_checker_same_user_approval_blocked(
+    client: TestClient, users_and_tokens: dict[str, dict[str, str]]
+) -> None:
+    with Session(engine) as session:
+        bureau_user = session.exec(
+            select(User).where(User.email == "bureau@example.com")
+        ).first()
+        inst_user = session.exec(
+            select(User).where(User.email == "inst.north1@example.com")
+        ).first()
+        assert bureau_user and inst_user
+        inst = Instrument(
+            institution_id=inst_user.institution_id,
+            region="NR",
+            kind="FDR",
+            ref_no=f"MC-{uuid.uuid4().hex[:6]}",
+            bank_code="SBIN",
+            ifsc="SBIN0001234",
+            amount_paise=100000000,
+            issue_date=date.today(),
+            maturity_date=date.today() + timedelta(days=365),
+            lifecycle="active",
+        )
+        session.add(inst)
+        session.commit()
+        session.refresh(inst)
+
+        rel = ReleaseRequest(
+            instrument_id=inst.id,
+            path="term_completion",
+            status="verified",
+            requested_by=inst_user.id,
+            verified_by=bureau_user.id,
+        )
+        session.add(rel)
+        session.commit()
+        session.refresh(rel)
+        rel_id = rel.id
+
+    res = client.patch(
+        f"/api/v1/release/{rel_id}/approve",
+        headers=users_and_tokens["bureau"],
+    )
+    assert res.status_code == 403
+    assert "Maker cannot be checker" in res.text

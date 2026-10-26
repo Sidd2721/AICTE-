@@ -24,6 +24,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BACKEND = ROOT / "backend"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+if str(BACKEND) not in sys.path:
+    sys.path.insert(0, str(BACKEND))
 
 
 def log(msg: str) -> None:
@@ -45,6 +49,8 @@ def run_cmd(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subp
 def main() -> int:
     parser = argparse.ArgumentParser(description="One-command AICTE FDR Portal Demo Launcher")
     parser.add_argument("--reseed", action="store_true", help="Force database re-seed")
+    parser.add_argument("--reset", "-Reset", action="store_true", help="Reset DB, seed, and execute 7 demo steps")
+    parser.add_argument("--steps", action="store_true", help="Execute 7 problem-statement demo steps")
     parser.add_argument("--no-launch", action="store_true", help="Prepare DB and exit without launching uvicorn")
     args = parser.parse_args()
 
@@ -70,7 +76,6 @@ def main() -> int:
         if docker_bin:
             log("Starting PostgreSQL via Docker Compose...")
             run_cmd([docker_bin, "compose", "up", "-d", "db"])
-            # Wait for postgres to be ready
             for _ in range(30):
                 time.sleep(1)
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -85,11 +90,31 @@ def main() -> int:
             return 1
     log_ok("PostgreSQL is listening on port 5432.")
 
+    # 2.5 Database Reset (if requested via --reset)
+    if args.reset:
+        log("Resetting database 'app' via maintenance connection (DROP & CREATE)...")
+        import psycopg
+        import re
+        from app.core.config import settings
+        url = str(settings.MIGRATION_DATABASE_URL or settings.DATABASE_URL)
+        pg_url = re.sub(r"/[^/?]+(?:\?|$)", "/postgres?", url).replace("postgresql+psycopg://", "postgresql://")
+        with psycopg.connect(pg_url, autocommit=True) as conn:
+            with conn.cursor() as cur:
+                cur.execute("DROP DATABASE IF EXISTS app WITH (FORCE);")
+                cur.execute("CREATE DATABASE app;")
+        log_ok("Database 'app' recreated fresh.")
+
     # 3. Migrations
     log("Step 3: Running database migrations (alembic upgrade head)...")
     uv_bin = shutil.which("uv") or shutil.which("uv.exe") or "uv"
     run_cmd([uv_bin, "run", "alembic", "upgrade", "head"], cwd=BACKEND)
     log_ok("Database migrations up to date.")
+
+    if args.reset:
+        log("Ensuring schema and table ownership is assigned to migrator role...")
+        from scripts.fix_ownership import set_ownership_to_migrator
+        set_ownership_to_migrator()
+        log_ok("Schema ownership configured.")
 
     # 4. Deterministic Seed
     log("Step 4: Seeding deterministic dual-custody matrix...")
@@ -97,6 +122,18 @@ def main() -> int:
     env["FASTAPI_ENV"] = "demo"
     subprocess.run([uv_bin, "run", "python", "-m", "app.initial_data"], cwd=BACKEND, env=env, check=True)
     log_ok("Initial dual-custody seed data applied.")
+
+    # 5. If --reset or --steps, run the 7 problem statement demo steps
+    if args.reset or args.steps:
+        log("Executing 7 Problem Statement Demo Steps...")
+        from scripts.demo_steps import run_demo_steps
+        success = run_demo_steps()
+        if not success:
+            log_err("Demo steps execution failed.")
+            return 1
+        log_ok("All 7 Demo Steps Verified Successfully!")
+        if args.reset:
+            return 0
 
     elapsed = time.time() - start_time
     log_ok(f"Environment prepared in {elapsed:.1f}s (Warm cache target < 120s achieved!).")

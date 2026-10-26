@@ -1,81 +1,126 @@
-# 7-Step Turnkey Demo Walkthrough — AICTE PS 26265
+# 7-Step Showcase Demo Walkthrough — AICTE PS 26265
 
-This walkthrough guides an evaluator through the complete end-to-end capabilities of the AICTE Security Deposit / FDR Portal in 7 reproducible steps.
+This walkthrough guides an evaluator through the complete end-to-end capabilities of the AICTE Security Deposit / FDR Portal in 7 reproducible problem-statement steps matching `scripts/demo_steps.py`.
 
 ---
 
 ## Prerequisites & One-Command Startup
-```bash
-# 1. Reset / Seed test matrix
-cd backend && uv run python -m app.initial_data
+```powershell
+# Reset database cleanly, seed deterministic matrix, and execute all 7 steps:
+powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset
 
-# 2. Run automated validation of the 7 steps
-cd backend && uv run pytest tests/test_m9_hardening_and_demo.py -v
+# Or launch interactive web server (serves compiled SPA on http://localhost:8000):
+powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1
 ```
 
----
-
-## 7-Step Interactive Walkthrough
-
-### Step 1: Submit an FDR (Institution View)
-1. Navigate to `http://localhost:5173/login` and sign in as:
-   - **Email:** `inst.north1@example.com` | **Password:** `changethis`
-2. Click **Add Deposit** (4-step submission modal):
-   - Enter Reference Number: `DEMO-FDR-2026-001`
-   - Select Bank: `State Bank of India (SBIN)`
-   - Enter Principal Amount: `₹ 15,00,000` (150,000,000 paise)
-   - Issue Date: Today | Maturity Date: Today + 10 Years
-   - Upload sample PDF/PNG document.
-3. Submit and verify deposit appears in *My Deposits* with status **Claimed** (`claimed` badge).
-
-### Step 2: Bank Confirmation & Discrepancy Flagging
-1. Sign in as Regional Officer: `officer.north@example.com` | `changethis`.
-2. Inspect the submitted deposit in the **Case View**.
-3. Trigger Bank Simulator with simulated discrepancy (e.g. Bank confirms only ₹ 10,00,000):
-   - System flags **D1_AMOUNT_MISMATCH** in real-time.
-   - Status badge transitions to **Changed** / **Discrepancy Open**.
-   - Primary action in Needs Action queue updates to *"Resolve Discrepancy"*.
-
-### Step 3: Clock Advance, Obligations & Escalations
-1. Advance system clock by 3,620 days (approaching 30-day maturity threshold).
-2. Daily worker executes under PostgreSQL advisory lock.
-3. Observe:
-   - Automated `renewal_due` obligation generated in database.
-   - Email reminder notice logged in `notice` table.
-   - Needs Action table promotes instrument to high-urgency tier.
-
-### Step 4: Renewal Linking
-1. Sign in as Institution user: `inst.north1@example.com`.
-2. On expiring instrument, click **Replace / Renew**.
-3. Submit replacement FDR `DEMO-FDR-2026-002` for ₹ 15,00,000.
-4. Verify:
-   - New instrument stores `replaces_id` pointing to old FDR.
-   - Old instrument lifecycle transitions from `active` to `renewed`.
-   - Complete audit trail preserved across linked lifecycle history.
-
-### Step 5: Fraud Lab Benchmark Inspection
-1. Sign in as Bureau Officer: `bureau@example.com` | `changethis`.
-2. Navigate to **Fraud Lab & Metrics** page:
-   - Review 20 planted discrepancies (D1..D6) + 20 clean instruments.
-   - Metrics displayed: **True Positives: 20**, **False Positives: 0**, **False Negatives: 0**, **Accuracy: 100%**.
-   - Prominent label: `SYNTHETIC LAB — BENCHMARK VALIDATION ONLY`.
-
-### Step 6: Dual-Custody Release & Offline Receipt Verification
-1. On matured clean instrument, Institution user clicks **Request Release** (path: `term_completion`).
-2. Regional Officer signs in (`officer.north@example.com`) and verifies checklist -> Status: `verified`.
-3. Regional Officer attempts to approve release -> **BLOCKED (HTTP 403: Maker cannot be checker)**.
-4. Bureau Officer signs in (`bureau@example.com`) and authorizes release -> Status: `released`.
-5. Release receipt token (RS256 JWT) issued.
-6. Verify token offline without database:
-   ```bash
-   cd backend && uv run python -c "from app.domain.receipt import verify_release_receipt; print(verify_release_receipt('<token>'))"
-   ```
-
-### Step 7: Bank Outage ("Source Unavailable")
-1. Simulate bank gateway disruption via `/sim/bank/simulate-outage`.
-2. Portal displays clear, honest status: **"source unavailable" (HTTP 503)**.
-3. System safely handles the outage without dropping transactions or showing generic crash errors.
+Demo Credentials (all passwords: `changethis`):
+- **Institution (North):** `inst.north1@example.com`
+- **Regional Officer (North Maker):** `officer.north@example.com`
+- **Regional Checker (North Checker):** `checker.north@example.com`
+- **Bureau Approver:** `bureau@example.com`
+- **Auditor:** `auditor@example.com`
+- **System Admin:** `admin@example.com`
 
 ---
 
-**All 7 steps verified and reproducible on demand.**
+## The 7 Problem-Statement Demo Steps
+
+### STEP 1: Institution: coverage card -> calculator -> submit FDR
+- **Persona:** `inst.north1@example.com` (Institution)
+- **UI State:**
+  - Navigate to `/deposits`.
+  - View the **Coverage Card**: Table 1.4 statutory calculation vs active deposits vs claimed deposits vs remaining shortfall.
+  - Interactive Table 1.4 calculator shows required deposit per approved programme.
+  - Click **Add Deposit** to submit new FDR (`DEMO-FDR-XXXX`) with State Bank of India, principal ₹ 35,00,000, 10-year term.
+  - Badge displays **Claimed** (`claimed` amber badge with explainer popover: "Self-reported by institution; pending independent bank confirmation").
+- **Terminal Execution:**
+  ```text
+  STEP 1: Institution: coverage card -> calculator -> submit FDR - PASSED
+  ```
+
+### STEP 2: RO requests bank confirmation -> SIMULATED reply -> gate report
+- **Persona:** `officer.north@example.com` (Regional Officer)
+- **UI State:**
+  - Open `/instruments/$id` (Case View).
+  - Side-by-side view shows **Submitted** vs **Confirmed** fields.
+  - Trigger bank confirmation inquiry via labelled simulator (`SIMULATED State Bank of India Gateway`).
+  - Signed bank reply passes the full 6-point cryptographic gate report (valid digital signature, non-repudiation key usage, byte-prefix continuity, matching trust root).
+  - Badge transitions to **Confirmed** (`confirmed` emerald badge).
+- **Terminal Execution:**
+  ```text
+  STEP 2: RO requests bank confirmation -> SIMULATED reply -> gate report - PASSED
+  ```
+
+### STEP 3: Break the gate: forged letter / appended page / replayed token
+- **Persona:** Evaluator / Security Auditor
+- **UI State & Security Verification:**
+  - Injects forged PDF confirmation letter not matching AICTE issued challenge -> REJECTED (`not_our_letter`).
+  - Injects authentic signed letter with bytes appended after digital signature -> REJECTED (`unreadable_or_invalid`).
+  - Injects expired or replayed token -> REJECTED (`token_expired_or_replayed`).
+  - Cryptographic gate report renders clear, honest diagnosis of why confirmation failed.
+- **Terminal Execution:**
+  ```text
+  STEP 3: Break the gate: forged letter / appended page / replayed token - PASSED
+  ```
+
+### STEP 4: Amount mismatch -> flag with plain message -> waiver demands a reason
+- **Persona:** `officer.north@example.com` (Regional Officer)
+- **UI State:**
+  - Bank confirms ₹ 25,00,000 against claimed ₹ 35,00,000.
+  - System automatically flags `D1_AMOUNT_MISMATCH` with human-readable explanation: "Confirmed bank amount is ₹ 10,00,000 less than declared principal".
+  - Status transitions to `changed` / `discrepancy`.
+  - Officer attempts to waive discrepancy with empty reason -> BLOCKED by schema validation.
+  - Submitting formal waiver demands a documented reason and records an append-only audit entry.
+- **Terminal Execution:**
+  ```text
+  STEP 4: Amount mismatch -> flag with plain message -> waiver demands a reason - PASSED
+  ```
+
+### STEP 5: Bureau advances the clock 30/60/90 days -> worker -> reminders
+- **Persona:** `bureau@example.com` (Bureau Officer)
+- **UI State:**
+  - Bureau advances system simulated clock by 30, 60, and 90 days.
+  - Background worker runs under PostgreSQL advisory locking.
+  - Instruments within 60 days of maturity move into the **Expiring** bucket.
+  - Matured instruments transition to **Matured** lifecycle.
+  - Automated reminder notices dispatched to institution contact log.
+- **Terminal Execution:**
+  ```text
+  STEP 5: Bureau advances the clock 30/60/90 days -> worker -> reminders - PASSED
+  ```
+
+### STEP 6: Renewal: replacement FDR -> chain and coverage-gap check
+- **Persona:** `inst.north1@example.com` (Institution)
+- **UI State:**
+  - Institution selects expiring/matured FDR and clicks **Replace / Renew**.
+  - Submits replacement instrument with `replaces_id` pointing to the previous FDR.
+  - Coverage gap validation verifies the replacement start date and maturity ensure zero gap in AICTE security deposit protection.
+  - Case view renders the lineage chain connecting old FDR and replacement FDR.
+- **Terminal Execution:**
+  ```text
+  STEP 6: Renewal: replacement FDR -> chain and coverage-gap check - PASSED
+  ```
+
+### STEP 7: Release: institution requests -> RO verifies -> same RO approve blocked -> bureau approves -> receipt -> offline verify
+- **Persona:** Institution -> Regional Officer -> Regional Officer (Blocked) -> Bureau Approver
+- **UI State:**
+  - Institution requests release under `term_completion`.
+  - Regional Officer (`officer.north@example.com`) reviews statutory release checklist and clicks **Verify** (`verified_by` recorded).
+  - Same Regional Officer attempts to click **Approve** -> **BLOCKED: HTTP 403 Maker cannot be checker**.
+  - Bureau Approver (`bureau@example.com`) inspects verified request and clicks **Authorize Release**.
+  - System generates signed cryptographic release receipt JWT.
+  - Standalone verification script (`scripts/verify_receipt.py`) validates the receipt offline without database or network access.
+  - Audit trail at `/audit` displays append-only hash-chained ledger; clicking **Verify Audit Chain** proves chain integrity.
+- **Terminal Execution:**
+  ```text
+  STEP 7: Release: institution requests -> RO verifies -> same RO approve blocked -> bureau approves -> receipt -> offline verify - PASSED
+  ```
+
+---
+
+## Resetting Between Demo Runs
+To return the environment to a pristine initial state at any time:
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset
+```
+This drops the database, applies all Alembic migrations, re-seeds deterministic credentials and institutions, and verifies all 7 demo steps.
