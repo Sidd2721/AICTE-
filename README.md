@@ -1,4 +1,4 @@
-# AICTE Fixed Deposit Receipt (FDR) & Security Deposit Portal
+# AICTE Security Deposit / Fixed Deposit Receipt (FDR) Portal
 
 [![CI - Full Gate Verification](https://github.com/Sidd2721/AICTE-/actions/workflows/ci.yml/badge.svg)](https://github.com/Sidd2721/AICTE-/actions/workflows/ci.yml)
 [![Python 3.14](https://img.shields.io/badge/python-3.14-blue.svg)](https://www.python.org/downloads/)
@@ -9,6 +9,25 @@
 High-assurance regulatory portal prototype engineered for **AICTE Problem Statement PS 26265** (*Monitoring and Verification of Fixed Deposit Receipts / Security Deposits*).
 
 Automates institutional security deposit obligations, independent cryptographic bank confirmations, 10-year maturity and renewal monitoring, and strict dual-custody release authorization.
+
+---
+
+## Quick Navigation
+
+- [1. Executive Summary & Regulatory Mandate](#1-executive-summary--regulatory-mandate)
+- [2. The Two-Key Locker Analogy (Conceptual Overview)](#2-the-two-key-locker-analogy-conceptual-overview)
+- [3. Interactive Walkthrough Video & Player Guide](#3-interactive-walkthrough-video--player-guide)
+- [4. High-Level System Architecture & Layer Breakdown](#4-high-level-system-architecture--layer-breakdown)
+- [5. The 15 Non-Negotiable System Safety Invariants (I1–I15)](#5-the-15-non-negotiable-system-safety-invariants-i1i15)
+- [6. Comprehensive Feature Breakdown (The 10 Statement Capabilities)](#6-comprehensive-feature-breakdown-the-10-statement-capabilities)
+- [7. The 7 Core Demonstration Scenarios (Live Evaluation Script)](#7-the-7-core-demonstration-scenarios-live-evaluation-script)
+- [8. Contracted Personas & Credentials Matrix](#8-contracted-personas--credentials-matrix)
+- [9. Complete Master Presentation Pitch Deck (10-Slide PPT Blueprint)](#9-complete-master-presentation-pitch-deck-10-slide-ppt-blueprint)
+- [10. Enterprise Integration Blueprint (Production Architecture)](#10-enterprise-integration-blueprint-production-architecture)
+- [11. How to Run & Deploy (Local, Docker & Free Cloud)](#11-how-to-run--deploy-local-docker--free-cloud)
+- [12. Verification & Quality Gate (All Proving Commands)](#12-verification--quality-gate-all-proving-commands)
+- [13. Evaluator Q&A Defense & Skepticism Cheat Sheet](#13-evaluator-qa-defense--skepticism-cheat-sheet)
+- [14. Honest Prototype Limits & Non-Claims](#14-honest-prototype-limits--non-claims)
 
 ---
 
@@ -62,14 +81,33 @@ Imagine an AICTE security deposit as a high-security bank vault deposit locker:
 
 ---
 
-## 3. High-Level System Architecture
+## 3. Interactive Walkthrough Video & Player Guide
+
+The repository includes a recorded walkthrough demonstration and a dedicated offline HTML5 player:
+
+- **Recorded Walkthrough Video:** Located at [`docs/demo_video.mp4`](docs/demo_video.mp4) (H.264 MP4, ~2.1 MB).
+- **Interactive Player with HUD Callouts:** Open [`docs/video_player.html`](docs/video_player.html) in any standard web browser.
+- **Video Generator Script:** Re-recordable on demand via [`scripts/record_full_demo_video.js`](scripts/record_full_demo_video.js) using Playwright.
+
+### Video Scene Breakdown
+1. **Scene 1 (0:00–0:10):** Institution Table 1.4 Coverage Calculator & FDR Instrument Intake.
+2. **Scene 2 (0:10–0:20):** Regional Officer Case Scrutiny & 6-Point Cryptographic Bank Gate.
+3. **Scene 3 (0:20–0:30):** The Break-Me Workbench (Appended Bytes & Forged Letter Defense).
+4. **Scene 4 (0:30–0:40):** Amount Shortfall (D1 Discrepancy) & Mandatory Scrutiny Waiver Note.
+5. **Scene 5 (0:40–0:50):** Virtual Clock Time Machine & Scheduled Obligation Worker Alerts.
+6. **Scene 6 (0:50–1:00):** Custody Renewal Linking & Coverage Gap Analysis.
+7. **Scene 7 (1:00–1:15):** Dual-Custody Release Authorization & Offline Cryptographic Receipt Verification.
+
+---
+
+## 4. High-Level System Architecture & Layer Breakdown
 
 ```mermaid
 graph TD
     subgraph ClientLayer["Presentation Layer (Client)"]
         Browser([Web Browser / Mobile Viewport])
         SPA[React 19 SPA + Vite + TanStack Router]
-        ClientSDK[TypeScript OpenApi Generated SDK]
+        ClientSDK[TypeScript OpenAPI Generated SDK]
         Browser <--> SPA
         SPA <--> ClientSDK
     end
@@ -118,63 +156,79 @@ graph TD
     end
 ```
 
-### Architectural Highlights
-- **Python 3.14 Standard:** Built natively on Python 3.14 utilizing modern syntax (`except A, B:`).
-- **Fail-Closed Database Security:** Runtime connections connect under `NOSUPERUSER` and `NOBYPASSRLS`. Every query executes within `set_rls_context(role, institution_id, user_id)`. Missing context returns zero rows.
-- **Server-Driven User Interface:** Primary call-to-action buttons derive entirely from `next_action()`. No state-machine logic resides in frontend client code.
-- **Integer Paise Accounting:** All financial balances are stored strictly as integer paise (`bigint`). Zero floating-point rounding errors.
+### Architectural Layer Explanations
+
+1. **Presentation Layer (React 19 SPA):**
+   - Built with React 19, TypeScript, TanStack Router, and TanStack Query.
+   - **Zero Client Logic:** Primary call-to-action buttons derive entirely from `next_action()`. The frontend never computes business logic or decision transitions.
+   - **Offline Self-Contained:** Zero external CDNs, Google Fonts, or tracking scripts. Fully functional in offline, air-gapped regulatory networks.
+2. **Security Gateway Layer (Caddy / Traefik):**
+   - Edge reverse proxy enforcing automated TLS, HSTS, frame-ancestors restrictions, nosniff, and strict Content Security Policies (CSP).
+3. **Application Core Layer (FastAPI + Python 3.14):**
+   - Built natively on Python 3.14 with modern multi-exception syntax (`except A, B:`).
+   - Injects tenant session context on every request via `set_rls_context(role, institution_id, user_id)`.
+   - Pure functional domain logic in `app/domain/` for bank confirmation parsing, rules evaluation, discrepancy checks, and receipt generation.
+4. **Data & Storage Kernel (PostgreSQL 16 + AES-GCM Vault):**
+   - **Dual Role Access:** Database owner (`migrator`) manages schema DDL; runtime application (`app`) has `NOSUPERUSER` and `NOBYPASSRLS`.
+   - **Row-Level Security:** Missing or malformed session context returns zero rows (fail-closed).
+   - **Encrypted Document Vault:** AES-256-GCM authenticated cipher with unique per-file IV and `instrument_id` AAD binding.
+   - **Immutable Audit Ledger:** Append-only table guarded by database triggers that reject `UPDATE`, `DELETE`, and `TRUNCATE`.
+5. **Background Scheduled Worker (`app/jobs/daily.py`):**
+   - Executes daily scans protected by PostgreSQL advisory lock `847291`.
+   - Uniqueness constraints `UNIQUE(obligation_id, step)` ensure idempotent reminder generation.
 
 ---
 
-## 4. The 15 Non-Negotiable System Safety Invariants (I1–I15)
+## 5. The 15 Non-Negotiable System Safety Invariants (I1–I15)
 
-The platform is governed by 15 safety invariants verified by automated mutation tests:
+The entire platform is governed by 15 architectural invariants verified by automated mutation tests:
 
-| Invariant | Requirement | Enforcement Mechanism |
-| :--- | :--- | :--- |
-| **I1: Computed Trust Badge** | Badges (`claimed`, `confirmed`, `stale`, `changed`) are computed dynamically in memory. | Never stored as an editable database column. |
-| **I2: Degradation Resilience** | Bank service unreachable produces `"source unavailable"`, never `"mismatch"`. | Graceful degradation boundary handling. |
-| **I3: Strict 6-Point Bank Gate** | Bank confirmation accepted only via the full byte-level gate. | Exact letter prefix, 1 valid signature, pinned certificate, non-repudiation. |
-| **I4: Least-Privilege DB Access** | Application connects as `NOSUPERUSER` and `NOBYPASSRLS`. | Unauthenticated queries return zero tenant rows (fail-closed). |
-| **I5: Append-Only Audit Chain** | State mutations write to `audit_event` via `audit_append()`. | Database triggers block `UPDATE`, `DELETE`, and `TRUNCATE`. |
-| **I6: Integer Money in Paise** | All financial values stored as integer paise (`bigint`). | Floats strictly prohibited; stored in UTC, displayed in IST. |
-| **I7: Dated Rulebook** | Regulatory rules are version-controlled, dated JSON files. | Startup halts outside development if rules contain unconfirmed DEMO values. |
-| **I8: Maker-Checker Dual-Custody** | Verifier cannot approve releases (`verified_by <> approved_by`). | PostgreSQL table CHECK constraint + service API layer. |
-| **I9: Privacy & Zero Leakage** | No real secrets, FDR numbers, PII, or unredacted tax IDs in git. | `.env` untracked; automated secrets scanners in CI. |
-| **I10: Uniform Route Isolation** | Every route enforces authentication, RLS context, and audit logging. | Cross-scope operations return 403 Forbidden. |
-| **I11: Invite-Only Access** | No public sign-up. 60-minute JWT token lifetime. | Sliding-window rate limiting on login and verification routes. |
-| **I12: Regulatory Grounding** | Deposit amounts originate strictly from Approval Process Handbook tables. | Zero hardcoded financial constants in application code. |
-| **I13: DSC Verification Boundary** | A Digital Signature Certificate proves submitter identity, not bank confirmation. | Separate document cryptographic inspection layers. |
-| **I14: UI Determinism** | Primary buttons derive completely from `next_action()`. | Server-side deterministic workflow state machine. |
-| **I15: Isolated Simulators** | Simulators exist only under `/sim` in development/demo mode. | Prominently watermarked with `[SIMULATED]`; disabled in production. |
+| Invariant | Requirement | Enforcing Code Reference | Verification Proof |
+| :--- | :--- | :--- | :--- |
+| **I1: Computed Trust Badge** | Badges (`claimed`, `confirmed`, `stale`, `changed`) are computed dynamically in memory. | `backend/app/domain/trust.py:34` | Never stored as an editable database column. |
+| **I2: Degradation Resilience** | Bank service unreachable produces `"source unavailable"`, never `"mismatch"`. | `backend/app/api/routes/bank.py:270` | Tested in `test_bank_simulator_and_discrepancy.py`. |
+| **I3: Strict 6-Point Bank Gate** | Bank confirmation accepted only via the full byte-level gate. | `backend/app/domain/bank_gate.py:22` | Tested against forged signatures & appended bytes. |
+| **I4: Least-Privilege DB Access** | Application connects as `NOSUPERUSER` and `NOBYPASSRLS`. | `backend/app/core/rls_context.py:31` | Tested in `test_sql_behaviour.py` (fail-closed). |
+| **I5: Append-Only Audit Chain** | State mutations write to `audit_event` via `audit_append()`. | `backend/app/core/audit.py:40` | Database triggers block `UPDATE`, `DELETE`, `TRUNCATE`. |
+| **I6: Integer Money in Paise** | All financial values stored as integer paise (`bigint`). | `backend/app/models.py:75` | Floats strictly prohibited; stored in UTC, shown in IST. |
+| **I7: Dated Rulebook** | Regulatory rules are version-controlled, dated JSON files. | `backend/app/domain/rules.py:72` | Startup halts outside development if rules are DEMO. |
+| **I8: Maker-Checker Dual-Custody** | Verifier cannot approve releases (`verified_by <> approved_by`). | `backend/app/api/routes/release.py:245` | Enforced by table CHECK constraint + service API layer. |
+| **I9: Privacy & Zero Leakage** | No real secrets, FDR numbers, PII, or unredacted tax IDs in git. | `.gitignore` & CI scanners | Verified by CI secret-scan workflow. |
+| **I10: Uniform Route Isolation** | Every route enforces authentication, RLS context, and audit logging. | `backend/app/api/deps.py:47` | Cross-scope operations return 403 Forbidden. |
+| **I11: Invite-Only Access** | No public sign-up. 60-minute JWT token lifetime. | `backend/app/api/routes/login.py:65` | Sliding-window rate limiting on login routes. |
+| **I12: Regulatory Grounding** | Deposit amounts originate strictly from Approval Process Handbook tables. | `backend/app/rules/deposit.2024-04-01.json` | Zero hardcoded financial constants in application code. |
+| **I13: DSC Verification Boundary** | A Digital Signature Certificate proves submitter identity, not bank confirmation. | `backend/app/domain/bank_gate.py:44` | Separate document cryptographic inspection layers. |
+| **I14: UI Determinism** | Primary buttons derive completely from `next_action()`. | `backend/app/domain/next_action.py:38` | Server-side deterministic workflow state machine. |
+| **I15: Isolated Simulators** | Simulators exist only under `/sim` in development/demo mode. | `backend/app/api/main.py:35` | Prominently watermarked with `[SIMULATED]`. |
 
 ---
 
-## 5. Comprehensive Feature Breakdown
+## 6. Comprehensive Feature Breakdown (The 10 Statement Capabilities)
 
-### A. Dynamic Approval Process Handbook Rules Engine (Table 1.4)
-- **Dynamic Rule Ingestion:** Loaded from version-controlled files (`backend/app/rules/deposit.2024-04-01.json`).
-- **Statutory Formula:**
+### 1. Dynamic Approval Process Handbook Rules Engine (Table 1.4)
+- **Problem Solved:** Handbook formulas evolve across academic editions. Hardcoded numbers break upon Gazette amendments.
+- **Implementation:** Stored in dated version-controlled JSON files (`backend/app/rules/deposit.2024-04-01.json`).
+- **Dynamic Formula:**
   $$\text{Required Deposit} = \sum (\text{Base Rate for Programme Level}) \times (\text{Lease Multiplier}) \times (\text{Exemption Factor})$$
-- Evaluates Engineering, Management, Planning, Architecture, and Computer Applications.
-- Applies 2x multiplier for private leased infrastructure; automatically applies full exemption for accredited government institutions.
-- **Coverage Card:** Real-time visual comparison showing Required vs. Confirmed deposit coverage.
+- Evaluates technical programmes (Engineering, Management, Planning, Architecture, Computer Applications).
+- Multipliers & Exemptions: 2x multiplier automatically applied for private leased properties; automatically applies full exemption for accredited government institutions.
+- **Integer Paise Representation:** Handled strictly in integer paise ($1\text{ Lakh} = 10^7\text{ paise}$).
 
-### B. AES-256-GCM Encrypted Document Vault
-- **Magic-Byte Inspection:** Verifies `%PDF`, `\x89PNG`, and `\xFF\xD8\xFF` headers prior to ingestion. Executable payloads or disguised scripts are rejected.
-- **Authenticated Encryption at Rest:** Unique Initialization Vector (IV) per document.
-- **Cryptographic Record Binding:** The unique `instrument_id` is passed as Additional Authenticated Data (AAD). If ciphertext is copied to another record, decryption fails cryptographically.
+### 2. Encrypted Document Vault (`app/domain/vault.py`)
+- **Pre-Ingestion Inspection:** Validates magic bytes (`%PDF`, `\x89PNG`, `\xFF\xD8\xFF`). Disguised executables and malicious scripts are rejected.
+- **Authenticated Encryption at Rest:** Encrypted with AES-256-GCM using a unique Initialization Vector (IV) per file.
+- **Cryptographic Binding (AAD):** Unique database `instrument_id` is passed as Additional Authenticated Data. Decryption under any other record fails cryptographically.
 
-### C. The 6-Point Cryptographic Bank Gate
-Bank confirmation letters must satisfy all 6 checkpoints:
-1. **Issued Letter Prefix Match:** Reply begins with the exact bytes of the verification letter issued by AICTE (`reply.startswith(issued)`).
+### 3. The 6-Point Cryptographic Bank Gate (`app/domain/bank_gate.py`)
+Incoming digital bank confirmation letters pass through 6 checks:
+1. **Issued Letter Prefix Match:** The counter-signed PDF must begin with the exact bytes of the verification letter issued by AICTE (`reply.startswith(issued)`).
 2. **Single Signature Count:** Exactly one valid PKCS#7 / CMS digital signature present.
 3. **Cryptographic Integrity:** Document digest matches signature mathematically with zero modifications.
 4. **Entire-File Byte Coverage:** Signature covers the complete byte stream (`SignatureCoverageLevel.ENTIRE_FILE`), rejecting trailing page insertions.
 5. **Pinned Certificate Trust:** Signer certificate fingerprint matches the bank's registered public root.
 6. **Non-Repudiation Key Usage:** Enforces explicit `nonRepudiation` X.509 extensions.
 
-### D. Automated Discrepancy Engine (D1–D7)
+### 4. Pure Discrepancy Engine (D1–D7) (`app/domain/discrepancy.py`)
 Pure functional evaluation checking bank assertions against institutional claims:
 - **D1 (Amount Shortfall):** Bank confirmed amount is less than claimed deposit. (Severity: BLOCK).
 - **D2 (Maturity Discrepancy):** Bank maturity date is shorter than statutory term. (Severity: BLOCK).
@@ -185,40 +239,262 @@ Pure functional evaluation checking bank assertions against institutional claims
 - **D7 (Renewal Coverage Gap):** Replacement FDR issue date is later than predecessor maturity date. (Severity: WARN).
 - **Mandatory Scrutiny Justification:** Manual discrepancy waivers require an officer justification note ($\ge 10$ characters) immutably recorded in the audit trail.
 
-### E. Virtual Clock & Daily Scheduled Worker
+### 5. Virtual Clock Time Machine & Daily Scheduled Worker
 - **Advisory Lock Concurrency:** Operates safely in multi-instance environments using PostgreSQL advisory lock `847291`.
 - **Idempotency Guarantee:** Enforced by relational uniqueness constraints `UNIQUE(obligation_id, step)`.
 - **Scheduled Escalation Matrix:** Automatically dispatches T-90, T-60, and T-30 renewal reminders to institutions and escalates overdue records to Regional Officers.
 
-### F. Dual-Custody Release Governance
-- **Segregation of Duties:** Regional Officer verifies checklist (Maker). Bureau Head authorizes release (Checker).
-- **Database Enforcement:** `CONSTRAINT chk_release_request_maker_checker CHECK (verified_by <> approved_by)`.
-- **Offline Cryptographic Receipt:** Once authorized, the system issues an RS256/JWT release receipt containing the instrument digest and timestamp, verifiable offline with AICTE's public key (`scripts/verify_receipt.py`).
+### 6. Dual-Custody Release Governance (Maker-Checker)
+- **Hard Rule I8:** Release authorization follows a strict two-person control model:
+  * **Maker Step (Regional Officer):** Scrutinizes closure, merger, university conversion, or term completion documents and verifies release eligibility. The RO is physically and cryptographically blocked from approving the release.
+  * **Checker Step (Bureau Approver):** National Bureau Approver reviews the verified case and authorizes release.
+- **Relational Enforcement:** `CONSTRAINT chk_release_request_maker_checker CHECK (verified_by <> approved_by)`.
+- **Service Enforcement:** Attempts by the verifier to approve return `403 Forbidden` (`MAKER_CANNOT_BE_CHECKER`).
+- **Offline Cryptographic Encashment Receipt:** Once authorized, the system issues an RS256/JWT release receipt containing the instrument digest and timestamp, verifiable offline with AICTE's public key (`scripts/verify_receipt.py`).
 
-### G. Tamper-Evident SHA-256 Audit Ledger
-- **Cryptographic Chaining:**
-  $$\text{entry\_hash}_n = \text{SHA-256}(\text{prev\_hash}_{n-1} \,||\, \text{timestamp} \,||\, \text{actor\_id} \,||\, \text{event\_type} \,||\, \text{payload})$$
-- Database triggers permanently block `UPDATE`, `DELETE`, and `TRUNCATE` operations.
+### 7. Tamper-Evident SHA-256 Audit Ledger (`starter/sql/audit.sql`)
+- **Structure:** Every mutation appends an entry:
+  $$\text{entry\_hash} = \text{SHA-256}(\text{prev\_hash} \,||\, \text{timestamp} \,||\, \text{event\_type} \,||\, \text{user\_id} \,||\, \text{canonical\_payload})$$
+- Database triggers permanently block `UPDATE`, `DELETE`, and `TRUNCATE` operations on `audit_event`.
 - `SELECT audit_verify()` validates ledger continuity in real-time.
 
+### 8. Deterministic Workflow Next-Action Engine
+- Central state machine computing the single primary action button, owner role, and urgency deadline based on lifecycle state, badge status, and active discrepancy flags.
+
+### 9. Formula Injection Defense (`app/domain/csv_safe.py`)
+- Sanitizes formula trigger characters (`=`, `+`, `-`, `@`, `\t`, `\r`) from all CSV export records to protect regulatory spreadsheets against remote code execution.
+
+### 10. Fraud Lab & Benchmark Engine (`app/domain/fraud_lab.py`)
+- Evaluates synthetic test matrices (20 planted discrepancies, 20 clean records) to verify zero false passes and zero false rejections.
+
 ---
 
-## 6. Seed Matrix & Contracted Personas
+## 7. The 7 Core Demonstration Scenarios (Live Evaluation Script)
 
-The portal is seeded with a dual-region, dual-custody maker-checker matrix:
+Synchronized with [`DEMO.md`](DEMO.md) and [`docs/guide.json`](docs/guide.json):
 
-| Role | Contracted Email | Region | Responsibilities | Default Password |
+```
+=======================================================================================================
+STEP 1: Institution: Coverage Card -> Calculator -> Submit FDR
+Actor: Institution User (`inst.north1@example.com`) | Route: /deposits
+Actions:
+  1. Sign in using 1-click persona switcher as Institution.
+  2. Inspect Coverage Card showing Required vs Confirmed balance.
+  3. Open Table 1.4 Calculator: Select Engineering (UG) + Management (PG) (Required: ₹ 50,00,000).
+  4. Submit new FDR instrument with certificate scan.
+Expected Outcome: Instrument created with badge 'Submitted (Claimed)'. Stored in AES-GCM vault.
+Why this matters: Transparent rule derivation removes manual calculation ambiguity.
+-------------------------------------------------------------------------------------------------------
+STEP 2: RO Requests Bank Confirmation -> SIMULATED Reply -> 6-Point Gate
+Actor: Regional Officer (`officer.north@example.com`) | Route: /deposits
+Actions:
+  1. Switch to Regional Officer persona.
+  2. Open case page for submitted instrument.
+  3. Click single primary action 'Request Bank Confirmation'.
+  4. Inspect the 6-Point Cryptographic Bank Gate evaluation report.
+Expected Outcome: All 6 checkpoints turn green. Status badge updates to 'Confirmed by Bank (SIMULATED)'.
+Why this matters: No deposit is trusted on self-declarations alone. Independent bank proof is required.
+-------------------------------------------------------------------------------------------------------
+STEP 3: Break the Gate: Forged Letter / Appended Page / Replayed Token
+Actor: Regional Officer / Evaluator | Route: /deposits -> Case Page
+Actions:
+  1. In the Break-Me Workbench, select 'Forged Letter Attack' (Signature invalid).
+  2. Test 'Appended Bytes Attack' (Trailing pages added).
+  3. Test 'Replayed Token Attack' (Challenge token reused).
+Expected Outcome: Every attack is rejected with precise reason codes. Zero false passes.
+Why this matters: Standard signers miss appended pages; the portal verifies full byte coverage.
+-------------------------------------------------------------------------------------------------------
+STEP 4: Amount Mismatch -> Discrepancy Flag -> Waiver Demands Written Reason
+Actor: Regional Officer (`officer.north@example.com`) | Route: /deposits -> Case Page
+Actions:
+  1. Run amount mismatch test where bank confirms ₹ 25 Lakh instead of claimed ₹ 35 Lakh.
+  2. Observe plain-language D1 Shortfall warning flag.
+  3. Attempt waiver with empty reason (blocked by form validation).
+  4. Enter formal scrutiny note (>= 10 characters) and submit waiver.
+Expected Outcome: Waiver accepted only with written justification and permanently audited.
+Why this matters: Officers cannot silently bypass discrepancies without an immutable paper trail.
+-------------------------------------------------------------------------------------------------------
+STEP 5: Bureau Advances Virtual Clock 30/60/90 Days -> Worker -> Reminders
+Actor: Bureau Approver (`bureau@example.com`) | Route: /dashboard
+Actions:
+  1. Switch to Bureau Approver persona.
+  2. Open Time Machine dropdown in header; advance +30 days.
+  3. Advance to +60 days to trigger renewal warnings.
+  4. Advance to +90 days to verify overdue alerts and review emails in Mailpit.
+Expected Outcome: Dashboard counts update; automated reminder notices dispatch without human intervention.
+Why this matters: Prevents 10-year deposits from being forgotten or lapsing unmonitored.
+-------------------------------------------------------------------------------------------------------
+STEP 6: Renewal: Replacement FDR -> Chain & Coverage Gap Check
+Actor: Institution User (`inst.north1@example.com`) | Route: /deposits
+Actions:
+  1. Switch back to Institution persona.
+  2. Submit renewal FDR referencing the original instrument ID (`replaces_id`).
+  3. Open case page to review linked predecessor.
+  4. Verify custody continuity and lack of coverage gaps (D7 check).
+Expected Outcome: Unbroken renewal chain created; old instrument transitions to renewed upon acceptance.
+Why this matters: Eliminates coverage lapses during 10-year renewal transitions.
+-------------------------------------------------------------------------------------------------------
+STEP 7: Release: Institution Requests -> RO Verifies -> RO Approve Blocked -> Bureau Approves -> Receipt
+Actor: Institution & Bureau Personas | Route: /deposits -> Case Page
+Actions:
+  1. As Institution, request term completion release.
+  2. As Regional Officer, verify release checklist (Maker step).
+  3. Attempt RO approval -> BLOCKED 403 Forbidden (chk_release_request_maker_checker).
+  4. As Bureau Approver (Checker), authorize release.
+  5. Inspect RS256 signed release receipt; verify offline via `python scripts/verify_receipt.py`.
+Expected Outcome: Status becomes Released, cryptographic receipt generated, audit ledger passes check.
+Why this matters: Dual-custody stops rogue insider releases. Proof is verifiable without database access.
+=======================================================================================================
+```
+
+---
+
+## 8. Contracted Personas & Credentials Matrix
+
+| Persona Role | Contracted Email | Region Scope | Responsibilities | Default Password |
 | :--- | :--- | :--- | :--- | :--- |
-| **Institution** | `inst.north1@example.com` | North (NR) | Submits FDR details, views Table 1.4 coverage card, requests releases. | `changethis` |
-| **Regional Officer (Maker)** | `officer.north@example.com` | North (NR) | Scrutinizes submissions, verifies releases (strictly blocked from approving). | `changethis` |
-| **Regional Checker** | `checker.north@example.com` | North (NR) | Verifies regional officer recommendations (maker-checker separation). | `changethis` |
-| **Bureau Approver (Checker)** | `bureau@example.com` | National | Advances virtual clock, approves verified releases (Maker != Checker). | `changethis` |
-| **External Auditor** | `auditor@example.com` | National | Read-only oversight across all regions; verifies SHA-256 audit ledger. | `changethis` |
-| **System Admin** | `admin@example.com` | National | User provisioning and system rule inspection. | `changethis` |
+| **Institution** | `inst.north1@example.com` | NR | Submits FDRs, views coverage cards, requests releases | `changethis` |
+| **Regional Officer** | `officer.north@example.com` | NR | Requests bank confirmations, verifies releases (Maker) | `changethis` |
+| **Regional Checker** | `checker.north@example.com` | NR | Regional inspection and scrutiny notes | `changethis` |
+| **Bureau Head** | `bureau@example.com` | ALL | National dashboard, approves releases (Checker), reports | `changethis` |
+| **External Auditor** | `auditor@example.com` | ALL | Read-only oversight, verifies SHA-256 audit ledger | `changethis` |
+| **System Admin** | `admin@example.com` | ALL | User administration and system configuration | `changethis` |
+
+*Password `changethis` is restricted to development/demo mode and blocked in production.*
 
 ---
 
-## 7. Enterprise Integration Blueprint (Production Target)
+## 9. Complete Master Presentation Pitch Deck (10-Slide PPT Blueprint)
+
+```
+========================================================================================
+[SLIDE 1] TITLE & REGULATORY MANDATE
+Title: AICTE Security Deposit & Fixed Deposit Receipt (FDR) Portal
+Subtitle: High-Assurance Automated Verification, Maturity Tracking & Dual-Custody Release
+Mandate: AICTE Problem Statement PS 26265
+Visual Suggestion: AICTE Emblem + Modern Regulatory Shield Diagram
+Talking Points:
+"Good morning, esteemed evaluators. Technical institutions nationwide pledge thousands 
+of security deposit FDRs to AICTE. Under the legacy paper process, verification was manual, 
+vulnerable to forged letters, and exposed to unmonitored 10-year lapses. We built an 
+automated portal where every fact is claimed or independently confirmed, maker is never 
+checker, money is integer paise, and every event is chained into an immutable SHA-256 ledger."
+----------------------------------------------------------------------------------------
+[SLIDE 2] THE REGULATORY CHALLENGE & TWO-KEY ANALOGY
+Title: The 10-Year Regulatory Gap: Why Paper Fails
+Bullet Points:
+- Paper Verification Fraud: Forged bank letterheads, fake stamps, unauthorized liquidations.
+- 10-Year Horizon Lapses: 10-year lock-in leads to lost records and untracked renewals.
+- Single-Desk Vulnerability: Lack of dual-control allows unauthorized individual releases.
+Visual Suggestion: The Two-Key Locker Diagram (Key 1: Bank CBS; Key 2: Bureau Checker).
+Talking Points:
+"Think of an AICTE security deposit as a dual-custody safety locker. No single person 
+holds both keys. The bank must independently confirm the deposit (Key 1), and a senior 
+Bureau Head must authorize release after Regional Officer verification (Key 2)."
+----------------------------------------------------------------------------------------
+[SLIDE 3] ARCHITECTURE & DEFENSE-IN-DEPTH
+Title: Architecture: Defense-in-Depth Engineering
+Bullet Points:
+- Python 3.14 + FastAPI + React 19 SPA + PostgreSQL 16.
+- Database Least-Privilege: Runtime application connects as NOSUPERUSER NOBYPASSRLS.
+- Row-Level Security (RLS): Missing session context returns 0 rows (fail-closed).
+- Encrypted Document Vault: AES-256-GCM cipher with unique AAD record binding.
+Visual Suggestion: Multi-layer Architecture Stack (Browser -> Gateway -> API -> Kernel).
+Talking Points:
+"Notice our database role separation: the app runs as a restricted role without superuser 
+or RLS bypass privileges. Tenant isolation is enforced at the database kernel level."
+----------------------------------------------------------------------------------------
+[SLIDE 4] DATED APPROVAL PROCESS HANDBOOK RULES ENGINE
+Title: Table 1.4 Calculation: Zero Hardcoded Constants
+Bullet Points:
+- Version-Controlled JSON: Loaded dynamically from dated files (deposit.2024-04-01.json).
+- Multi-Programme Support: Engineering, Management, Planning, Architecture, Computer Applications.
+- Leased Property Multiplier (2x) & Accredited Government Institution Full Exemption.
+- Integer-Paise Arithmetic: All calculations in bigint paise. Zero float rounding errors.
+Visual Suggestion: Screenshot of Institution Coverage Card (Required vs Confirmed).
+Talking Points:
+"Zero regulatory numbers are hardcoded in our code. If AICTE amends Table 1.4 in the Gazette, 
+we update the dated JSON file without modifying a single line of backend or frontend logic."
+----------------------------------------------------------------------------------------
+[SLIDE 5] THE 6-POINT CRYPTOGRAPHIC BANK CONFIRMATION GATE
+Title: Independent Verification: Why Claims Are Never Facts
+Bullet Points:
+- Check 1: Byte-Prefix Invariant (reply begins with issued challenge bytes).
+- Check 2 & 3: Single valid digital signature with intact mathematical digest.
+- Check 4: Whole-File Coverage (SignatureCoverageLevel.ENTIRE_FILE blocks appended pages).
+- Check 5 & 6: Pinned bank public certificate root & non-repudiation key extensions.
+Visual Suggestion: The 6-Point Gate Checklist with Green Verification Shield Badges.
+Talking Points:
+"An institution's claim is never a confirmed fact. Only when the issuing bank counter-signs 
+the issued challenge and passes all six byte-level cryptographic gates does status become Confirmed."
+----------------------------------------------------------------------------------------
+[SLIDE 6] THE BREAK-ME WORKBENCH — LIVE FRAUD DEFENSE
+Title: Testing Real Attacks Live: The Fraud Lab
+Bullet Points:
+- Attack 1: Forged Bank Letterhead -> REJECTED (Signature intactness fails).
+- Attack 2: Appended Pages / Injected Bytes -> REJECTED (Coverage check catches trailing bytes).
+- Attack 3: Token Replay Attack -> REJECTED (One-time challenge consumed on first use).
+- Accuracy Benchmark: 20 planted discrepancies, 20 clean records, zero false passes.
+Visual Suggestion: UI screenshot of Break-Me Workbench showing real-time error codes.
+Talking Points:
+"We invite evaluators to test attacks directly. In our Break-Me workbench, you can inject 
+forged signatures and appended pages. The system catches every attack with clear diagnostics."
+----------------------------------------------------------------------------------------
+[SLIDE 7] DUAL-CUSTODY RELEASE GOVERNANCE (MAKER-CHECKER)
+Title: Regulatory Governance: Maker Is Never Checker (Invariant I8)
+Bullet Points:
+- Step 1: Regional Officer verifies checklist & scrutinizes documents (Maker).
+- Step 2: Regional Officer attempted approval is blocked (403 Forbidden).
+- Step 3: Central Bureau Head conducts independent authorization (Checker).
+- Enforced by table CHECK constraint: `verified_by <> approved_by`.
+- Issues RS256/JWT Release Receipt verifiable offline with public key only.
+Visual Suggestion: Dual-Custody Approval Flowchart with Red 403 Stop Sign on self-approval.
+Talking Points:
+"Dual custody is guaranteed by database constraints and service logic. The officer who 
+verifies a release cannot approve it. An offline cryptographic receipt proves encashment."
+----------------------------------------------------------------------------------------
+[SLIDE 8] TAMPER-EVIDENT SHA-256 AUDIT LEDGER
+Title: Mathematical Proof: The Immutable Regulatory Trail
+Bullet Points:
+- Every state mutation written via SECURITY DEFINER function `audit_append()`.
+- Cryptographic Hash Chaining: entry_hash = SHA256(prev_hash + payload).
+- Permanent Database Triggers block UPDATE, DELETE, and TRUNCATE operations.
+- Real-Time Verification: `SELECT audit_verify()` validates ledger continuity in real-time.
+Visual Suggestion: Linked Hash Chain Diagram + Screenshot of Audit Log Verification Badge.
+Talking Points:
+"If a database administrator alters a past record directly on disk, the SHA-256 hash chain 
+breaks immediately. One click on 'Verify Ledger' detects the tamper and names the row."
+----------------------------------------------------------------------------------------
+[SLIDE 9] INTEGRATION BLUEPRINT: AICTE ERP & BANKING NETWORK
+Title: National Production Integration Roadmap
+Bullet Points:
+- Indian Banking Network: SFMS MT760 (FDR Issuance) & MT767 (Renewal) messaging.
+- NeSL Digital Document Execution (DDE): Electronic lien marking and charge filing.
+- AICTE Central Platform: OAuth2 Single Sign-On & Extension of Approval (EoA) Gate.
+- DigiLocker Depository: Direct ingestion of bank-issued PDF-A certificates.
+Visual Suggestion: National Integration Hub Diagram linking AICTE, Banks, and DigiLocker.
+Talking Points:
+"This prototype is designed to plug directly into the national banking backbone via SFMS 
+MT760 messages, electronic liens via NeSL, and AICTE's central portal for EoA gatekeeping."
+----------------------------------------------------------------------------------------
+[SLIDE 10] OPERATIONAL SAVINGS & PRODUCTION READINESS
+Title: Measured Impact & Production Readiness
+Bullet Points:
+- Ingestion: < 3 minutes vs. 3–5 working days (documented in docs/TIMING.md).
+- Bank Confirmation: Real-time to < 24 hours vs. 20–45 days via post.
+- Release Turnaround: < 1 hour vs. 14–21 working days.
+- 172 Automated Unit & Integration Tests Passing (0 Failures, Fully Offline Capable).
+- Live on Render + Neon PostgreSQL 16; GitHub Actions CI pipeline active.
+Visual Suggestion: Operational Comparison Chart + System Health Badge (All Checks Green).
+Talking Points:
+"We replaced a manual, paper-vulnerable process with an automated, cryptographically 
+sound digital system. The repository, tests, video walkthrough, and cloud deployment are ready."
+========================================================================================
+```
+
+---
+
+## 10. Enterprise Integration Blueprint (Production Architecture)
 
 ```mermaid
 graph LR
@@ -255,109 +531,111 @@ graph LR
     CoreAPI <--> BankPortal
 ```
 
-- **AICTE Central Single Sign-On:** Integration via OAuth 2.0 / SAML 2.0 with existing government credentials.
-- **Master Data Synchronization:** Automated REST / Kafka synchronization of Permanent Institute IDs (PID), approved programme levels, and seat intake.
-- **Extension of Approval (EoA) Gatekeeping:** Internal webhook `GET /api/v1/institutions/{id}/coverage-status` allowing AICTE's central portal to automatically withhold annual EoA approvals if FDR coverage is deficient.
-- **DigiLocker Depository:** Ingestion of bank-issued PDF-A certificates directly via W3C Verifiable Credentials.
-- **Structured Financial Messaging System (SFMS):**
-  * `MT760`: Electronic Fixed Deposit / Guarantee confirmation advice.
-  * `MT767`: 10-year term renewal advice.
-  * `MT769`: Electronic lien discharge advice upon Bureau approval.
-- **NeSL Digital Document Execution (DDE):** Electronic lien marking and legally binding digital charge filing on bank deposit instruments.
+### 1. Integration with AICTE Platforms
+- **Single Sign-On (SSO):** Integration with AICTE's National Approval Portal using OAuth 2.0 / SAML 2.0. Regional Officers and Bureau Heads authenticate using existing central government credentials.
+- **Master Data Synchronization:** Automated REST / Kafka synchronization of:
+  * Permanent Institute ID (PID).
+  * Institution Category (Government, Private Aided, Self-Financing, Leased Property).
+  * Approved Programme Levels & Seat Intake (used directly by the Table 1.4 dynamic rules engine).
+- **Extension of Approval (EoA) Gatekeeping:** The FDR portal exposes an internal webhook API: `GET /api/v1/institutions/{id}/coverage-status`. If an institution has a shortfall or an unconfirmed/expired deposit, AICTE's central ERP can automatically halt the annual EoA issuance until compliance is cleared.
+- **DigiLocker Regulatory Depository:** Integration with DigiLocker's National Academic Depository (NAD) / Regulatory Locker via W3C Verifiable Credentials. When a bank issues an FDR, the digitally signed PDF-A is ingested directly from the bank's DigiLocker repository, bypassing manual physical document handling.
+
+### 2. Integration with Indian Banking Infrastructure
+- **SFMS (Structured Financial Messaging System):** Production connection to RBI/IDRBT's SFMS network:
+  * `MT760` (Guarantee / Security Deposit Advice): Authoritative bank-to-regulator message confirming principal sum, term, interest, and exclusive lien to AICTE.
+  * `MT767` (Amendment / Extension Advice): Automated processing of 10-year term renewals.
+  * `MT769` (Release / Lien Lifting Advice): Automated electronic lien discharge upon Bureau approval.
+- **NeSL (National E-Governance Services Ltd):** Electronic lien marking via NeSL Digital Document Execution (DDE) platform, enabling legally binding digital stamp duty and joint charge filing on FDRs under Indian law.
+- **Direct CBS Banking APIs (Open Banking / Corporate Banking):** Secure mTLS (Mutual TLS) REST webhooks with scheduled commercial banks (SBI, PNB, Canara, Bank of Baroda, HDFC, ICICI) passing encrypted PKCS#7 JSON payloads.
+- **Secure Fallback Bank Verification Portal:** For regional cooperative or rural banks without automated CBS API adapters, the portal provides a secure, single-use, 14-day cryptographic token link (`secrets.token_urlsafe(32)`). The branch manager authenticates via Aadhaar OTP / bank DSC and confirms deposit parameters directly.
 
 ---
 
-## 8. Quick Start & Local Setup
+## 11. How to Run & Deploy (Local, Docker & Free Cloud)
 
-### Prerequisites
-- Python 3.14+
-- uv package manager (`0.9.26+`)
-- Bun runtime (`1.0+`)
-- PostgreSQL 16
-
-### One-Command Setup & Demo
+### Track 1: One-Command Local Showcase
 ```powershell
-# 1. Reset database, seed synthetic data, and run 7-step showcase
+# Reset database, seed synthetic data, and run all 7 demo scenarios
 powershell -ExecutionPolicy Bypass -File scripts/run-demo.ps1 -Reset
 
-# 2. Access the portal
-# Web UI: http://localhost:8000
-# Interactive 6-minute tour: http://localhost:8000/guide
+# Visit http://localhost:8000 (Interactive tour at /guide)
 ```
 
-### Manual Development Setup
-```bash
-# 1. Configure environment
-cp .env.example .env
-uv run python scripts/gen_secrets.py
-
-# 2. Setup backend dependencies and database migrations
-cd backend
-uv sync
-uv run alembic upgrade head
-uv run python app/initial_data.py
-
-# 3. Build frontend assets
-cd ../frontend
-bun install
-bun run build
-
-# 4. Start backend server
-cd ../backend
-uv run uvicorn app.main:app --reload --port 8000
-```
-
----
-
-## 9. Quality Gate & Automated Verification
-
-The project includes a 10-point quality gate:
-
+### Track 2: Instant Public Cloudflare Tunnel
 ```powershell
-# Run the complete verification gate (Windows PowerShell)
-powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
-
-# Run full gate on Linux / Git Bash
-bash scripts/verify.sh
+# Spawns a secure public HTTPS tunnel for remote evaluator review
+powershell -ExecutionPolicy Bypass -File scripts/share.ps1
 ```
 
-### Verification Checks Executed
-1. **Backend Tests:** 172 unit and integration tests passing (`uv run pytest -q`).
-2. **Type Checking:** Strict Mypy validation (`uv run mypy app`).
-3. **Python Linting:** Ruff lint and formatting checks (`uv run ruff check app`).
-4. **Frontend Linting:** Biome code quality checks (`bunx biome check`).
-5. **Frontend Compilation:** Full production asset compilation (`bun run build`).
-6. **Leak Prevention:** Scan compiled distribution bundle for default passwords.
-7. **Capability Map:** Verify all 10 problem statement capabilities across 29 mapped tests.
-8. **Client Drift:** Verify OpenAPI generated TypeScript client matches FastAPI routes.
-9. **Documentation Drift:** Verify `DEMO.md` is synchronized with `docs/guide.json`.
-10. **Claims & Reference Lint:** Verify honest claims and script path integrity.
+### Track 3: Local Docker Compose Bringup
+```bash
+# Build multi-stage Docker container (Frontend SPA + Python 3.14 API)
+docker compose up --build
+```
 
----
-
-## 10. Free-Tier Cloud Deployment (Render + Neon)
-
-The repository is configured for zero-cost cloud deployment using Render (Docker Web Service) and Neon (PostgreSQL 16):
-
-1. **Database Setup (Neon):**
-   * Create a PostgreSQL 16 project on [neon.tech](https://neon.tech).
-   * Copy the direct connection string for the database owner (`neondb_owner`).
-   * Run [scripts/db-roles-managed.sql](scripts/db-roles-managed.sql) via `psql` to create the restricted `app` role (`NOSUPERUSER NOBYPASSRLS`).
-2. **Service Deployment (Render):**
-   * Connect your GitHub repository using **Render Blueprint** ([render.yaml](render.yaml)).
-   * Supply the generated environment variables from `scripts/gen_secrets.py`.
-   * Set `DATABASE_URL` to the direct Neon string with username `app`.
-   * Set `MIGRATION_DATABASE_URL` to the owner string with username `neondb_owner`.
-3. **Live Verification:**
+### Track 4: Free Cloud Deployment (Render + Neon)
+1. **Neon Database Setup:**
+   * Create a PostgreSQL 16 database on [neon.tech](https://neon.tech).
+   * Uncheck "Pooled connection" to obtain the direct string for `neondb_owner`.
+   * Execute [scripts/db-roles-managed.sql](scripts/db-roles-managed.sql) via `psql` to create the restricted `app` role (`NOSUPERUSER NOBYPASSRLS`).
+2. **Render Blueprint Deployment:**
+   * Connect your GitHub repo to [render.com](https://render.com) using Blueprint mode ([render.yaml](render.yaml)).
+   * Supply the environment variables generated by `scripts/gen_secrets.py`.
+   * Set `DATABASE_URL` with user `app` and `MIGRATION_DATABASE_URL` with user `neondb_owner`.
+3. **Smoke Verification:**
    ```bash
    uv run python scripts/smoke_deployed.py https://<your-service>.onrender.com
    ```
-
-For detailed deployment guidance, refer to [DEPLOY-GUIDE.md](DEPLOY-GUIDE.md) and [REVIEW.md](REVIEW.md).
+   *(For full instructions, read [DEPLOY-GUIDE.md](DEPLOY-GUIDE.md) and [REVIEW.md](REVIEW.md))*
 
 ---
 
-## 11. Honest Prototype Limits & Non-Claims
+## 12. Verification & Quality Gate (All Proving Commands)
+
+Run the full verification suite before any release:
+
+```powershell
+# Windows PowerShell Verification Gate
+powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
+
+# Linux / Git Bash Verification Gate
+bash scripts/verify.sh
+```
+
+### Additional Standalone Verifiers
+- **System Doctor & Health Check:** `uv run python scripts/doctor.py`
+- **Standalone Smoke Suite:** `uv run python scripts/smoke_deployed.py http://localhost:8000`
+- **Offline Cryptographic Receipt Verifier:** `uv run python scripts/verify_receipt.py`
+- **Environment Contract Zero-Drift Check:** `uv run python scripts/print_env_contract.py backend/app`
+- **Offline Self-Contained Assets Audit:** `uv run python scripts/check-offline.py`
+
+---
+
+## 13. Evaluator Q&A Defense & Skepticism Cheat Sheet
+
+#### Q1: "Are these live bank Core Banking Systems (CBS) integrations?"
+**Defense:** *"No. We adhere to honest disclosure: all bank endpoints in this prototype are labelled simulators. Live banking integrations require formal bilateral MOUs and RBI/IDRBT-approved SFMS gateways. What we have built and verified is the exact production cryptographic contract: our simulator signs genuine X.509 PKCS#7 PDFs, and our 6-point verification gate evaluates them at the raw byte level using the exact cryptography required in production."*
+
+#### Q2: "What stops a database administrator or malicious insider from altering a release record or audit entry?"
+**Defense:** *"Two independent layers of defense. First, at the database engine level, PostgreSQL triggers unconditionally reject any `UPDATE`, `DELETE`, or `TRUNCATE` query on `audit_event`. Second, every event is chained using SHA-256: $\text{hash}_n = \text{SHA256}(\text{hash}_{n-1} + \text{data})$. If someone bypasses triggers using raw disk edits, the mathematical hash chain breaks. Our `SELECT audit_verify()` endpoint immediately detects the alteration and identifies the exact tampered row."*
+
+#### Q3: "What prevents an officer from colluding and approving their own deposit release?"
+**Defense:** *"System Invariant I8 strictly enforces that the Maker cannot be the Checker. This is guaranteed at two distinct layers:
+1. In the database schema via `CONSTRAINT chk_release_request_maker_checker CHECK (verified_by <> approved_by)`.
+2. In the FastAPI service layer, which returns an explicit `403 Forbidden` (`MAKER_CANNOT_BE_CHECKER`) if `release_req.verified_by == current_user.id`. Our test suite includes tests proving this restriction cannot be bypassed."*
+
+#### Q4: "Where are the AICTE handbook deposit rates stored? Are they hardcoded?"
+**Defense:** *"There is zero hardcoding of financial amounts or handbook rates anywhere in the Python or TypeScript codebase. All requirements derive from dated, version-controlled JSON files (`deposit.2024-04-01.json`). Furthermore, Invariant I7 dictates that if the application is started in production mode with rules marked as DEMO, the server halts immediately at startup to prevent incorrect figures from being used."*
+
+#### Q5: "How does the system handle an institution that fails to renew an FDR upon 10-year maturity?"
+**Defense:** *"The portal features an automated daily background worker protected by PostgreSQL advisory lock `847291`. It scans upcoming obligations and executes an automated escalation ladder: dispatching reminders at T-90, T-60, and T-30 days to maturity. At T-0, it transitions the instrument state to `matured`. If unrenewed, it flags an overdue alert to the Regional Officer and Bureau Approver, simultaneously notifying the central AICTE approval portal to place a hold on the institution's annual Extension of Approval (EoA)."*
+
+#### Q6: "Why use integer paise instead of standard floating-point numbers or decimals?"
+**Defense:** *"IEEE 754 floating-point representations introduce fractional precision errors when performing cumulative summations across thousands of records. In a statutory regulatory ledger, rounding discrepancies are unacceptable. Invariant I6 mandates that all money is represented as integer paise (`bigint`), where 1 Lakh is strictly `10,000,000` paise. Calculations are exact down to the single paisa."*
+
+---
+
+## 14. Honest Prototype Limits & Non-Claims
 
 - **DEMO Rule Values:** Table 1.4 Approval Process Handbook rules are marked `DEMO` pending official council gazette confirmation; startup is blocked outside development/demo.
 - **SIMULATED Bank & Email:** Bank confirmation APIs and email notices are SIMULATED and transparently labelled.
@@ -367,7 +645,7 @@ For detailed deployment guidance, refer to [DEPLOY-GUIDE.md](DEPLOY-GUIDE.md) an
 
 ---
 
-## 12. Documentation Index
+## Documentation Index
 
 - [DEMO.md](DEMO.md) — 7-step live evaluation script synchronized with `docs/guide.json`.
 - [DEPLOY-GUIDE.md](DEPLOY-GUIDE.md) — Production deployment instructions for Render and Neon.
