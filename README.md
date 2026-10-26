@@ -20,7 +20,7 @@ powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
 
 ---
 
-## Prototype Boundaries & What It Does NOT Do
+## Limits of This Prototype
 - **Synthetic Data Only:** All institutions, deposit amounts, reference numbers, and user profiles are synthetic.
 - **Labelled Bank Simulators:** Real banking networks (SFMS/CBS) do not expose public sandboxes for hackathons; all bank confirmation flows operate through transparently labelled, cryptographically rigorous simulators.
 - **No Real Money Movement:** The portal orchestrates regulatory custody and legal release authorizations; funds remain in designated commercial banks under joint lien.
