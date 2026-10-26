@@ -39,8 +39,27 @@ def seed_rich_data() -> None:
             select(User).where(User.email == "inst.west@example.com")
         ).first()
 
-        officer_id = officer.id if officer else uuid.uuid4()
-        inst_user_id = inst_user.id if inst_user else uuid.uuid4()
+        if not officer or not inst_user:
+            from app.core.db import init_db
+
+            init_db(session)
+            officer = session.exec(
+                select(User).where(User.email == "officer.north@example.com")
+            ).first()
+            inst_user = session.exec(
+                select(User).where(User.email == "inst.north1@example.com")
+            ).first()
+            inst2_user = session.exec(
+                select(User).where(User.email == "inst.north2@example.com")
+            ).first()
+            west_user = session.exec(
+                select(User).where(User.email == "inst.west@example.com")
+            ).first()
+
+        fallback = session.exec(select(User)).first()
+        fallback_id = fallback.id if fallback else uuid.uuid4()
+        officer_id = officer.id if officer else fallback_id
+        inst_user_id = inst_user.id if inst_user else fallback_id
 
         # 2. Seed Diverse Institutions Across Regions
         institutions_def = [

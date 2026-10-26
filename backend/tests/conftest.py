@@ -31,6 +31,14 @@ def db() -> Generator[Session]:
         statement = delete(User)
         session.execute(statement)
         session.commit()
+        # Restore standard seed personas so the environment is always demo-ready
+        try:
+            init_db(session)
+            from app.seed_rich_synthetic_data import seed_rich_data
+
+            seed_rich_data()
+        except Exception:
+            session.rollback()
 
 
 

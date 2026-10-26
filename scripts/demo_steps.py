@@ -39,12 +39,25 @@ def run_demo_steps(base_url: str | None = None) -> bool:
         client = TestClient(app)
 
     demo_password = "changethis"
+
+    def get_token(email: str) -> dict[str, str]:
+        # Try demo login endpoint first (handles randomized passwords in demo mode)
+        try:
+            r = client.post(f"{settings.API_V1_STR}/login/demo", json={"email": email})
+            if r.status_code == 200:
+                token = r.json().get("access_token")
+                if token:
+                    return {"Authorization": f"Bearer {token}"}
+        except Exception:
+            pass
+        return user_authentication_headers(client=client, email=email, password=demo_password)
+
     tokens = {
-        "institution": user_authentication_headers(client=client, email="inst.north1@example.com", password=demo_password),
-        "regional": user_authentication_headers(client=client, email="officer.north@example.com", password=demo_password),
-        "checker": user_authentication_headers(client=client, email="checker.north@example.com", password=demo_password),
-        "bureau": user_authentication_headers(client=client, email="bureau@example.com", password=demo_password),
-        "auditor": user_authentication_headers(client=client, email="auditor@example.com", password=demo_password),
+        "institution": get_token("inst.north1@example.com"),
+        "regional": get_token("officer.north@example.com"),
+        "checker": get_token("checker.north@example.com"),
+        "bureau": get_token("bureau@example.com"),
+        "auditor": get_token("auditor@example.com"),
     }
 
     # STEP 1

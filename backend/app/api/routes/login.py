@@ -255,6 +255,10 @@ def demo_login(
             status_code=404, detail="Demo login disabled outside development/demo"
         )
     user = crud.get_user_by_email(session=session, email=data.email)
+    if not user:
+        from app.core.db import init_db
+        init_db(session)
+        user = crud.get_user_by_email(session=session, email=data.email)
     if not user or not user.is_active:
         raise HTTPException(status_code=400, detail="Invalid demo persona")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
