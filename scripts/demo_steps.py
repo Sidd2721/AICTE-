@@ -41,13 +41,6 @@ def run_demo_steps() -> bool:
             ("bureau@example.com", "bureau", "ALL"),
             ("auditor@example.com", "auditor", "ALL"),
         ]
-        for email, role, region in users_config:
-            u = session.exec(select(User).where(User.email == email)).first()
-            if u:
-                u.role = role
-                u.region = region
-                session.add(u)
-        session.commit()
 
         tokens = {
             "institution": authentication_token_from_email(client=client, email="inst.north1@example.com", db=session),
@@ -56,6 +49,14 @@ def run_demo_steps() -> bool:
             "bureau": authentication_token_from_email(client=client, email="bureau@example.com", db=session),
             "auditor": authentication_token_from_email(client=client, email="auditor@example.com", db=session),
         }
+
+        for email, role, region in users_config:
+            u = session.exec(select(User).where(User.email == email)).first()
+            if u:
+                u.role = role
+                u.region = region
+                session.add(u)
+        session.commit()
 
     # STEP 1
     title_1 = "Institution: coverage card -> calculator -> submit FDR"
