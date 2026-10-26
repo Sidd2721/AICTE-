@@ -374,18 +374,22 @@ def preview_missing_documents(
     instruments = session.exec(query.limit(limit)).all()
     rows = []
     for i in instruments:
-        docs = session.exec(select(Document).where(Document.instrument_id == i.id)).all()
+        docs = session.exec(
+            select(Document).where(Document.instrument_id == i.id)
+        ).all()
         doc_kinds = {d.kind for d in docs}
         missing = [k for k in ("fdr_scan", "payment_proof") if k not in doc_kinds]
         if missing:
             inst_obj = session.get(Institution, i.institution_id)
-            rows.append({
-                "id": str(i.id),
-                "institution_name": inst_obj.name if inst_obj else "",
-                "region": i.region,
-                "ref_no": i.ref_no,
-                "missing": missing,
-            })
+            rows.append(
+                {
+                    "id": str(i.id),
+                    "institution_name": inst_obj.name if inst_obj else "",
+                    "region": i.region,
+                    "ref_no": i.ref_no,
+                    "missing": missing,
+                }
+            )
     return {"rows": rows, "count": len(rows)}
 
 
@@ -419,12 +423,13 @@ def preview_cases_needing_intervention(
         for o in obs:
             reasons.append(f"Overdue {o.kind} (due {o.due_date})")
         if reasons:
-            rows.append({
-                "id": str(i.id),
-                "ref_no": i.ref_no,
-                "region": i.region,
-                "lifecycle": i.lifecycle,
-                "reasons": reasons,
-            })
+            rows.append(
+                {
+                    "id": str(i.id),
+                    "ref_no": i.ref_no,
+                    "region": i.region,
+                    "lifecycle": i.lifecycle,
+                    "reasons": reasons,
+                }
+            )
     return {"rows": rows, "count": len(rows)}
-

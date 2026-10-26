@@ -260,18 +260,29 @@ def get_instrument_case(
 ) -> Any:
     """Aggregate case view: instrument + bank confirmations + discrepancies + documents +
     flags + release request + per-instrument audit trail — saves 5+ separate requests."""
-    from datetime import UTC, datetime
 
     from sqlmodel import col
 
     from app.domain.discrepancy import evaluate_discrepancies
-    from app.models import AuditEvent, CaseNote, Confirmation, Document, FlagWaiver, Institution, ReleaseRequest
+    from app.models import (
+        AuditEvent,
+        CaseNote,
+        Confirmation,
+        Document,
+        FlagWaiver,
+        Institution,
+        ReleaseRequest,
+    )
 
     instrument = session.get(Instrument, instrument_id)
     if not instrument:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instrument not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Instrument not found"
+        )
 
-    role = current_user.role or ("institution" if current_user.institution_id else "regional")
+    role = current_user.role or (
+        "institution" if current_user.institution_id else "regional"
+    )
     hydrated = _hydrate_instrument_meta(instrument, session, role)
 
     # Confirmations
@@ -283,7 +294,7 @@ def get_instrument_case(
         latest_conf = max(confs, key=lambda c: c.requested_at)
 
     # Discrepancies
-    discrepancies: list[dict] = []
+    discrepancies: list[dict[str, object]] = []
     if latest_conf and latest_conf.status == "confirmed" and latest_conf.fields:
         inst_dict = {
             "ref_no": instrument.ref_no,
@@ -295,13 +306,19 @@ def get_instrument_case(
         discrepancies = evaluate_discrepancies(inst_dict, latest_conf.fields)
 
     # Documents
-    docs = session.exec(select(Document).where(Document.instrument_id == instrument_id)).all()
+    docs = session.exec(
+        select(Document).where(Document.instrument_id == instrument_id)
+    ).all()
 
     # Flags / waivers
-    waivers = session.exec(select(FlagWaiver).where(FlagWaiver.instrument_id == instrument_id)).all()
+    waivers = session.exec(
+        select(FlagWaiver).where(FlagWaiver.instrument_id == instrument_id)
+    ).all()
 
     # Case notes
-    notes = session.exec(select(CaseNote).where(CaseNote.instrument_id == instrument_id)).all()
+    notes = session.exec(
+        select(CaseNote).where(CaseNote.instrument_id == instrument_id)
+    ).all()
 
     # Release request
     release_req = session.exec(
@@ -382,12 +399,18 @@ def get_instrument_case(
             "path": release_req.path,
             "checklist": release_req.checklist,
             "requested_by": str(release_req.requested_by),
-            "verified_by": str(release_req.verified_by) if release_req.verified_by else None,
-            "approved_by": str(release_req.approved_by) if release_req.approved_by else None,
+            "verified_by": str(release_req.verified_by)
+            if release_req.verified_by
+            else None,
+            "approved_by": str(release_req.approved_by)
+            if release_req.approved_by
+            else None,
             "receipt_token": release_req.receipt_token,
             "created_at": release_req.created_at.isoformat(),
             "updated_at": release_req.updated_at.isoformat(),
-        } if release_req else None,
+        }
+        if release_req
+        else None,
         "audit_timeline": [
             {
                 "id": e.id,

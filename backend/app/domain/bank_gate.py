@@ -59,49 +59,63 @@ def build_verification_gate_report(
             "label": "Issued Letter Prefix Match",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "Counter-signed document begins with issued bytes" if sig_passed else "Prefix mismatch",
+            "detail": "Counter-signed document begins with issued bytes"
+            if sig_passed
+            else "Prefix mismatch",
         },
         {
             "id": "signature_count",
             "label": "Signature Count",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "Exactly 1 embedded PKCS#7 signature" if sig_passed else "Signature count invalid",
+            "detail": "Exactly 1 embedded PKCS#7 signature"
+            if sig_passed
+            else "Signature count invalid",
         },
         {
             "id": "cryptographic_validity",
             "label": "Cryptographic Integrity",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "Digital signature mathematically intact and valid" if sig_passed else "Signature invalid",
+            "detail": "Digital signature mathematically intact and valid"
+            if sig_passed
+            else "Signature invalid",
         },
         {
             "id": "trust_chain",
             "label": "Certificate Authority Trust",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "Chains to trusted simulated Root CA" if sig_passed else "Untrusted signer",
+            "detail": "Chains to trusted simulated Root CA"
+            if sig_passed
+            else "Untrusted signer",
         },
         {
             "id": "full_file_coverage",
             "label": "Byte-Range Coverage",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "Signature covers 100% of document bytes" if sig_passed else "Incomplete coverage",
+            "detail": "Signature covers 100% of document bytes"
+            if sig_passed
+            else "Incomplete coverage",
         },
         {
             "id": "pinned_signer",
             "label": "Pinned Signer Hash",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "SHA-256 matches bank certificate fingerprint" if sig_passed else "Signer fingerprint mismatch",
+            "detail": "SHA-256 matches bank certificate fingerprint"
+            if sig_passed
+            else "Signer fingerprint mismatch",
         },
         {
             "id": "key_usage",
             "label": "Key Usage",
             "passed": sig_passed,
             "status": "passed" if sig_passed else "failed",
-            "detail": "Certificate includes non_repudiation" if sig_passed else "Missing non-repudiation",
+            "detail": "Certificate includes non_repudiation"
+            if sig_passed
+            else "Missing non-repudiation",
         },
         {
             "id": "revocation",
@@ -122,7 +136,11 @@ def build_verification_gate_report(
     i_ref = instrument.get("ref_no")
     i_bank = instrument.get("bank_code")
     i_amt = instrument.get("amount_paise")
-    i_mat = str(instrument.get("maturity_date")) if instrument.get("maturity_date") else None
+    i_mat = (
+        str(instrument.get("maturity_date"))
+        if instrument.get("maturity_date")
+        else None
+    )
     i_lien = instrument.get("lien_marked")
 
     ref_pass = bool(c_ref and i_ref and str(c_ref) == str(i_ref))
