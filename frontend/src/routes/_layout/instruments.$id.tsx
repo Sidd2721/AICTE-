@@ -114,11 +114,52 @@ function InstrumentCaseView() {
     onError: (err: any) => toast.error(err?.detail || "Failed to waive flag"),
   })
 
+  const requestConfirmationMutation = useMutation({
+    mutationFn: async () => {
+      const res = await client.post<any>({
+        url: `/api/v1/bank/request-confirmation/${id}`,
+      })
+      try {
+        await client.post<any>({
+          url: `/sim/bank/confirm/${id}`,
+          body: { outcome: "match" },
+        })
+      } catch {
+        // Simulation callback triggered
+      }
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success("Bank confirmation requested & verified (SIMULATED)")
+      queryClient.invalidateQueries({ queryKey: ["instrument-case", id] })
+    },
+    onError: (err: any) =>
+      toast.error(err?.detail || "Failed to request bank confirmation"),
+  })
+
+  const acceptRecordMutation = useMutation({
+    mutationFn: async () => {
+      const res = await client.post<any>({
+        url: `/api/v1/instruments/${id}/accept`,
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      toast.success("Instrument accepted and marked Active")
+      queryClient.invalidateQueries({ queryKey: ["instrument-case", id] })
+    },
+    onError: (err: any) =>
+      toast.error(err?.detail || "Failed to accept instrument record"),
+  })
+
   const requestReleaseMutation = useMutation({
     mutationFn: async () => {
       const res = await client.post({
         url: `/api/v1/instruments/${id}/release`,
-        body: { reason: "Maturity completed. Return requested." },
+        body: {
+          path: "term_completion",
+          reason: "Maturity completed. Return requested.",
+        },
       })
       return res.data
     },
@@ -224,7 +265,11 @@ function InstrumentCaseView() {
   ]
 
   const handleNextAction = () => {
-    if (inst.next_action_code === "verify_release" && relReq?.id) {
+    if (inst.next_action_code === "request_confirmation") {
+      requestConfirmationMutation.mutate()
+    } else if (inst.next_action_code === "accept_record") {
+      acceptRecordMutation.mutate()
+    } else if (inst.next_action_code === "verify_release" && relReq?.id) {
       verifyReleaseMutation.mutate(relReq.id)
     } else if (inst.next_action_code === "approve_release" && relReq?.id) {
       approveReleaseMutation.mutate(relReq.id)
@@ -267,6 +312,8 @@ function InstrumentCaseView() {
               className="font-semibold shadow-sm"
               onClick={handleNextAction}
               disabled={
+                requestConfirmationMutation.isPending ||
+                acceptRecordMutation.isPending ||
                 requestReleaseMutation.isPending ||
                 verifyReleaseMutation.isPending ||
                 approveReleaseMutation.isPending

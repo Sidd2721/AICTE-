@@ -55,8 +55,10 @@ services:
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
       EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL:-noreply@fdr.aicte-india.org}
+    volumes:
+      - demo-vault-data:/app/backend/vault
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -66,7 +68,7 @@ services:
     image: axllent/mailpit:latest
     restart: unless-stopped
     ports:
-      - "8025:8025"
+      - "127.0.0.1:8025:8025"
 
   caddy:
     image: caddy:2-alpine
@@ -84,5 +86,7 @@ services:
 
 volumes:
   demo-db-data:
+  demo-vault-data:
   caddy-data:
   caddy-config:
+

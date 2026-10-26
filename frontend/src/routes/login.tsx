@@ -92,9 +92,26 @@ function Login() {
     loginMutation.mutate(data)
   }
 
-  const fillDemoPersona = (persona: DemoPersona) => {
+  const fillDemoPersona = async (persona: DemoPersona) => {
     form.setValue("username", persona.email, { shouldValidate: true })
     form.setValue("password", persona.password, { shouldValidate: true })
+    try {
+      const res = await fetch("/api/v1/login/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: persona.email }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.access_token) {
+          localStorage.setItem("access_token", data.access_token)
+          window.location.href = "/"
+          return
+        }
+      }
+    } catch {
+      // Fallback
+    }
     loginMutation.mutate({
       username: persona.email,
       password: persona.password,

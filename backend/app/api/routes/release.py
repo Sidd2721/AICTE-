@@ -125,6 +125,11 @@ def get_instrument_release(
 
 
 @router.patch("/release/{release_id}/verify", response_model=ReleaseRequestPublic)
+@router.post(
+    "/release/{release_id}/verify",
+    response_model=ReleaseRequestPublic,
+    operation_id="release-verify_release_post",
+)
 def verify_release(
     release_id: uuid.UUID,
     session: SessionDep,
@@ -230,6 +235,11 @@ def verify_release(
 
 
 @router.patch("/release/{release_id}/approve", response_model=ReleaseRequestPublic)
+@router.post(
+    "/release/{release_id}/approve",
+    response_model=ReleaseRequestPublic,
+    operation_id="release-approve_release_post",
+)
 def approve_release(
     release_id: uuid.UUID,
     session: SessionDep,

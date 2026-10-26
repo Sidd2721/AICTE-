@@ -19,6 +19,7 @@ class ClockUpdate(BaseModel):
 
 
 @router.get("/sim/clock")
+@router.get("/api/v1/sim/clock", operation_id="clock-get_clock_v1")
 def get_clock() -> dict[str, Any]:
     return {
         "now": now().isoformat(),
@@ -29,6 +30,7 @@ def get_clock() -> dict[str, Any]:
 
 
 @router.put("/sim/clock")
+@router.put("/api/v1/sim/clock", operation_id="clock-update_clock_v1")
 def update_clock(update: ClockUpdate, request: Request) -> dict[str, Any]:
     if settings.FASTAPI_ENV == "demo":
         auth_header = request.headers.get("Authorization")

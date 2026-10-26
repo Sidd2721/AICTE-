@@ -64,6 +64,8 @@ if (-not $cloudflaredCmd) {
 }
 
 Write-Host "Starting Cloudflare quick tunnel to http://localhost:8000..." -ForegroundColor Green
+Write-Host "Anyone with this link can use the demo logins; share only with your audience; close the tunnel after." -ForegroundColor Yellow
 Write-Host "Press Ctrl+C to terminate the public tunnel at any time.`n" -ForegroundColor Gray
 
 & cloudflared tunnel --url http://localhost:8000
+

@@ -77,7 +77,7 @@
 ## 4. Test Suite Counts & Timing
 
 - **Command:** `cd backend && uv run pytest -q -rs`
-- **Result:** **149 passed**, 0 skipped, 0 xfailed in **55.57s**
+- **Result:** **163 passed**, 0 skipped, 0 xfailed in **57.4s**
 - **Warnings:** 102 (expected HMAC key length warnings and demo default password notifications in test harness)
 
 ---
@@ -86,12 +86,12 @@
 
 | Dimension | Before (`sprint-start`) | After (`sprint/present-anywhere`) | Delta |
 | :--- | :--- | :--- | :--- |
-| **Tracked Files** | 338 | 353 | +15 files |
-| **Non-test App LOC** | ~19,200 | 21,302 (Py: 6,882, TS: 14,420) | +2,102 LOC |
+| **Tracked Files** | 338 | 354 | +16 files |
+| **Non-test App LOC** | ~19,200 | 21,390 (Py: 6,940, TS: 14,450) | +2,190 LOC |
 | **Dependencies (Py)** | 18 | 18 | 0 (No new deps) |
 | **Dependencies (JS)** | 33 | 33 | 0 (No new deps) |
 | **Frontend Dist Size** | 980 KB | 1025.7 KB | +45.7 KB |
-| **Backend Tests** | 137 | 149 | +12 tests |
+| **Backend Tests** | 137 | 163 | +26 tests |
 | **Instrument List Max Queries**| 2 | 2 | 0 (O(1) queries) |
 
 ---

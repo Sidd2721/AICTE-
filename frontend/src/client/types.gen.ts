@@ -107,6 +107,46 @@ export type ClockUpdate = {
 };
 
 /**
+ * DemoLoginRequest
+ */
+export type DemoLoginRequest = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * DemoPersona
+ */
+export type DemoPersona = {
+    /**
+     * Role
+     */
+    role: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Badge
+     */
+    badge: string;
+    /**
+     * Color
+     */
+    color: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
  * DocumentPublic
  */
 export type DocumentPublic = {
@@ -158,6 +198,16 @@ export type DocumentPublic = {
      * Is Signed Dsc
      */
     is_signed_dsc?: boolean | null;
+};
+
+/**
+ * GateTestRequest
+ */
+export type GateTestRequest = {
+    /**
+     * Attack Type
+     */
+    attack_type: string;
 };
 
 /**
@@ -348,6 +398,28 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * MetaResponse
+ */
+export type MetaResponse = {
+    /**
+     * Env Label
+     */
+    env_label: string;
+    /**
+     * Rule Status
+     */
+    rule_status: string;
+    /**
+     * Commit
+     */
+    commit: string;
+    /**
+     * Built At
+     */
+    built_at: string;
 };
 
 /**
@@ -708,6 +780,55 @@ export type ValidationError = {
     };
 };
 
+export type clockGetClockV1Data = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/sim/clock';
+};
+
+export type clockGetClockV1Responses = {
+    /**
+     * Response Clock-Get Clock V1
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type clockGetClockV1Response = clockGetClockV1Responses[keyof clockGetClockV1Responses];
+
+export type clockUpdateClockV1Data = {
+    body: ClockUpdate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/sim/clock';
+};
+
+export type clockUpdateClockV1Errors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type clockUpdateClockV1Error = clockUpdateClockV1Errors[keyof clockUpdateClockV1Errors];
+
+export type clockUpdateClockV1Responses = {
+    /**
+     * Response Clock-Update Clock V1
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type clockUpdateClockV1Response = clockUpdateClockV1Responses[keyof clockUpdateClockV1Responses];
+
 export type simulationGetClockData = {
     body?: never;
     path?: never;
@@ -881,6 +1002,40 @@ export type bankSimulateBankOutageResponses = {
     200: unknown;
 };
 
+export type bankTestBankGateScenarioData = {
+    body: GateTestRequest;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/sim/bank/test-gate/{instrument_id}';
+};
+
+export type bankTestBankGateScenarioErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type bankTestBankGateScenarioError = bankTestBankGateScenarioErrors[keyof bankTestBankGateScenarioErrors];
+
+export type bankTestBankGateScenarioResponses = {
+    /**
+     * Response Bank-Test Bank Gate Scenario
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type bankTestBankGateScenarioResponse = bankTestBankGateScenarioResponses[keyof bankTestBankGateScenarioResponses];
+
 export type simulationTriggerDailyWorkerData = {
     body?: never;
     path?: never;
@@ -896,6 +1051,22 @@ export type simulationTriggerDailyWorkerResponses = {
      */
     200: unknown;
 };
+
+export type metaGetMetaData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/meta';
+};
+
+export type metaGetMetaResponses = {
+    /**
+     * Successful Response
+     */
+    200: MetaResponse;
+};
+
+export type metaGetMetaResponse = metaGetMetaResponses[keyof metaGetMetaResponses];
 
 export type loginLoginAccessTokenData = {
     body: Body_login_login_access_token;
@@ -1022,6 +1193,49 @@ export type loginRecoverPasswordHtmlContentResponses = {
 };
 
 export type loginRecoverPasswordHtmlContentResponse = loginRecoverPasswordHtmlContentResponses[keyof loginRecoverPasswordHtmlContentResponses];
+
+export type loginGetDemoPersonasData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/login/demo-personas';
+};
+
+export type loginGetDemoPersonasResponses = {
+    /**
+     * Response Login-Get Demo Personas
+     *
+     * Successful Response
+     */
+    200: Array<DemoPersona>;
+};
+
+export type loginGetDemoPersonasResponse = loginGetDemoPersonasResponses[keyof loginGetDemoPersonasResponses];
+
+export type loginDemoLoginData = {
+    body: DemoLoginRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/login/demo';
+};
+
+export type loginDemoLoginErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type loginDemoLoginError = loginDemoLoginErrors[keyof loginDemoLoginErrors];
+
+export type loginDemoLoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: Token;
+};
+
+export type loginDemoLoginResponse = loginDemoLoginResponses[keyof loginDemoLoginResponses];
 
 export type usersReadUsersData = {
     body?: never;
@@ -1493,6 +1707,40 @@ export type depositsCalculateDepositResponses = {
 
 export type depositsCalculateDepositResponse = depositsCalculateDepositResponses[keyof depositsCalculateDepositResponses];
 
+export type depositsGetInstitutionCoverageData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Institution Id
+         */
+        institution_id?: string | null;
+    };
+    url: '/api/v1/deposits/coverage';
+};
+
+export type depositsGetInstitutionCoverageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type depositsGetInstitutionCoverageError = depositsGetInstitutionCoverageErrors[keyof depositsGetInstitutionCoverageErrors];
+
+export type depositsGetInstitutionCoverageResponses = {
+    /**
+     * Response Deposits-Get Institution Coverage
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type depositsGetInstitutionCoverageResponse = depositsGetInstitutionCoverageResponses[keyof depositsGetInstitutionCoverageResponses];
+
 export type documentsUploadDocumentData = {
     body: Body_documents_upload_document;
     path?: never;
@@ -1667,6 +1915,36 @@ export type instrumentsGetInstrumentCaseResponses = {
     200: unknown;
 };
 
+export type instrumentsAcceptInstrumentData = {
+    body?: never;
+    path: {
+        /**
+         * Instrument Id
+         */
+        instrument_id: string;
+    };
+    query?: never;
+    url: '/api/v1/instruments/{instrument_id}/accept';
+};
+
+export type instrumentsAcceptInstrumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type instrumentsAcceptInstrumentError = instrumentsAcceptInstrumentErrors[keyof instrumentsAcceptInstrumentErrors];
+
+export type instrumentsAcceptInstrumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: InstrumentPublic;
+};
+
+export type instrumentsAcceptInstrumentResponse = instrumentsAcceptInstrumentResponses[keyof instrumentsAcceptInstrumentResponses];
+
 export type releaseGetInstrumentReleaseData = {
     body?: never;
     path: {
@@ -1759,6 +2037,36 @@ export type releaseVerifyReleaseResponses = {
 
 export type releaseVerifyReleaseResponse = releaseVerifyReleaseResponses[keyof releaseVerifyReleaseResponses];
 
+export type releaseVerifyReleasePostData = {
+    body?: never;
+    path: {
+        /**
+         * Release Id
+         */
+        release_id: string;
+    };
+    query?: never;
+    url: '/api/v1/release/{release_id}/verify';
+};
+
+export type releaseVerifyReleasePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseVerifyReleasePostError = releaseVerifyReleasePostErrors[keyof releaseVerifyReleasePostErrors];
+
+export type releaseVerifyReleasePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseRequestPublic;
+};
+
+export type releaseVerifyReleasePostResponse = releaseVerifyReleasePostResponses[keyof releaseVerifyReleasePostResponses];
+
 export type releaseApproveReleaseData = {
     body?: never;
     path: {
@@ -1788,6 +2096,36 @@ export type releaseApproveReleaseResponses = {
 };
 
 export type releaseApproveReleaseResponse = releaseApproveReleaseResponses[keyof releaseApproveReleaseResponses];
+
+export type releaseApproveReleasePostData = {
+    body?: never;
+    path: {
+        /**
+         * Release Id
+         */
+        release_id: string;
+    };
+    query?: never;
+    url: '/api/v1/release/{release_id}/approve';
+};
+
+export type releaseApproveReleasePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type releaseApproveReleasePostError = releaseApproveReleasePostErrors[keyof releaseApproveReleasePostErrors];
+
+export type releaseApproveReleasePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReleaseRequestPublic;
+};
+
+export type releaseApproveReleasePostResponse = releaseApproveReleasePostResponses[keyof releaseApproveReleasePostResponses];
 
 export type releaseRejectReleaseData = {
     body?: never;
@@ -2188,6 +2526,26 @@ export type fraudLabGetFraudLabMetricsResponses = {
 };
 
 export type fraudLabGetFraudLabMetricsResponse = fraudLabGetFraudLabMetricsResponses[keyof fraudLabGetFraudLabMetricsResponses];
+
+export type evidenceGetEvidenceSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/evidence/summary';
+};
+
+export type evidenceGetEvidenceSummaryResponses = {
+    /**
+     * Response Evidence-Get Evidence Summary
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type evidenceGetEvidenceSummaryResponse = evidenceGetEvidenceSummaryResponses[keyof evidenceGetEvidenceSummaryResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

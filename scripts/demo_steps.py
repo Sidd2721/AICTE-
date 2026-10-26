@@ -142,11 +142,16 @@ def run_demo_steps(base_url: str | None = None) -> bool:
     # STEP 5
     title_5 = "Bureau advances the clock 30/60/90 days -> worker -> reminders"
     try:
-        set_clock_offset(60 * 86400) # 60 days
-        with Session(engine) as session:
-            worker_res = run_daily_worker(session, today=date.today() + timedelta(days=60))
-            assert worker_res["scanned_instruments"] >= 0
-        set_clock_offset(0) # reset
+        if base_url:
+            client.put("/sim/clock", headers=tokens["bureau"], json={"offset_seconds": 60 * 86400})
+            client.post("/sim/worker/run-daily", headers=tokens["bureau"])
+            client.put("/sim/clock", headers=tokens["bureau"], json={"offset_seconds": 0})
+        else:
+            set_clock_offset(60 * 86400) # 60 days
+            with Session(engine) as session:
+                worker_res = run_daily_worker(session, today=date.today() + timedelta(days=60))
+                assert worker_res["scanned_instruments"] >= 0
+            set_clock_offset(0) # reset
         print(f"STEP 5: {title_5} - PASSED")
     except Exception as e:
         print(f"STEP 5: {title_5} - FAILED ({e})")
@@ -180,38 +185,47 @@ def run_demo_steps(base_url: str | None = None) -> bool:
     # STEP 7
     title_7 = "Release: institution requests -> RO verifies -> same RO approve blocked -> bureau approves -> receipt -> offline verify"
     try:
-        from datetime import UTC, datetime
-        from app.models import Confirmation
-        with Session(engine) as session:
-            inst_obj = session.get(Instrument, inst_id)
-            if inst_obj:
-                inst_obj.lifecycle = "matured"
-                inst_obj.maturity_date = date.today() - timedelta(days=1)
-                inst_obj.lien_marked = True
-                session.add(inst_obj)
+        target_inst_id = inst_id
+        if base_url:
+            inst_list_res = client.get(f"{settings.API_V1_STR}/instruments", headers=tokens["institution"])
+            if inst_list_res.status_code == 200:
+                for item in inst_list_res.json().get("data", []):
+                    if item.get("lifecycle") == "matured":
+                        target_inst_id = item["id"]
+                        break
+        else:
+            from datetime import UTC, datetime
+            from app.models import Confirmation
+            with Session(engine) as session:
+                inst_obj = session.get(Instrument, inst_id)
+                if inst_obj:
+                    inst_obj.lifecycle = "matured"
+                    inst_obj.maturity_date = date.today() - timedelta(days=1)
+                    inst_obj.lien_marked = True
+                    session.add(inst_obj)
 
-                conf = Confirmation(
-                    instrument_id=inst_id,
-                    status="confirmed",
-                    method="signed_letter",
-                    token_hash="dummy_hash",
-                    token_expires_at=datetime.now(UTC) + timedelta(days=14),
-                    confirmed_at=datetime.now(UTC),
-                    expires_at=datetime.now(UTC) + timedelta(days=365),
-                    fields={
-                        "ref_no": inst_obj.ref_no,
-                        "bank_code": inst_obj.bank_code,
-                        "amount_paise": inst_obj.amount_paise,
-                        "maturity_date": str(inst_obj.maturity_date),
-                        "lien_marked": True,
-                    },
-                )
-                session.add(conf)
-                session.commit()
+                    conf = Confirmation(
+                        instrument_id=inst_id,
+                        status="confirmed",
+                        method="signed_letter",
+                        token_hash="dummy_hash",
+                        token_expires_at=datetime.now(UTC) + timedelta(days=14),
+                        confirmed_at=datetime.now(UTC),
+                        expires_at=datetime.now(UTC) + timedelta(days=365),
+                        fields={
+                            "ref_no": inst_obj.ref_no,
+                            "bank_code": inst_obj.bank_code,
+                            "amount_paise": inst_obj.amount_paise,
+                            "maturity_date": str(inst_obj.maturity_date),
+                            "lien_marked": True,
+                        },
+                    )
+                    session.add(conf)
+                    session.commit()
 
         # Step 7a: Institution requests release
         rel_req_res = client.post(
-            f"{settings.API_V1_STR}/instruments/{inst_id}/release",
+            f"{settings.API_V1_STR}/instruments/{target_inst_id}/release",
             headers=tokens["institution"],
             json={"path": "term_completion"},
         )
@@ -264,5 +278,6 @@ def run_demo_steps(base_url: str | None = None) -> bool:
 
 
 if __name__ == "__main__":
-    success = run_demo_steps()
+    target_url = sys.argv[1] if len(sys.argv) > 1 else None
+    success = run_demo_steps(base_url=target_url)
     sys.exit(0 if success else 1)

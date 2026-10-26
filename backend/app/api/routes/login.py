@@ -182,15 +182,19 @@ class DemoPersona(SQLModel):
     password: str
 
 
+class DemoLoginRequest(SQLModel):
+    email: str
+
+
 @router.get("/login/demo-personas", response_model=list[DemoPersona])
 def get_demo_personas() -> Any:
     """
     Returns pre-configured demo personas for evaluation.
-    Only available in development / demo mode. Blocked in production.
+    Only available in development / demo mode. Blocked outside development/demo.
     """
-    if settings.FASTAPI_ENV == "production":
+    if settings.FASTAPI_ENV not in ("development", "demo"):
         raise HTTPException(
-            status_code=404, detail="Demo personas disabled in production"
+            status_code=404, detail="Demo personas disabled outside development/demo"
         )
 
     return [
@@ -235,3 +239,28 @@ def get_demo_personas() -> Any:
             password=settings.FIRST_SUPERUSER_PASSWORD,
         ),
     ]
+
+
+@router.post("/login/demo", response_model=Token)
+def demo_login(
+    data: DemoLoginRequest,
+    session: SessionDep,
+) -> Token:
+    """
+    1-Click Demo Login for turnkey evaluation.
+    Only available in development / demo mode. Blocked outside development/demo.
+    """
+    if settings.FASTAPI_ENV not in ("development", "demo"):
+        raise HTTPException(
+            status_code=404, detail="Demo login disabled outside development/demo"
+        )
+    user = crud.get_user_by_email(session=session, email=data.email)
+    if not user or not user.is_active:
+        raise HTTPException(status_code=400, detail="Invalid demo persona")
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        )
+    )
+

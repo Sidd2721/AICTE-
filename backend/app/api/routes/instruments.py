@@ -422,3 +422,37 @@ def get_instrument_case(
             for e in audit_events
         ],
     }
+
+
+@router.post("/{instrument_id}/accept", response_model=InstrumentPublic)
+def accept_instrument(
+    instrument_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    if current_user.role != "regional" and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Regional Officers can accept instrument records",
+        )
+    instrument = session.get(Instrument, instrument_id)
+    if not instrument:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Instrument not found",
+        )
+    instrument.lifecycle = "active"
+    session.add(instrument)
+    session.commit()
+    session.refresh(instrument)
+    audit(
+        session=session,
+        actor_id=current_user.id,
+        action="instrument_accepted",
+        entity="instrument",
+        entity_id=str(instrument.id),
+        payload={"ref_no": instrument.ref_no, "lifecycle": "active"},
+    )
+    role = current_user.role or "regional"
+    return _hydrate_instrument_meta(instrument, session, role)
+

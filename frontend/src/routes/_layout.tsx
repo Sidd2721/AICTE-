@@ -118,7 +118,7 @@ function RegulatoryHeader() {
   const { data: clockData } = useQuery({
     queryKey: ["sim-clock"],
     queryFn: async () => {
-      const res = await client.get<any>({ url: "/api/v1/sim/clock" })
+      const res = await client.get<any>({ url: "/sim/clock" })
       return res.data
     },
     refetchInterval: 15000,
@@ -128,7 +128,7 @@ function RegulatoryHeader() {
     mutationFn: async (offsetDays: number) => {
       const offset_seconds = offsetDays * 86400
       const res = await client.put<any>({
-        url: "/api/v1/sim/clock",
+        url: "/sim/clock",
         body: { offset_seconds },
       })
       return res.data
@@ -219,6 +219,19 @@ function RegulatoryHeader() {
 
   const switchPersona = async (email: string) => {
     try {
+      const demoRes = await fetch("/api/v1/login/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      if (demoRes.ok) {
+        const data = await demoRes.json()
+        if (data.access_token) {
+          localStorage.setItem("access_token", data.access_token)
+          window.location.reload()
+          return
+        }
+      }
       const res = await fetch("/api/v1/login/demo-personas")
       if (res.ok) {
         const personas: Array<{ email: string; password?: string }> =

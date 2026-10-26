@@ -206,6 +206,19 @@ function GuidePage() {
 
   const handleSwitchPersona = async (email: string) => {
     try {
+      const demoRes = await fetch("/api/v1/login/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      if (demoRes.ok) {
+        const data = await demoRes.json()
+        if (data.access_token) {
+          localStorage.setItem("access_token", data.access_token)
+          window.location.href = "/"
+          return
+        }
+      }
       const res = await fetch("/api/v1/login/demo-personas")
       if (res.ok) {
         const personas: Array<{ email: string; password?: string }> =

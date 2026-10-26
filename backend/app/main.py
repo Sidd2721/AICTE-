@@ -40,14 +40,28 @@ if settings.SENTRY_DSN and settings.FASTAPI_ENV != "development":
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=None
-    if settings.FASTAPI_ENV == "demo"
-    else f"{settings.API_V1_STR}/openapi.json",
-    docs_url=None if settings.FASTAPI_ENV == "demo" else "/docs",
-    redoc_url=None if settings.FASTAPI_ENV == "demo" else "/redoc",
+    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    if settings.FASTAPI_ENV == "development"
+    else None,
+    docs_url="/docs" if settings.FASTAPI_ENV == "development" else None,
+    redoc_url="/redoc" if settings.FASTAPI_ENV == "development" else None,
     generate_unique_id_function=custom_generate_unique_id,
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def guard_docs_outside_dev(
+    request: Request, call_next: Callable[[Request], Any]
+) -> Response:
+    path = request.url.path
+    if path in ("/docs", "/redoc", f"{settings.API_V1_STR}/openapi.json"):
+        if settings.FASTAPI_ENV != "development":
+            return Response(
+                status_code=404, content=b"Not Found", media_type="text/plain"
+            )
+    response: Response = await call_next(request)
+    return response
 
 
 @app.middleware("http")
@@ -59,6 +73,9 @@ async def add_security_headers(
         "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
         "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+    )
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains"
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"

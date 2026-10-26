@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { auditListAuditEventsData, auditListAuditEventsErrors, auditListAuditEventsResponses, auditListEntityAuditEventsData, auditListEntityAuditEventsErrors, auditListEntityAuditEventsResponses, auditVerifyAuditChainData, auditVerifyAuditChainResponses, bankGetBankSimStatusData, bankGetBankSimStatusResponses, bankGetVerificationResultsData, bankGetVerificationResultsErrors, bankGetVerificationResultsResponses, bankRequestConfirmationData, bankRequestConfirmationErrors, bankRequestConfirmationResponses, bankSimulateBankConfirmationData, bankSimulateBankConfirmationErrors, bankSimulateBankConfirmationResponses, bankSimulateBankOutageData, bankSimulateBankOutageResponses, dashboardGetDashboardCountersData, dashboardGetDashboardCountersResponses, dashboardGetNeedsActionQueueData, dashboardGetNeedsActionQueueResponses, dashboardSearchInstrumentsData, dashboardSearchInstrumentsErrors, dashboardSearchInstrumentsResponses, dashboardUpdateInstrumentMetadataData, dashboardUpdateInstrumentMetadataErrors, dashboardUpdateInstrumentMetadataResponses, depositsCalculateDepositData, depositsCalculateDepositErrors, depositsCalculateDepositResponses, depositsGetProgrammesData, depositsGetProgrammesErrors, depositsGetProgrammesResponses, documentsDownloadDocumentData, documentsDownloadDocumentErrors, documentsDownloadDocumentResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, fraudLabGetFraudLabMetricsData, fraudLabGetFraudLabMetricsResponses, instrumentsGetInstrumentCaseData, instrumentsGetInstrumentCaseErrors, instrumentsGetInstrumentCaseResponses, instrumentsGetInstrumentData, instrumentsGetInstrumentErrors, instrumentsGetInstrumentResponses, instrumentsListInstrumentsData, instrumentsListInstrumentsErrors, instrumentsListInstrumentsResponses, instrumentsSubmitInstrumentData, instrumentsSubmitInstrumentErrors, instrumentsSubmitInstrumentResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, releaseApproveReleaseData, releaseApproveReleaseErrors, releaseApproveReleaseResponses, releaseGetInstrumentReleaseData, releaseGetInstrumentReleaseErrors, releaseGetInstrumentReleaseResponses, releaseRejectReleaseData, releaseRejectReleaseErrors, releaseRejectReleaseResponses, releaseRequestReleaseData, releaseRequestReleaseErrors, releaseRequestReleaseResponses, releaseVerifyReceiptEndpointData, releaseVerifyReceiptEndpointErrors, releaseVerifyReceiptEndpointResponses, releaseVerifyReleaseData, releaseVerifyReleaseErrors, releaseVerifyReleaseResponses, reportsPreviewCasesNeedingInterventionData, reportsPreviewCasesNeedingInterventionErrors, reportsPreviewCasesNeedingInterventionResponses, reportsPreviewMissingDocumentsData, reportsPreviewMissingDocumentsErrors, reportsPreviewMissingDocumentsResponses, reportsPreviewPendingVerificationsData, reportsPreviewPendingVerificationsErrors, reportsPreviewPendingVerificationsResponses, reportsPreviewUpcomingMaturitiesData, reportsPreviewUpcomingMaturitiesErrors, reportsPreviewUpcomingMaturitiesResponses, reportsReportCasesNeedingInterventionData, reportsReportCasesNeedingInterventionResponses, reportsReportMissingDocumentsData, reportsReportMissingDocumentsResponses, reportsReportPendingVerificationsData, reportsReportPendingVerificationsResponses, reportsReportUpcomingMaturitiesData, reportsReportUpcomingMaturitiesResponses, simulationGetClockData, simulationGetClockResponses, simulationTriggerDailyWorkerData, simulationTriggerDailyWorkerResponses, simulationUpdateClockData, simulationUpdateClockErrors, simulationUpdateClockResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { auditListAuditEventsData, auditListAuditEventsErrors, auditListAuditEventsResponses, auditListEntityAuditEventsData, auditListEntityAuditEventsErrors, auditListEntityAuditEventsResponses, auditVerifyAuditChainData, auditVerifyAuditChainResponses, bankGetBankSimStatusData, bankGetBankSimStatusResponses, bankGetVerificationResultsData, bankGetVerificationResultsErrors, bankGetVerificationResultsResponses, bankRequestConfirmationData, bankRequestConfirmationErrors, bankRequestConfirmationResponses, bankSimulateBankConfirmationData, bankSimulateBankConfirmationErrors, bankSimulateBankConfirmationResponses, bankSimulateBankOutageData, bankSimulateBankOutageResponses, bankTestBankGateScenarioData, bankTestBankGateScenarioErrors, bankTestBankGateScenarioResponses, clockGetClockV1Data, clockGetClockV1Responses, clockUpdateClockV1Data, clockUpdateClockV1Errors, clockUpdateClockV1Responses, dashboardGetDashboardCountersData, dashboardGetDashboardCountersResponses, dashboardGetNeedsActionQueueData, dashboardGetNeedsActionQueueResponses, dashboardSearchInstrumentsData, dashboardSearchInstrumentsErrors, dashboardSearchInstrumentsResponses, dashboardUpdateInstrumentMetadataData, dashboardUpdateInstrumentMetadataErrors, dashboardUpdateInstrumentMetadataResponses, depositsCalculateDepositData, depositsCalculateDepositErrors, depositsCalculateDepositResponses, depositsGetInstitutionCoverageData, depositsGetInstitutionCoverageErrors, depositsGetInstitutionCoverageResponses, depositsGetProgrammesData, depositsGetProgrammesErrors, depositsGetProgrammesResponses, documentsDownloadDocumentData, documentsDownloadDocumentErrors, documentsDownloadDocumentResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, evidenceGetEvidenceSummaryData, evidenceGetEvidenceSummaryResponses, fraudLabGetFraudLabMetricsData, fraudLabGetFraudLabMetricsResponses, instrumentsAcceptInstrumentData, instrumentsAcceptInstrumentErrors, instrumentsAcceptInstrumentResponses, instrumentsGetInstrumentCaseData, instrumentsGetInstrumentCaseErrors, instrumentsGetInstrumentCaseResponses, instrumentsGetInstrumentData, instrumentsGetInstrumentErrors, instrumentsGetInstrumentResponses, instrumentsListInstrumentsData, instrumentsListInstrumentsErrors, instrumentsListInstrumentsResponses, instrumentsSubmitInstrumentData, instrumentsSubmitInstrumentErrors, instrumentsSubmitInstrumentResponses, loginDemoLoginData, loginDemoLoginErrors, loginDemoLoginResponses, loginGetDemoPersonasData, loginGetDemoPersonasResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, metaGetMetaData, metaGetMetaResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, releaseApproveReleaseData, releaseApproveReleaseErrors, releaseApproveReleasePostData, releaseApproveReleasePostErrors, releaseApproveReleasePostResponses, releaseApproveReleaseResponses, releaseGetInstrumentReleaseData, releaseGetInstrumentReleaseErrors, releaseGetInstrumentReleaseResponses, releaseRejectReleaseData, releaseRejectReleaseErrors, releaseRejectReleaseResponses, releaseRequestReleaseData, releaseRequestReleaseErrors, releaseRequestReleaseResponses, releaseVerifyReceiptEndpointData, releaseVerifyReceiptEndpointErrors, releaseVerifyReceiptEndpointResponses, releaseVerifyReleaseData, releaseVerifyReleaseErrors, releaseVerifyReleasePostData, releaseVerifyReleasePostErrors, releaseVerifyReleasePostResponses, releaseVerifyReleaseResponses, reportsPreviewCasesNeedingInterventionData, reportsPreviewCasesNeedingInterventionErrors, reportsPreviewCasesNeedingInterventionResponses, reportsPreviewMissingDocumentsData, reportsPreviewMissingDocumentsErrors, reportsPreviewMissingDocumentsResponses, reportsPreviewPendingVerificationsData, reportsPreviewPendingVerificationsErrors, reportsPreviewPendingVerificationsResponses, reportsPreviewUpcomingMaturitiesData, reportsPreviewUpcomingMaturitiesErrors, reportsPreviewUpcomingMaturitiesResponses, reportsReportCasesNeedingInterventionData, reportsReportCasesNeedingInterventionResponses, reportsReportMissingDocumentsData, reportsReportMissingDocumentsResponses, reportsReportPendingVerificationsData, reportsReportPendingVerificationsResponses, reportsReportUpcomingMaturitiesData, reportsReportUpcomingMaturitiesResponses, simulationGetClockData, simulationGetClockResponses, simulationTriggerDailyWorkerData, simulationTriggerDailyWorkerResponses, simulationUpdateClockData, simulationUpdateClockErrors, simulationUpdateClockResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,6 +19,32 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 export class SimulationService {
+    /**
+     * Get Clock
+     */
+    public static getClockV1<ThrowOnError extends boolean = true>(options?: Options<clockGetClockV1Data, ThrowOnError>) {
+        return (options?.client ?? client).get<clockGetClockV1Responses, unknown, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/sim/clock',
+            ...options
+        });
+    }
+    
+    /**
+     * Update Clock
+     */
+    public static updateClockV1<ThrowOnError extends boolean = true>(options: Options<clockUpdateClockV1Data, ThrowOnError>) {
+        return (options.client ?? client).put<clockUpdateClockV1Responses, clockUpdateClockV1Errors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/sim/clock',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
     /**
      * Get Clock
      */
@@ -120,6 +146,39 @@ export class BankService {
             ...options
         });
     }
+    
+    /**
+     * Test Bank Gate Scenario
+     *
+     * Interactive Break-Me Cryptographic Security Test (CHARTER W5, Hard Rule I3).
+     */
+    public static testBankGateScenario<ThrowOnError extends boolean = true>(options: Options<bankTestBankGateScenarioData, ThrowOnError>) {
+        return (options.client ?? client).post<bankTestBankGateScenarioResponses, bankTestBankGateScenarioErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/sim/bank/test-gate/{instrument_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class MetaService {
+    /**
+     * Get Meta
+     *
+     * Returns runtime environment metadata without exposing secrets (CHARTER G6).
+     */
+    public static getMeta<ThrowOnError extends boolean = true>(options?: Options<metaGetMetaData, ThrowOnError>) {
+        return (options?.client ?? client).get<metaGetMetaResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/meta',
+            ...options
+        });
+    }
 }
 
 export class LoginService {
@@ -196,6 +255,38 @@ export class LoginService {
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/password-recovery-html-content/{email}',
             ...options
+        });
+    }
+    
+    /**
+     * Get Demo Personas
+     *
+     * Returns pre-configured demo personas for evaluation.
+     * Only available in development / demo mode. Blocked outside development/demo.
+     */
+    public static getDemoPersonas<ThrowOnError extends boolean = true>(options?: Options<loginGetDemoPersonasData, ThrowOnError>) {
+        return (options?.client ?? client).get<loginGetDemoPersonasResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/login/demo-personas',
+            ...options
+        });
+    }
+    
+    /**
+     * Demo Login
+     *
+     * 1-Click Demo Login for turnkey evaluation.
+     * Only available in development / demo mode. Blocked outside development/demo.
+     */
+    public static demoLogin<ThrowOnError extends boolean = true>(options: Options<loginDemoLoginData, ThrowOnError>) {
+        return (options.client ?? client).post<loginDemoLoginResponses, loginDemoLoginErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/login/demo',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
         });
     }
 }
@@ -440,6 +531,20 @@ export class DepositsService {
             ...options
         });
     }
+    
+    /**
+     * Get Institution Coverage
+     *
+     * Calculate institution security deposit coverage: required vs confirmed vs claimed vs shortfall.
+     */
+    public static getInstitutionCoverage<ThrowOnError extends boolean = true>(options?: Options<depositsGetInstitutionCoverageData, ThrowOnError>) {
+        return (options?.client ?? client).get<depositsGetInstitutionCoverageResponses, depositsGetInstitutionCoverageErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/deposits/coverage',
+            ...options
+        });
+    }
 }
 
 export class DocumentsService {
@@ -528,6 +633,18 @@ export class InstrumentsService {
             ...options
         });
     }
+    
+    /**
+     * Accept Instrument
+     */
+    public static acceptInstrument<ThrowOnError extends boolean = true>(options: Options<instrumentsAcceptInstrumentData, ThrowOnError>) {
+        return (options.client ?? client).post<instrumentsAcceptInstrumentResponses, instrumentsAcceptInstrumentErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/instruments/{instrument_id}/accept',
+            ...options
+        });
+    }
 }
 
 export class ReleaseService {
@@ -572,10 +689,34 @@ export class ReleaseService {
     }
     
     /**
+     * Verify Release
+     */
+    public static verifyReleasePost<ThrowOnError extends boolean = true>(options: Options<releaseVerifyReleasePostData, ThrowOnError>) {
+        return (options.client ?? client).post<releaseVerifyReleasePostResponses, releaseVerifyReleasePostErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/release/{release_id}/verify',
+            ...options
+        });
+    }
+    
+    /**
      * Approve Release
      */
     public static approveRelease<ThrowOnError extends boolean = true>(options: Options<releaseApproveReleaseData, ThrowOnError>) {
         return (options.client ?? client).patch<releaseApproveReleaseResponses, releaseApproveReleaseErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/release/{release_id}/approve',
+            ...options
+        });
+    }
+    
+    /**
+     * Approve Release
+     */
+    public static approveReleasePost<ThrowOnError extends boolean = true>(options: Options<releaseApproveReleasePostData, ThrowOnError>) {
+        return (options.client ?? client).post<releaseApproveReleasePostResponses, releaseApproveReleasePostErrors, ThrowOnError>({
             responseType: 'json',
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/release/{release_id}/approve',
@@ -798,6 +939,21 @@ export class FraudLabService {
             responseType: 'json',
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/fraud-lab/metrics',
+            ...options
+        });
+    }
+}
+
+export class EvidenceService {
+    /**
+     * Get Evidence Summary
+     *
+     * Summary of system status, DEMO disclaimers, capability coverage, and synthetic benchmarks.
+     */
+    public static getEvidenceSummary<ThrowOnError extends boolean = true>(options?: Options<evidenceGetEvidenceSummaryData, ThrowOnError>) {
+        return (options?.client ?? client).get<evidenceGetEvidenceSummaryResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/evidence/summary',
             ...options
         });
     }

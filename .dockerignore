@@ -1,6 +1,12 @@
 .git
-**/__pycache__
+**/.git
 **/.venv
+.venv
+**/__pycache__
+*.pyc
+.env
+.env.*
+!.env.demo.example
 backend/htmlcov
 frontend/blob-report
 frontend/dist
