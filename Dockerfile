@@ -30,15 +30,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 # Create non-root system user
 RUN groupadd -g 1001 appgroup && useradd -u 1001 -g appgroup -s /bin/bash -m appuser
 
-# Install python dependencies with frozen lockfile
+# Copy backend application source, configuration, and scripts
 COPY pyproject.toml uv.lock* /app/
 COPY backend/pyproject.toml backend/alembic.ini /app/backend/
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --package app || uv sync --package app
-
-# Copy backend application source and scripts
 COPY backend/app /app/backend/app
 COPY backend/scripts /app/backend/scripts
+
+# Install python dependencies and project package
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev || uv sync --no-dev
 
 # Copy compiled frontend from frontend stage
 COPY --from=frontend-builder /app/backend/app/frontend /app/backend/app/frontend
