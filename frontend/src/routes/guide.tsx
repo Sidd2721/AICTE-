@@ -2,12 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   ArrowRight,
   BookOpen,
+  Check,
   CheckCircle2,
   Circle,
+  Copy,
   ExternalLink,
   HelpCircle,
   Info,
   Sparkles,
+  Terminal,
   UserCheck,
 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -173,9 +176,16 @@ const GUIDE_STEPS: GuideStep[] = [
 
 function GuidePage() {
   const { loginMutation } = useAuth()
+  const [copiedCmd, setCopiedCmd] = useState<string | null>(null)
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>(
     {},
   )
+
+  const handleCopyCmd = (cmd: string) => {
+    navigator.clipboard.writeText(cmd)
+    setCopiedCmd(cmd)
+    setTimeout(() => setCopiedCmd(null), 2000)
+  }
 
   useEffect(() => {
     try {
@@ -467,6 +477,94 @@ function GuidePage() {
                   <p className="text-[10px] text-muted-foreground leading-relaxed pt-1 border-t border-border/40">
                     {term.detail}
                   </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Section: CLI Demo Data Controls (Requirement 2.3) */}
+        <div id="cli-controls" className="pt-8 border-t space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
+              <Terminal className="size-5 text-primary" />
+              Demo Data & Scenario Controller (CLI)
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Run deterministic scenarios and database reset commands from your
+              terminal. Zero destructive UI actions are exposed in the web
+              interface.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {[
+              {
+                title: "Judge Scenario (7-Step Demo)",
+                desc: "5 fixed-UUID instruments mapped directly to presentation steps.",
+                cmd: "uv run python scripts/demo_data.py load --scenario judge",
+              },
+              {
+                title: "Rich Seed Scenario",
+                desc: "11 institutions across all regions with 18+ diverse instruments.",
+                cmd: "uv run python scripts/demo_data.py load --scenario rich",
+              },
+              {
+                title: "Stress Dataset (2,000 Instruments)",
+                desc: "Deterministic high-volume dataset for p95 latency verification.",
+                cmd: "uv run python scripts/demo_data.py load --scenario stress",
+              },
+              {
+                title: "Empty Database (Users + Rules Only)",
+                desc: "0 instruments; verifies clean submission workflows.",
+                cmd: "uv run python scripts/demo_data.py load --scenario empty",
+              },
+              {
+                title: "Live Database Table Status",
+                desc: "Prints table row counts and detected scenario in terminal.",
+                cmd: "uv run python scripts/demo_data.py status",
+              },
+              {
+                title: "Full Database Reset & Re-migration",
+                desc: "Pristine database recreate, Alembic head upgrade, and Judge reload.",
+                cmd: "uv run python scripts/demo_data.py reset",
+              },
+            ].map((item, idx) => (
+              <Card
+                key={idx}
+                className="p-3 bg-card/60 border flex flex-col justify-between"
+              >
+                <div>
+                  <div className="font-semibold text-xs text-foreground flex items-center justify-between">
+                    <span>{item.title}</span>
+                    <Badge variant="outline" className="text-[10px] font-mono">
+                      CLI
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {item.desc}
+                  </p>
+                </div>
+                <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between gap-2">
+                  <code className="text-[10px] font-mono bg-muted/60 px-1.5 py-0.5 rounded truncate flex-1 text-muted-foreground">
+                    {item.cmd}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-6 text-[10px] gap-1 px-2 shrink-0"
+                    onClick={() => handleCopyCmd(item.cmd)}
+                  >
+                    {copiedCmd === item.cmd ? (
+                      <>
+                        <Check className="size-3 text-emerald-600" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="size-3" /> Copy
+                      </>
+                    )}
+                  </Button>
                 </div>
               </Card>
             ))}

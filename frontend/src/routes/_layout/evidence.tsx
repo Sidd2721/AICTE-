@@ -154,6 +154,47 @@ function EvidenceView() {
             </Card>
           </div>
 
+          {/* Live Database Table Counts (Requirement 2.3) */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Database className="h-4 w-4 text-primary" /> Live Database
+                    Table Counts
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Real-time counts queried directly from PostgreSQL system
+                    tables.
+                  </CardDescription>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className="text-xs font-mono uppercase"
+                >
+                  Scenario: {status.scenario || "rich"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {Object.entries(status.table_counts || {}).map(([tbl, cnt]) => (
+                  <div
+                    key={tbl}
+                    className="p-2.5 rounded-lg border bg-muted/30"
+                  >
+                    <div className="text-[11px] text-muted-foreground uppercase tracking-wide font-mono truncate">
+                      {tbl}
+                    </div>
+                    <div className="text-base font-bold font-mono mt-0.5">
+                      {Number(cnt).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           <Alert className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <AlertTitle className="text-amber-900 dark:text-amber-200">

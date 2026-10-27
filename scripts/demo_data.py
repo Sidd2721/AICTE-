@@ -136,7 +136,7 @@ class InstrumentCSVRow(BaseModel):
     institution_permanent_id: str = Field(min_length=3, max_length=100)
     ref_no: str = Field(min_length=3, max_length=100)
     bank_code: str = Field(min_length=2, max_length=50)
-    ifsc: str = Field(min_length=11, max_length=11)
+    ifsc: str = Field(min_length=1, max_length=30)
     amount_paise: int = Field(gt=0)
     issue_date: date
     maturity_date: date
@@ -157,11 +157,11 @@ class InstrumentCSVRow(BaseModel):
     def validate_amount(cls, v: Any) -> int:
         try:
             val = int(v)
-            if val <= 0:
-                raise ValueError("Amount in paise must be strictly positive (> 0)")
-            return val
         except (ValueError, TypeError) as e:
-            raise ValueError(f"Invalid amount_paise '{v}': must be positive integer") from e
+            raise ValueError(f"Invalid amount_paise '{v}': must be integer") from e
+        if val <= 0:
+            raise ValueError("Amount in paise must be strictly greater than 0")
+        return val
 
     @field_validator("lien_marked", mode="before")
     @classmethod
