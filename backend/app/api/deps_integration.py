@@ -62,7 +62,10 @@ def require_scope(scope: str) -> Callable[..., MachineApiKey]:
                 detail={
                     "code": "FORBIDDEN",
                     "message": f"API key lacks required scope: {scope}",
-                    "details": {"required_scope": scope, "granted_scopes": client.scopes},
+                    "details": {
+                        "required_scope": scope,
+                        "granted_scopes": client.scopes,
+                    },
                     "request_id": f"req_{uuid.uuid4().hex[:12]}",
                 },
             )

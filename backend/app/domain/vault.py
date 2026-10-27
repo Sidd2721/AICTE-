@@ -64,18 +64,49 @@ def detect_dsc(data: bytes, mime_type: str) -> bool:
 
 
 def store_in_vault(storage_key: str, data: bytes) -> Path:
-    """Encrypt and store data in the vault directory."""
+    """Encrypt and store data in the vault directory and Supabase Storage."""
     VAULT_DIR.mkdir(parents=True, exist_ok=True)
     target_path = VAULT_DIR / f"{storage_key}.enc"
     encrypted = encrypt_bytes(data)
     target_path.write_bytes(encrypted)
+
+    # Cloud Persistence: upload to Supabase Storage if configured
+    try:
+        from app.integration.supabase_storage import (
+            is_supabase_configured,
+            upload_to_supabase_vault,
+        )
+
+        if is_supabase_configured():
+            upload_to_supabase_vault(f"{storage_key}.enc", encrypted)
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("Supabase vault upload skipped: %s", exc)
+
     return target_path
 
 
 def read_from_vault(storage_key: str) -> bytes:
-    """Read and decrypt data from the vault directory."""
+    """Read and decrypt data from local vault directory or Supabase Storage."""
     target_path = VAULT_DIR / f"{storage_key}.enc"
-    if not target_path.exists():
-        raise FileNotFoundError(f"Vault key {storage_key} not found")
-    encrypted = target_path.read_bytes()
-    return decrypt_bytes(encrypted)
+    if target_path.exists():
+        encrypted = target_path.read_bytes()
+        return decrypt_bytes(encrypted)
+
+    # Fallback: attempt download from Supabase Storage
+    try:
+        from app.integration.supabase_storage import (
+            download_from_supabase_vault,
+            is_supabase_configured,
+        )
+
+        if is_supabase_configured():
+            encrypted = download_from_supabase_vault(f"{storage_key}.enc")
+            # Cache locally
+            target_path.write_bytes(encrypted)
+            return decrypt_bytes(encrypted)
+    except Exception:
+        pass
+
+    raise FileNotFoundError(f"Vault key {storage_key} not found")

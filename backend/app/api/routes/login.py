@@ -190,51 +190,51 @@ class DemoLoginRequest(SQLModel):
 def get_demo_personas() -> Any:
     """
     Returns pre-configured demo personas for evaluation.
-    Only available in development / demo mode. Blocked outside development/demo.
+    Only available in development and demo environments.
     """
     if settings.FASTAPI_ENV not in ("development", "demo"):
         raise HTTPException(
-            status_code=404, detail="Demo personas disabled outside development/demo"
+            status_code=404,
+            detail="Demo persona endpoint is disabled in production environment",
         )
-
     return [
         DemoPersona(
-            role="Institution",
-            name="North Tech Inst.",
+            role="Technical Institution",
+            name="North Tech Institute",
             email="inst.north1@example.com",
             badge="Maker",
             color="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
             password=settings.FIRST_SUPERUSER_PASSWORD,
         ),
         DemoPersona(
-            role="RO Maker",
-            name="Officer North",
+            role="Regional Officer",
+            name="RO North (Maker)",
             email="officer.north@example.com",
-            badge="Regional",
+            badge="Regional Maker",
             color="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
             password=settings.FIRST_SUPERUSER_PASSWORD,
         ),
         DemoPersona(
-            role="RO Checker",
+            role="Scrutiny Checker",
             name="Checker North",
             email="checker.north@example.com",
-            badge="Checker",
+            badge="Regional Checker",
             color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
             password=settings.FIRST_SUPERUSER_PASSWORD,
         ),
         DemoPersona(
-            role="Bureau Head",
-            name="Central Bureau",
+            role="Bureau Approver",
+            name="Central Bureau (Key 2)",
             email="bureau@example.com",
-            badge="Admin",
+            badge="Bureau Head",
             color="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
             password=settings.FIRST_SUPERUSER_PASSWORD,
         ),
         DemoPersona(
-            role="Auditor",
-            name="Reg. Auditor",
+            role="Compliance Auditor",
+            name="CAG / Independent Auditor",
             email="auditor@example.com",
-            badge="Read-Only",
+            badge="Read-Only Auditor",
             color="bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30",
             password=settings.FIRST_SUPERUSER_PASSWORD,
         ),
@@ -248,11 +248,12 @@ def demo_login(
 ) -> Token:
     """
     1-Click Demo Login for turnkey evaluation.
-    Only available in development / demo mode. Blocked outside development/demo.
+    Only available in development and demo environments.
     """
     if settings.FASTAPI_ENV not in ("development", "demo"):
         raise HTTPException(
-            status_code=404, detail="Demo login disabled outside development/demo"
+            status_code=404,
+            detail="Demo persona endpoint is disabled in production environment",
         )
     user = crud.get_user_by_email(session=session, email=data.email)
     if not user:
@@ -260,6 +261,41 @@ def demo_login(
 
         init_db(session)
         user = crud.get_user_by_email(session=session, email=data.email)
+
+    if not user:
+        email = data.email.lower()
+        role = "institution"
+        region: str | None = "NR"
+        name = "Evaluator"
+        if "officer" in email:
+            role = "regional"
+            name = "North Regional Officer (Maker)"
+        elif "checker" in email:
+            role = "regional"
+            name = "North Regional Checker"
+        elif "bureau" in email:
+            role = "bureau"
+            region = None
+            name = "Bureau Approver"
+        elif "auditor" in email:
+            role = "auditor"
+            region = None
+            name = "Compliance Auditor"
+        elif "inst" in email or "principal" in email:
+            role = "institution"
+            name = "North Tech Institute"
+
+        from app.models import UserCreate
+
+        u_in = UserCreate(
+            email=email,
+            password=settings.FIRST_SUPERUSER_PASSWORD,
+            full_name=name,
+            role=role,
+            region=region,
+        )
+        user = crud.create_user(session=session, user_create=u_in)
+
     if not user or not user.is_active:
         raise HTTPException(status_code=400, detail="Invalid demo persona")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

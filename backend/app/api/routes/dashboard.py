@@ -301,7 +301,9 @@ def get_impact_metrics(
 
     total_paise = sum(i.amount_paise for i in instruments)
     active_lien_paise = sum(i.amount_paise for i in instruments if i.lien_marked)
-    confirmed_confs = [c for c in confirmations if c.status == "confirmed" and not c.revoked]
+    confirmed_confs = [
+        c for c in confirmations if c.status == "confirmed" and not c.revoked
+    ]
     unique_banks = len({i.bank_code for i in instruments})
 
     return {

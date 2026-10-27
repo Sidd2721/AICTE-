@@ -5,7 +5,12 @@ from app.core.config import settings
 from app.core.security import get_password_hash
 from app.models import User, UserCreate
 
-engine = create_engine(str(settings.DATABASE_URL), pool_pre_ping=True)
+engine = create_engine(
+    str(settings.DATABASE_URL),
+    pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=10,
+)
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB

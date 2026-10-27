@@ -5,7 +5,7 @@ services:
     plan: free
     region: singapore
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/v1/utils/health-check/
+    healthCheckPath: /health
     envVars:
       - key: FASTAPI_ENV
         value: demo # Set to 'production' for strict production enforcement
@@ -17,13 +17,17 @@ services:
         sync: false # Set via Render dashboard (>= 32 chars)
       - key: VAULT_KEY
         sync: false # Set via Render dashboard (32-byte base64)
+      - key: DATABASE_URL
+        sync: false # Supabase session pooler (Port 5432): postgresql://postgres.<ref>:<pw>@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+      - key: SUPABASE_URL
+        sync: false # Supabase Project URL: https://<ref>.supabase.co
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false # Supabase service_role key
+      - key: SUPABASE_STORAGE_BUCKET
+        value: fdr-vault
       - key: FIRST_SUPERUSER
         value: admin@example.com
       - key: FIRST_SUPERUSER_PASSWORD
         sync: false # Set via Render dashboard
-      - key: DATABASE_URL
-        sync: false # Neon direct connection string with user 'app' (NOSUPERUSER, NOBYPASSRLS)
-      - key: MIGRATION_DATABASE_URL
-        sync: false # Neon direct connection string with owner role (e.g., neondb_owner)
       - key: FRONTEND_HOST
         sync: false # Once deployed, set to your https://<app-name>.onrender.com

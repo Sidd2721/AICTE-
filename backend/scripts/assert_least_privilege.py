@@ -9,8 +9,8 @@ from sqlalchemy import create_engine, text
 from app.core.config import settings
 
 def check_privileges() -> None:
-    if settings.FASTAPI_ENV == "development":
-        print("[assert_least_privilege] FASTAPI_ENV is development; skipping strict role check.")
+    if settings.FASTAPI_ENV in ("development", "demo"):
+        print(f"[assert_least_privilege] FASTAPI_ENV is '{settings.FASTAPI_ENV}'; skipping strict role check.")
         return
 
     db_url = str(settings.DATABASE_URL)

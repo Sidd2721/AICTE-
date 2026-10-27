@@ -33,6 +33,14 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
         if settings.FASTAPI_ENV != "development":
             raise RuntimeError(f"Startup guard failed: {e}") from e
 
+    # Ensure Supabase storage bucket exists if configured
+    try:
+        from app.integration.supabase_storage import ensure_bucket_exists
+
+        ensure_bucket_exists()
+    except Exception:
+        pass
+
     # Ensure demo database has initial seed data if unseeded in dev/demo
     if settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
         try:
@@ -129,7 +137,12 @@ async def integration_v1_middleware(
                 f'{{"code":"RATE_LIMIT_EXCEEDED","message":"Rate limit exceeded. Please retry later.",'
                 f'"details":{{"retry_after":{retry_after}}},"request_id":"req_{uuid.uuid4().hex[:12]}"}}'
             ).encode()
-            return Response(status_code=429, content=body, media_type="application/json", headers=headers)
+            return Response(
+                status_code=429,
+                content=body,
+                media_type="application/json",
+                headers=headers,
+            )
 
         response: Response = await call_next(request)
         response.headers["X-RateLimit-Limit"] = "100"
@@ -164,11 +177,25 @@ async def add_security_headers(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_HOST],
+    allow_origins=[
+        settings.FRONTEND_HOST,
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8000",
+    ],
+    allow_origin_regex=r"https?://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/health")
+@app.get("/api/health")
+def health_check() -> dict[str, str]:
+    return {"status": "ok", "app": settings.PROJECT_NAME}
+
 
 app.include_router(clock.router)
 app.include_router(bank.router)
@@ -178,4 +205,4 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 if FRONTEND_DIR.is_dir():
-    app.frontend("/", directory=FRONTEND_DIR)
+    app.frontend("/", directory=FRONTEND_DIR, fallback="index.html")

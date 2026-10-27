@@ -588,7 +588,9 @@ class WebhookDeliveryLog(SQLModel, table=True):
     __tablename__ = "webhook_delivery_log"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    subscription_id: uuid.UUID = Field(foreign_key="webhook_subscription.id", index=True)
+    subscription_id: uuid.UUID = Field(
+        foreign_key="webhook_subscription.id", index=True
+    )
     event_type: str = Field(max_length=100)
     status_code: int | None = Field(default=None)
     success: bool = Field(default=False)

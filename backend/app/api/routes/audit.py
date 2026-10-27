@@ -24,7 +24,9 @@ CHECKPOINT_KEY_PATH = CHECKPOINT_DIR / "ed25519_checkpoint.key"
 def get_checkpoint_signer() -> AuditCheckpointSigner:
     CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
     if CHECKPOINT_KEY_PATH.exists():
-        return AuditCheckpointSigner.from_private_key_file(CHECKPOINT_DIR, CHECKPOINT_KEY_PATH)
+        return AuditCheckpointSigner.from_private_key_file(
+            CHECKPOINT_DIR, CHECKPOINT_KEY_PATH
+        )
     key = Ed25519PrivateKey.generate()
     CHECKPOINT_KEY_PATH.write_bytes(
         key.private_bytes(
@@ -47,7 +49,11 @@ def list_checkpoints(session: SessionDep) -> dict[str, Any]:
 
     checkpoints = []
     if CHECKPOINT_DIR.exists():
-        for cp_file in sorted(CHECKPOINT_DIR.glob("checkpoint-*.json"), key=lambda f: f.stat().st_mtime, reverse=True):
+        for cp_file in sorted(
+            CHECKPOINT_DIR.glob("checkpoint-*.json"),
+            key=lambda f: f.stat().st_mtime,
+            reverse=True,
+        ):
             try:
                 data = json.loads(cp_file.read_text(encoding="utf-8"))
                 checkpoints.append(data)

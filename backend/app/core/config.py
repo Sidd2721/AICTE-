@@ -35,8 +35,13 @@ class Settings(BaseSettings):
     MIGRATION_DATABASE_URL: PostgresDsn | None = None
     TEST_DATABASE_URL: PostgresDsn | None = None
     AUTO_SEED: bool = False
+    SUPABASE_URL: str | None = None
+    SUPABASE_SERVICE_ROLE_KEY: str | None = None
+    SUPABASE_STORAGE_BUCKET: str = "fdr-vault"
 
-    @field_validator("DATABASE_URL", "MIGRATION_DATABASE_URL", "TEST_DATABASE_URL", mode="before")
+    @field_validator(
+        "DATABASE_URL", "MIGRATION_DATABASE_URL", "TEST_DATABASE_URL", mode="before"
+    )
     @classmethod
     def _use_psycopg_driver(cls, value: str | PostgresDsn | None) -> str | None:
         if value is None:

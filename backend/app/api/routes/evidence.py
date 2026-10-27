@@ -61,7 +61,9 @@ def get_evidence_summary(session: SessionDep) -> dict[str, Any]:
     table_counts: dict[str, int] = {}
     for name, model in table_models:
         try:
-            table_counts[name] = session.exec(select(func.count()).select_from(model)).one()
+            table_counts[name] = session.exec(
+                select(func.count()).select_from(model)
+            ).one()
         except Exception:
             table_counts[name] = 0
 

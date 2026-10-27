@@ -50,7 +50,7 @@ WORKDIR /app/backend
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:8000/api/v1/utils/health-check/ || exit 1
+  CMD curl -f http://localhost:8000/health || exit 1
 
 USER appuser
 

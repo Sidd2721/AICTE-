@@ -15,8 +15,19 @@ import "./index.css"
 import { routeTree } from "./routeTree.gen"
 
 client.setConfig({
-  baseURL: import.meta.env.VITE_API_URL ?? "",
+  baseURL:
+    import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "",
   auth: () => localStorage.getItem("access_token") || "",
+})
+
+// Dynamic token injection on every API call (prevents 401s after F5 refresh or deep links)
+client.instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token")
+  if (token) {
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 const handleApiError = (error: Error) => {

@@ -62,7 +62,12 @@ keys_router = admin_router  # Alias for backward compatibility
 # ==========================================
 # Error Helpers & Pydantic Models
 # ==========================================
-def integration_error(code: str, message: str, details: dict[str, Any] | None = None, status_code: int = 400) -> HTTPException:
+def integration_error(
+    code: str,
+    message: str,
+    details: dict[str, Any] | None = None,
+    status_code: int = 400,
+) -> HTTPException:
     return HTTPException(
         status_code=status_code,
         detail={
@@ -127,7 +132,9 @@ def validate_target_url(url: str) -> None:
     is_dev = settings.FASTAPI_ENV == "development"
     if hostname.lower() in ("localhost", "127.0.0.1", "::1"):
         if not is_dev:
-            raise ValueError("Localhost webhook targets are only permitted in development mode")
+            raise ValueError(
+                "Localhost webhook targets are only permitted in development mode"
+            )
         return
 
     try:
@@ -183,19 +190,25 @@ def list_pending_bank_requests(
 
     items = []
     for conf, ins in page_results:
-        items.append({
-            "request_token": conf.token_hash,  # or identifier
-            "instrument_id": str(ins.id),
-            "ref_no": ins.ref_no,
-            "bank_code": ins.bank_code,
-            "ifsc": ins.ifsc,
-            "amount_paise": ins.amount_paise,
-            "issue_date": ins.issue_date.isoformat(),
-            "maturity_date": ins.maturity_date.isoformat(),
-            "expires_at": conf.token_expires_at.isoformat(),
-        })
+        items.append(
+            {
+                "request_token": conf.token_hash,  # or identifier
+                "instrument_id": str(ins.id),
+                "ref_no": ins.ref_no,
+                "bank_code": ins.bank_code,
+                "ifsc": ins.ifsc,
+                "amount_paise": ins.amount_paise,
+                "issue_date": ins.issue_date.isoformat(),
+                "maturity_date": ins.maturity_date.isoformat(),
+                "expires_at": conf.token_expires_at.isoformat(),
+            }
+        )
 
-    next_cursor = page_results[-1][0].requested_at.isoformat() if has_more and page_results else None
+    next_cursor = (
+        page_results[-1][0].requested_at.isoformat()
+        if has_more and page_results
+        else None
+    )
     return CursorPage(items=items, next_cursor=next_cursor)
 
 
@@ -208,7 +221,11 @@ def submit_bank_confirmation(
 ) -> dict[str, Any]:
     """Submit cryptographically signed bank verification reply."""
     if not idempotency_key:
-        raise integration_error("MISSING_IDEMPOTENCY_KEY", "Idempotency-Key header is required", status_code=400)
+        raise integration_error(
+            "MISSING_IDEMPOTENCY_KEY",
+            "Idempotency-Key header is required",
+            status_code=400,
+        )
 
     # Idempotency check
     req_hash = body_hash(body.model_dump(mode="json"))
@@ -220,13 +237,17 @@ def submit_bank_confirmation(
             request_hash=req_hash,
         )
     except IdempotencyConflict as exc:
-        raise integration_error("IDEMPOTENCY_CONFLICT", str(exc), status_code=422) from exc
+        raise integration_error(
+            "IDEMPOTENCY_CONFLICT", str(exc), status_code=422
+        ) from exc
 
     if not is_new:
         cached = replay_response(idemp_record)
         if cached is not None:
             return cached
-        raise integration_error("REQUEST_IN_PROGRESS", "Request is already in progress", status_code=409)
+        raise integration_error(
+            "REQUEST_IN_PROGRESS", "Request is already in progress", status_code=409
+        )
 
     # Find Confirmation by token
     # Supports matching by direct hash or token string
@@ -235,32 +256,46 @@ def submit_bank_confirmation(
 
     conf = session.exec(
         select(Confirmation).where(
-            (Confirmation.token_hash == token_str) | (Confirmation.token_hash == hashed_token)
+            (Confirmation.token_hash == token_str)
+            | (Confirmation.token_hash == hashed_token)
         )
     ).first()
 
     if not conf:
-        raise integration_error("TOKEN_NOT_FOUND", "Confirmation request token is invalid", status_code=404)
+        raise integration_error(
+            "TOKEN_NOT_FOUND", "Confirmation request token is invalid", status_code=404
+        )
 
     if conf.token_used_at is not None:
-        raise integration_error("TOKEN_ALREADY_USED", "Challenge token has already been consumed", status_code=409)
+        raise integration_error(
+            "TOKEN_ALREADY_USED",
+            "Challenge token has already been consumed",
+            status_code=409,
+        )
 
     if conf.token_expires_at < now():
-        raise integration_error("TOKEN_EXPIRED", "Challenge token has expired", status_code=410)
+        raise integration_error(
+            "TOKEN_EXPIRED", "Challenge token has expired", status_code=410
+        )
 
     # Fetch Instrument
     ins = session.get(Instrument, conf.instrument_id)
     if not ins:
-        raise integration_error("INSTRUMENT_NOT_FOUND", "Instrument record not found", status_code=404)
+        raise integration_error(
+            "INSTRUMENT_NOT_FOUND", "Instrument record not found", status_code=404
+        )
 
     # Evaluate Cryptographic Bank Gate
     try:
         raw_pdf_bytes = base64.b64decode(body.signed_letter_base64)
     except Exception as e:
-        raise integration_error("INVALID_BASE64", f"Malformed base64 PDF payload: {e}", status_code=400)
+        raise integration_error(
+            "INVALID_BASE64", f"Malformed base64 PDF payload: {e}", status_code=400
+        )
 
     is_simulated = raw_pdf_bytes.startswith(b"%PDF") and (
-        b"SIMULATED BANK VERIFICATION LETTER" in raw_pdf_bytes or len(raw_pdf_bytes) > 20
+        b"SIMULATED BANK VERIFICATION LETTER" in raw_pdf_bytes
+        or len(raw_pdf_bytes) > 20
     )
     if is_simulated and settings.FASTAPI_ENV in ("development", "demo"):
         gate_ok = True
@@ -313,7 +348,11 @@ def submit_bank_confirmation(
             event_type="instrument.confirmed",
             aggregate_type="instrument",
             aggregate_id=str(ins.id),
-            payload={"ref_no": ins.ref_no, "amount_paise": ins.amount_paise, "badge": "confirmed"},
+            payload={
+                "ref_no": ins.ref_no,
+                "amount_paise": ins.amount_paise,
+                "badge": "confirmed",
+            },
         )
     else:
         enqueue(
@@ -337,7 +376,11 @@ def submit_bank_confirmation(
     )
 
     gate_report = build_verification_gate_report(
-        instrument={"amount_paise": ins.amount_paise, "ref_no": ins.ref_no, "maturity_date": ins.maturity_date},
+        instrument={
+            "amount_paise": ins.amount_paise,
+            "ref_no": ins.ref_no,
+            "maturity_date": ins.maturity_date,
+        },
         confirmed_fields=body.fields.model_dump(mode="json"),
         gate_outcome=gate_reason if gate_ok else "rejected",
     )
@@ -363,7 +406,11 @@ def sandbox_bank_sign(
 ) -> dict[str, Any]:
     """Generate a sample signed bank verification letter for sandbox curl testing."""
     if settings.FASTAPI_ENV not in ("development", "demo"):
-        raise integration_error("NOT_FOUND", "Sandbox signer is unavailable outside development/demo mode", status_code=404)
+        raise integration_error(
+            "NOT_FOUND",
+            "Sandbox signer is unavailable outside development/demo mode",
+            status_code=404,
+        )
 
     letter_content = (
         f"%PDF-1.4 SIMULATED BANK VERIFICATION LETTER\n"
@@ -435,7 +482,9 @@ def list_instruments(
     cursor: str | None = Query(None),
 ) -> CursorPage:
     """List fixed deposit instruments with lifecycle and badge filters."""
-    query = select(Instrument).order_by(col(Instrument.created_at).asc(), col(Instrument.id).asc())
+    query = select(Instrument).order_by(
+        col(Instrument.created_at).asc(), col(Instrument.id).asc()
+    )
 
     if lifecycle:
         query = query.where(Instrument.lifecycle == lifecycle.strip().lower())
@@ -457,24 +506,28 @@ def list_instruments(
         current_badge = "confirmed" if ins.lifecycle == "active" else "claimed"
         if badge_filter and current_badge != badge_filter.strip().lower():
             continue
-        items.append({
-            "id": str(ins.id),
-            "institution_id": str(ins.institution_id),
-            "ref_no": ins.ref_no,
-            "bank_code": ins.bank_code,
-            "ifsc": ins.ifsc,
-            "amount_paise": ins.amount_paise,
-            "issue_date": ins.issue_date.isoformat(),
-            "maturity_date": ins.maturity_date.isoformat(),
-            "kind": ins.kind,
-            "lifecycle": ins.lifecycle,
-            "badge": current_badge,
-            "lien_marked": ins.lien_marked,
-            "created_at": ins.created_at.isoformat(),
-            "updated_at": ins.updated_at.isoformat(),
-        })
+        items.append(
+            {
+                "id": str(ins.id),
+                "institution_id": str(ins.institution_id),
+                "ref_no": ins.ref_no,
+                "bank_code": ins.bank_code,
+                "ifsc": ins.ifsc,
+                "amount_paise": ins.amount_paise,
+                "issue_date": ins.issue_date.isoformat(),
+                "maturity_date": ins.maturity_date.isoformat(),
+                "kind": ins.kind,
+                "lifecycle": ins.lifecycle,
+                "badge": current_badge,
+                "lien_marked": ins.lien_marked,
+                "created_at": ins.created_at.isoformat(),
+                "updated_at": ins.updated_at.isoformat(),
+            }
+        )
 
-    next_cursor = page_items[-1].created_at.isoformat() if has_more and page_items else None
+    next_cursor = (
+        page_items[-1].created_at.isoformat() if has_more and page_items else None
+    )
     return CursorPage(items=items, next_cursor=next_cursor)
 
 
@@ -486,7 +539,9 @@ def list_events(
     cursor: str | None = Query(None),
 ) -> CursorPage:
     """Stream outbox lifecycle events with cursor pagination."""
-    query = select(OutboxMessage).order_by(col(OutboxMessage.created_at).asc(), col(OutboxMessage.id).asc())
+    query = select(OutboxMessage).order_by(
+        col(OutboxMessage.created_at).asc(), col(OutboxMessage.id).asc()
+    )
 
     if cursor:
         try:
@@ -511,7 +566,9 @@ def list_events(
         for msg in page_items
     ]
 
-    next_cursor = page_items[-1].created_at.isoformat() if has_more and page_items else None
+    next_cursor = (
+        page_items[-1].created_at.isoformat() if has_more and page_items else None
+    )
     return CursorPage(items=items, next_cursor=next_cursor)
 
 
@@ -528,7 +585,9 @@ def register_webhook(
     try:
         validate_target_url(body.target_url)
     except ValueError as e:
-        raise integration_error("SSRF_BLOCKED", f"Invalid target URL: {e}", status_code=400)
+        raise integration_error(
+            "SSRF_BLOCKED", f"Invalid target URL: {e}", status_code=400
+        )
 
     secret = body.secret or secrets.token_hex(24)
     sub = WebhookSubscription(
@@ -557,7 +616,9 @@ def list_webhooks(
     _client: MachineApiKey = Depends(require_scope("aicte:webhooks")),
 ) -> dict[str, Any]:
     """List registered webhooks."""
-    subs = session.exec(select(WebhookSubscription).where(WebhookSubscription.active)).all()
+    subs = session.exec(
+        select(WebhookSubscription).where(WebhookSubscription.active)
+    ).all()
     return {
         "items": [
             {
@@ -566,7 +627,9 @@ def list_webhooks(
                 "event_types": s.event_types,
                 "active": s.active,
                 "created_at": s.created_at.isoformat(),
-                "last_delivered_at": s.last_delivered_at.isoformat() if s.last_delivered_at else None,
+                "last_delivered_at": s.last_delivered_at.isoformat()
+                if s.last_delivered_at
+                else None,
                 "failure_count": s.failure_count,
             }
             for s in subs
@@ -583,7 +646,9 @@ def delete_webhook(
     """Revoke a webhook subscription."""
     sub = session.get(WebhookSubscription, subscription_id)
     if not sub:
-        raise integration_error("NOT_FOUND", "Webhook subscription not found", status_code=404)
+        raise integration_error(
+            "NOT_FOUND", "Webhook subscription not found", status_code=404
+        )
     sub.active = False
     session.add(sub)
     session.commit()
@@ -599,7 +664,9 @@ def test_webhook(
     """Test webhook delivery by dispatching a ping event."""
     sub = session.get(WebhookSubscription, subscription_id)
     if not sub or not sub.active:
-        raise integration_error("NOT_FOUND", "Active webhook subscription not found", status_code=404)
+        raise integration_error(
+            "NOT_FOUND", "Active webhook subscription not found", status_code=404
+        )
 
     success, status_code, err, latency = deliver_to_subscription(
         sub,
@@ -624,7 +691,9 @@ def rotate_webhook_secret(
     """Rotate the HMAC secret of a webhook subscription."""
     sub = session.get(WebhookSubscription, subscription_id)
     if not sub or not sub.active:
-        raise integration_error("NOT_FOUND", "Active webhook subscription not found", status_code=404)
+        raise integration_error(
+            "NOT_FOUND", "Active webhook subscription not found", status_code=404
+        )
 
     sub.secret = secrets.token_hex(24)
     session.add(sub)
@@ -677,9 +746,16 @@ def create_machine_api_key(
 ) -> dict[str, Any]:
     """Bureau only: Issue new machine API key."""
     if current_user.role != "bureau" and not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Only Bureau Officers may issue machine integration keys")
+        raise HTTPException(
+            status_code=403,
+            detail="Only Bureau Officers may issue machine integration keys",
+        )
 
-    expires_at = datetime.now(UTC) + timedelta(days=body.expires_in_days) if body.expires_in_days else None
+    expires_at = (
+        datetime.now(UTC) + timedelta(days=body.expires_in_days)
+        if body.expires_in_days
+        else None
+    )
     raw_key, record = issue_api_key(
         client_name=body.client_name,
         scopes=set(body.scopes),
@@ -717,7 +793,9 @@ def list_machine_api_keys(
     if current_user.role != "bureau" and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    keys = session.exec(select(MachineApiKey).order_by(col(MachineApiKey.created_at).desc())).all()
+    keys = session.exec(
+        select(MachineApiKey).order_by(col(MachineApiKey.created_at).desc())
+    ).all()
     return {
         "items": [
             {
@@ -744,7 +822,9 @@ def revoke_machine_api_key(
     if current_user.role != "bureau" and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    key_record = session.exec(select(MachineApiKey).where(MachineApiKey.key_id == key_id)).first()
+    key_record = session.exec(
+        select(MachineApiKey).where(MachineApiKey.key_id == key_id)
+    ).first()
     if not key_record:
         raise HTTPException(status_code=404, detail="API Key not found")
 
@@ -773,7 +853,9 @@ def list_admin_webhooks(
     if current_user.role != "bureau" and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    subs = session.exec(select(WebhookSubscription).where(WebhookSubscription.active)).all()
+    subs = session.exec(
+        select(WebhookSubscription).where(WebhookSubscription.active)
+    ).all()
     items = []
     for s in subs:
         recent_logs = session.exec(
@@ -782,28 +864,32 @@ def list_admin_webhooks(
             .order_by(col(WebhookDeliveryLog.delivered_at).desc())
             .limit(5)
         ).all()
-        items.append({
-            "id": str(s.id),
-            "target_url": s.target_url,
-            "secret": s.secret,
-            "event_types": s.event_types,
-            "active": s.active,
-            "created_at": s.created_at.isoformat(),
-            "last_delivered_at": s.last_delivered_at.isoformat() if s.last_delivered_at else None,
-            "failure_count": s.failure_count,
-            "logs": [
-                {
-                    "id": str(log_item.id),
-                    "event_type": log_item.event_type,
-                    "status_code": log_item.status_code,
-                    "success": log_item.success,
-                    "error_message": log_item.error_message,
-                    "latency_ms": log_item.latency_ms,
-                    "delivered_at": log_item.delivered_at.isoformat(),
-                }
-                for log_item in recent_logs
-            ],
-        })
+        items.append(
+            {
+                "id": str(s.id),
+                "target_url": s.target_url,
+                "secret": s.secret,
+                "event_types": s.event_types,
+                "active": s.active,
+                "created_at": s.created_at.isoformat(),
+                "last_delivered_at": s.last_delivered_at.isoformat()
+                if s.last_delivered_at
+                else None,
+                "failure_count": s.failure_count,
+                "logs": [
+                    {
+                        "id": str(log_item.id),
+                        "event_type": log_item.event_type,
+                        "status_code": log_item.status_code,
+                        "success": log_item.success,
+                        "error_message": log_item.error_message,
+                        "latency_ms": log_item.latency_ms,
+                        "delivered_at": log_item.delivered_at.isoformat(),
+                    }
+                    for log_item in recent_logs
+                ],
+            }
+        )
     return {"items": items}
 
 
@@ -900,7 +986,9 @@ def get_outbox_tail(
         raise HTTPException(status_code=403, detail="Forbidden")
 
     events = session.exec(
-        select(OutboxMessage).order_by(col(OutboxMessage.created_at).desc()).limit(limit)
+        select(OutboxMessage)
+        .order_by(col(OutboxMessage.created_at).desc())
+        .limit(limit)
     ).all()
     return {
         "items": [
@@ -928,8 +1016,10 @@ def test_bank_flow(
 
     # Find or create a testable pending confirmation
     conf = session.exec(
-        select(Confirmation)
-        .where(Confirmation.status == "requested", col(Confirmation.token_used_at).is_(None))
+        select(Confirmation).where(
+            Confirmation.status == "requested",
+            col(Confirmation.token_used_at).is_(None),
+        )
     ).first()
 
     raw_token = f"tok_test_{secrets.token_urlsafe(16)}"
@@ -939,7 +1029,10 @@ def test_bank_flow(
         # Pick any instrument to attach a test confirmation
         ins = session.exec(select(Instrument)).first()
         if not ins:
-            raise HTTPException(status_code=400, detail="No instruments found in database. Load judge scenario first.")
+            raise HTTPException(
+                status_code=400,
+                detail="No instruments found in database. Load judge scenario first.",
+            )
         conf = Confirmation(
             instrument_id=ins.id,
             method="signed_letter",
