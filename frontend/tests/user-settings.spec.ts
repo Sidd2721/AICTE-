@@ -202,53 +202,49 @@ test.describe("Change password validation", () => {
   })
 })
 
-test("Appearance button is visible in sidebar", async ({ page }) => {
-  await page.goto("/settings")
-  await expect(page.getByTestId("theme-button")).toBeVisible()
-})
+test.describe("Appearance settings", () => {
+  test.describe.configure({ mode: "serial" })
 
-test("User can switch between theme modes", async ({ page }) => {
-  await page.goto("/settings")
+  test("Appearance button is visible in sidebar", async ({ page }) => {
+    await page.goto("/settings")
+    await expect(page.getByTestId("theme-button")).toBeVisible()
+  })
 
-  await page.getByTestId("theme-button").click()
-  await page.getByTestId("dark-mode").click()
-  await expect(page.locator("html")).toHaveClass(/dark/)
+  test("User can switch between theme modes", async ({ page }) => {
+    await page.goto("/settings")
 
-  await expect(page.getByTestId("dark-mode")).not.toBeVisible()
+    await page.getByTestId("theme-button").click()
+    await page.getByTestId("dark-mode").click()
+    await expect(page.locator("html")).toHaveClass(/dark/)
 
-  await page.getByTestId("theme-button").click()
-  await page.getByTestId("light-mode").click()
-  await expect(page.locator("html")).toHaveClass(/light/)
-})
+    await expect(page.getByTestId("dark-mode")).not.toBeVisible()
 
-test("Selected mode is preserved across sessions", async ({ page }) => {
-  await page.goto("/settings")
-
-  const currentlyDark = await page.evaluate(() =>
-    document.documentElement.classList.contains("dark"),
-  )
-  if (currentlyDark) {
     await page.getByTestId("theme-button").click()
     await page.getByTestId("light-mode").click()
-  }
+    await expect(page.locator("html")).toHaveClass(/light/)
+  })
 
-  const isLightMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("light"),
-  )
-  expect(isLightMode).toBe(true)
+  test("Selected mode is preserved across sessions", async ({ page }) => {
+    await page.goto("/settings")
 
-  await page.getByTestId("theme-button").click()
-  await page.getByTestId("dark-mode").click()
-  let isDarkMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("dark"),
-  )
-  expect(isDarkMode).toBe(true)
+    const currentlyDark = await page.evaluate(() =>
+      document.documentElement.classList.contains("dark"),
+    )
+    if (currentlyDark) {
+      await page.getByTestId("theme-button").click()
+      await page.getByTestId("light-mode").click()
+      await expect(page.locator("html")).toHaveClass(/light/)
+      await expect(page.getByTestId("light-mode")).not.toBeVisible()
+    }
 
-  await logOutUser(page)
-  await logInUser(page, firstSuperuser, firstSuperuserPassword)
+    await page.getByTestId("theme-button").click()
+    await expect(page.getByTestId("dark-mode")).toBeVisible()
+    await page.getByTestId("dark-mode").click()
+    await expect(page.locator("html")).toHaveClass(/dark/)
 
-  isDarkMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("dark"),
-  )
-  expect(isDarkMode).toBe(true)
+    await logOutUser(page)
+    await logInUser(page, firstSuperuser, firstSuperuserPassword)
+
+    await expect(page.locator("html")).toHaveClass(/dark/)
+  })
 })

@@ -107,6 +107,19 @@ Record-Check "Document Script References" {
     uv run python scripts/doc_refs.py
 }
 
+# 11. Integration Contract & Snippets
+Record-Check "Integration OpenAPI Contract Drift" {
+    Set-Location (Join-Path $Root "backend")
+    uv run python ../scripts/generate_integration_openapi.py --check
+    Set-Location $Root
+}
+
+Record-Check "Integration Snippets End-to-End" {
+    Set-Location (Join-Path $Root "backend")
+    uv run python ../scripts/integration_examples_test.py
+    Set-Location $Root
+}
+
 Write-Host "`n=========================================================" -ForegroundColor White
 Write-Host "             FULL GATE VERIFICATION SUMMARY" -ForegroundColor White
 Write-Host "=========================================================" -ForegroundColor White
