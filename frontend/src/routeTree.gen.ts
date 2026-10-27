@@ -20,6 +20,7 @@ import { Route as LayoutAuditRouteImport } from './routes/_layout/audit'
 import { Route as LayoutDepositsRouteImport } from './routes/_layout/deposits'
 import { Route as LayoutEvidenceRouteImport } from './routes/_layout/evidence'
 import { Route as LayoutImpactRouteImport } from './routes/_layout/impact'
+import { Route as LayoutIntegrateRouteImport } from './routes/_layout/integrate'
 import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutInstrumentsIdRouteImport } from './routes/_layout/instruments.$id'
@@ -78,6 +79,11 @@ const LayoutImpactRoute = LayoutImpactRouteImport.update({
   path: '/impact',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutIntegrateRoute = LayoutIntegrateRouteImport.update({
+  id: '/integrate',
+  path: '/integrate',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutReportsRoute = LayoutReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/deposits': typeof LayoutDepositsRoute
   '/evidence': typeof LayoutEvidenceRoute
   '/impact': typeof LayoutImpactRoute
+  '/integrate': typeof LayoutIntegrateRoute
   '/reports': typeof LayoutReportsRoute
   '/settings': typeof LayoutSettingsRoute
   '/instruments/$id': typeof LayoutInstrumentsIdRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/deposits': typeof LayoutDepositsRoute
   '/evidence': typeof LayoutEvidenceRoute
   '/impact': typeof LayoutImpactRoute
+  '/integrate': typeof LayoutIntegrateRoute
   '/reports': typeof LayoutReportsRoute
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/_layout/deposits': typeof LayoutDepositsRoute
   '/_layout/evidence': typeof LayoutEvidenceRoute
   '/_layout/impact': typeof LayoutImpactRoute
+  '/_layout/integrate': typeof LayoutIntegrateRoute
   '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/deposits'
     | '/evidence'
     | '/impact'
+    | '/integrate'
     | '/reports'
     | '/settings'
     | '/instruments/$id'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/deposits'
     | '/evidence'
     | '/impact'
+    | '/integrate'
     | '/reports'
     | '/settings'
     | '/'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/_layout/deposits'
     | '/_layout/evidence'
     | '/_layout/impact'
+    | '/_layout/integrate'
     | '/_layout/reports'
     | '/_layout/settings'
     | '/_layout/'
@@ -277,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutImpactRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/integrate': {
+      id: '/_layout/integrate'
+      path: '/integrate'
+      fullPath: '/integrate'
+      preLoaderRoute: typeof LayoutIntegrateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/reports': {
       id: '/_layout/reports'
       path: '/reports'
@@ -307,6 +326,7 @@ interface LayoutRouteChildren {
   LayoutDepositsRoute: typeof LayoutDepositsRoute
   LayoutEvidenceRoute: typeof LayoutEvidenceRoute
   LayoutImpactRoute: typeof LayoutImpactRoute
+  LayoutIntegrateRoute: typeof LayoutIntegrateRoute
   LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
@@ -319,6 +339,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDepositsRoute: LayoutDepositsRoute,
   LayoutEvidenceRoute: LayoutEvidenceRoute,
   LayoutImpactRoute: LayoutImpactRoute,
+  LayoutIntegrateRoute: LayoutIntegrateRoute,
   LayoutReportsRoute: LayoutReportsRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
