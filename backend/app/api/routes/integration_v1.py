@@ -277,10 +277,17 @@ def submit_bank_confirmation(
 
     # Evaluate discrepancies
     discrepancies = evaluate_discrepancies(
-        {"amount_paise": ins.amount_paise, "ref_no": ins.ref_no, "maturity_date": str(ins.maturity_date)},
+        {
+            "amount_paise": ins.amount_paise,
+            "ref_no": ins.ref_no,
+            "bank_code": ins.bank_code,
+            "maturity_date": str(ins.maturity_date),
+            "lien_marked": True,
+        },
         {
             "amount_paise": body.fields.amount_paise,
             "ref_no": body.fields.ref_no,
+            "bank_code": body.fields.bank_code,
             "maturity_date": str(body.fields.maturity_date),
             "lien_marked": body.fields.lien_marked,
         },
@@ -291,7 +298,8 @@ def submit_bank_confirmation(
     # Update Confirmation
     conf.token_used_at = now()
     conf.confirmed_at = now()
-    conf.status = "confirmed" if verdict == "accepted" else "flagged"
+    conf.expires_at = now() + timedelta(days=365)
+    conf.status = "confirmed" if verdict == "accepted" else "rejected"
     conf.fields = body.fields.model_dump(mode="json")
     session.add(conf)
 

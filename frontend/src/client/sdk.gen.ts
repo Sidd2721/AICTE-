@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { auditListAuditEventsData, auditListAuditEventsErrors, auditListAuditEventsResponses, auditListEntityAuditEventsData, auditListEntityAuditEventsErrors, auditListEntityAuditEventsResponses, auditVerifyAuditChainData, auditVerifyAuditChainResponses, bankGetBankSimStatusData, bankGetBankSimStatusResponses, bankGetVerificationResultsData, bankGetVerificationResultsErrors, bankGetVerificationResultsResponses, bankRequestConfirmationData, bankRequestConfirmationErrors, bankRequestConfirmationResponses, bankSimulateBankConfirmationData, bankSimulateBankConfirmationErrors, bankSimulateBankConfirmationResponses, bankSimulateBankOutageData, bankSimulateBankOutageResponses, bankTestBankGateScenarioData, bankTestBankGateScenarioErrors, bankTestBankGateScenarioResponses, clockGetClockV1Data, clockGetClockV1Responses, clockUpdateClockV1Data, clockUpdateClockV1Errors, clockUpdateClockV1Responses, dashboardGetDashboardCountersData, dashboardGetDashboardCountersResponses, dashboardGetImpactMetricsData, dashboardGetImpactMetricsResponses, dashboardGetNeedsActionQueueData, dashboardGetNeedsActionQueueResponses, dashboardSearchInstrumentsData, dashboardSearchInstrumentsErrors, dashboardSearchInstrumentsResponses, dashboardUpdateInstrumentMetadataData, dashboardUpdateInstrumentMetadataErrors, dashboardUpdateInstrumentMetadataResponses, depositsCalculateDepositData, depositsCalculateDepositErrors, depositsCalculateDepositResponses, depositsGetInstitutionCoverageData, depositsGetInstitutionCoverageErrors, depositsGetInstitutionCoverageResponses, depositsGetProgrammesData, depositsGetProgrammesErrors, depositsGetProgrammesResponses, documentsDownloadDocumentData, documentsDownloadDocumentErrors, documentsDownloadDocumentResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, evidenceGetEvidenceSummaryData, evidenceGetEvidenceSummaryResponses, fraudLabGetFraudLabMetricsData, fraudLabGetFraudLabMetricsResponses, instrumentsAcceptInstrumentData, instrumentsAcceptInstrumentErrors, instrumentsAcceptInstrumentResponses, instrumentsGetInstrumentCaseData, instrumentsGetInstrumentCaseErrors, instrumentsGetInstrumentCaseResponses, instrumentsGetInstrumentData, instrumentsGetInstrumentErrors, instrumentsGetInstrumentResponses, instrumentsListInstrumentsData, instrumentsListInstrumentsErrors, instrumentsListInstrumentsResponses, instrumentsSubmitInstrumentData, instrumentsSubmitInstrumentErrors, instrumentsSubmitInstrumentResponses, integrationBulkUpsertInstitutionsData, integrationBulkUpsertInstitutionsErrors, integrationBulkUpsertInstitutionsResponses, integrationCoverageStatusData, integrationCoverageStatusErrors, integrationCoverageStatusResponses, loginDemoLoginData, loginDemoLoginErrors, loginDemoLoginResponses, loginGetDemoPersonasData, loginGetDemoPersonasResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, metaGetMetaData, metaGetMetaResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, releaseApproveReleaseData, releaseApproveReleaseErrors, releaseApproveReleasePostData, releaseApproveReleasePostErrors, releaseApproveReleasePostResponses, releaseApproveReleaseResponses, releaseGetInstrumentReleaseData, releaseGetInstrumentReleaseErrors, releaseGetInstrumentReleaseResponses, releaseRejectReleaseData, releaseRejectReleaseErrors, releaseRejectReleaseResponses, releaseRequestReleaseData, releaseRequestReleaseErrors, releaseRequestReleaseResponses, releaseVerifyReceiptEndpointData, releaseVerifyReceiptEndpointErrors, releaseVerifyReceiptEndpointResponses, releaseVerifyReleaseData, releaseVerifyReleaseErrors, releaseVerifyReleasePostData, releaseVerifyReleasePostErrors, releaseVerifyReleasePostResponses, releaseVerifyReleaseResponses, reportsPreviewCasesNeedingInterventionData, reportsPreviewCasesNeedingInterventionErrors, reportsPreviewCasesNeedingInterventionResponses, reportsPreviewMissingDocumentsData, reportsPreviewMissingDocumentsErrors, reportsPreviewMissingDocumentsResponses, reportsPreviewPendingVerificationsData, reportsPreviewPendingVerificationsErrors, reportsPreviewPendingVerificationsResponses, reportsPreviewUpcomingMaturitiesData, reportsPreviewUpcomingMaturitiesErrors, reportsPreviewUpcomingMaturitiesResponses, reportsReportCasesNeedingInterventionData, reportsReportCasesNeedingInterventionResponses, reportsReportMissingDocumentsData, reportsReportMissingDocumentsResponses, reportsReportPendingVerificationsData, reportsReportPendingVerificationsResponses, reportsReportUpcomingMaturitiesData, reportsReportUpcomingMaturitiesResponses, simulationGetClockData, simulationGetClockResponses, simulationTriggerDailyWorkerData, simulationTriggerDailyWorkerResponses, simulationUpdateClockData, simulationUpdateClockErrors, simulationUpdateClockResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { auditGetCheckpointPubkeyData, auditGetCheckpointPubkeyResponses, auditListAuditEventsData, auditListAuditEventsErrors, auditListAuditEventsResponses, auditListCheckpointsData, auditListCheckpointsResponses, auditListEntityAuditEventsData, auditListEntityAuditEventsErrors, auditListEntityAuditEventsResponses, auditVerifyAuditChainData, auditVerifyAuditChainResponses, bankGetBankSimStatusData, bankGetBankSimStatusResponses, bankGetVerificationResultsData, bankGetVerificationResultsErrors, bankGetVerificationResultsResponses, bankRequestConfirmationData, bankRequestConfirmationErrors, bankRequestConfirmationResponses, bankSimulateBankConfirmationData, bankSimulateBankConfirmationErrors, bankSimulateBankConfirmationResponses, bankSimulateBankOutageData, bankSimulateBankOutageResponses, bankTestBankGateScenarioData, bankTestBankGateScenarioErrors, bankTestBankGateScenarioResponses, clockGetClockV1Data, clockGetClockV1Responses, clockUpdateClockV1Data, clockUpdateClockV1Errors, clockUpdateClockV1Responses, dashboardGetDashboardCountersData, dashboardGetDashboardCountersResponses, dashboardGetImpactMetricsData, dashboardGetImpactMetricsResponses, dashboardGetNeedsActionQueueData, dashboardGetNeedsActionQueueResponses, dashboardSearchInstrumentsData, dashboardSearchInstrumentsErrors, dashboardSearchInstrumentsResponses, dashboardUpdateInstrumentMetadataData, dashboardUpdateInstrumentMetadataErrors, dashboardUpdateInstrumentMetadataResponses, depositsCalculateDepositData, depositsCalculateDepositErrors, depositsCalculateDepositResponses, depositsGetInstitutionCoverageData, depositsGetInstitutionCoverageErrors, depositsGetInstitutionCoverageResponses, depositsGetProgrammesData, depositsGetProgrammesErrors, depositsGetProgrammesResponses, documentsDownloadDocumentData, documentsDownloadDocumentErrors, documentsDownloadDocumentResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, evidenceGetEvidenceSummaryData, evidenceGetEvidenceSummaryResponses, fraudLabGetFraudLabMetricsData, fraudLabGetFraudLabMetricsResponses, instrumentsAcceptInstrumentData, instrumentsAcceptInstrumentErrors, instrumentsAcceptInstrumentResponses, instrumentsGetInstrumentCaseData, instrumentsGetInstrumentCaseErrors, instrumentsGetInstrumentCaseResponses, instrumentsGetInstrumentData, instrumentsGetInstrumentErrors, instrumentsGetInstrumentResponses, instrumentsListInstrumentsData, instrumentsListInstrumentsErrors, instrumentsListInstrumentsResponses, instrumentsSubmitInstrumentData, instrumentsSubmitInstrumentErrors, instrumentsSubmitInstrumentResponses, integrationAdminCreateAdminWebhookData, integrationAdminCreateAdminWebhookErrors, integrationAdminCreateAdminWebhookResponses, integrationAdminCreateMachineApiKeyData, integrationAdminCreateMachineApiKeyErrors, integrationAdminCreateMachineApiKeyResponses, integrationAdminDeleteAdminWebhookData, integrationAdminDeleteAdminWebhookErrors, integrationAdminDeleteAdminWebhookResponses, integrationAdminGetOutboxTailData, integrationAdminGetOutboxTailErrors, integrationAdminGetOutboxTailResponses, integrationAdminListAdminWebhooksData, integrationAdminListAdminWebhooksResponses, integrationAdminListMachineApiKeysData, integrationAdminListMachineApiKeysResponses, integrationAdminRevokeMachineApiKeyData, integrationAdminRevokeMachineApiKeyErrors, integrationAdminRevokeMachineApiKeyResponses, integrationAdminTestAdminWebhookData, integrationAdminTestAdminWebhookErrors, integrationAdminTestAdminWebhookResponses, integrationAdminTestBankFlowData, integrationAdminTestBankFlowResponses, integrationBulkUpsertInstitutionsData, integrationBulkUpsertInstitutionsErrors, integrationBulkUpsertInstitutionsResponses, integrationCoverageStatusData, integrationCoverageStatusErrors, integrationCoverageStatusResponses, integrationV1DeleteWebhookData, integrationV1DeleteWebhookErrors, integrationV1DeleteWebhookResponses, integrationV1GetWebhookLogsData, integrationV1GetWebhookLogsErrors, integrationV1GetWebhookLogsResponses, integrationV1ListEventsData, integrationV1ListEventsErrors, integrationV1ListEventsResponses, integrationV1ListInstitutionsData, integrationV1ListInstitutionsErrors, integrationV1ListInstitutionsResponses, integrationV1ListInstrumentsData, integrationV1ListInstrumentsErrors, integrationV1ListInstrumentsResponses, integrationV1ListPendingBankRequestsData, integrationV1ListPendingBankRequestsErrors, integrationV1ListPendingBankRequestsResponses, integrationV1ListWebhooksData, integrationV1ListWebhooksErrors, integrationV1ListWebhooksResponses, integrationV1RegisterWebhookData, integrationV1RegisterWebhookErrors, integrationV1RegisterWebhookResponses, integrationV1RotateWebhookSecretData, integrationV1RotateWebhookSecretErrors, integrationV1RotateWebhookSecretResponses, integrationV1SandboxBankSignData, integrationV1SandboxBankSignErrors, integrationV1SandboxBankSignResponses, integrationV1SubmitBankConfirmationData, integrationV1SubmitBankConfirmationErrors, integrationV1SubmitBankConfirmationResponses, integrationV1TestWebhookData, integrationV1TestWebhookErrors, integrationV1TestWebhookResponses, loginDemoLoginData, loginDemoLoginErrors, loginDemoLoginResponses, loginGetDemoPersonasData, loginGetDemoPersonasResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, metaGetMetaData, metaGetMetaResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, releaseApproveReleaseData, releaseApproveReleaseErrors, releaseApproveReleasePostData, releaseApproveReleasePostErrors, releaseApproveReleasePostResponses, releaseApproveReleaseResponses, releaseGetInstrumentReleaseData, releaseGetInstrumentReleaseErrors, releaseGetInstrumentReleaseResponses, releaseRejectReleaseData, releaseRejectReleaseErrors, releaseRejectReleaseResponses, releaseRequestReleaseData, releaseRequestReleaseErrors, releaseRequestReleaseResponses, releaseVerifyReceiptEndpointData, releaseVerifyReceiptEndpointErrors, releaseVerifyReceiptEndpointResponses, releaseVerifyReleaseData, releaseVerifyReleaseErrors, releaseVerifyReleasePostData, releaseVerifyReleasePostErrors, releaseVerifyReleasePostResponses, releaseVerifyReleaseResponses, reportsPreviewCasesNeedingInterventionData, reportsPreviewCasesNeedingInterventionErrors, reportsPreviewCasesNeedingInterventionResponses, reportsPreviewMissingDocumentsData, reportsPreviewMissingDocumentsErrors, reportsPreviewMissingDocumentsResponses, reportsPreviewPendingVerificationsData, reportsPreviewPendingVerificationsErrors, reportsPreviewPendingVerificationsResponses, reportsPreviewUpcomingMaturitiesData, reportsPreviewUpcomingMaturitiesErrors, reportsPreviewUpcomingMaturitiesResponses, reportsReportCasesNeedingInterventionData, reportsReportCasesNeedingInterventionResponses, reportsReportMissingDocumentsData, reportsReportMissingDocumentsResponses, reportsReportPendingVerificationsData, reportsReportPendingVerificationsResponses, reportsReportUpcomingMaturitiesData, reportsReportUpcomingMaturitiesResponses, simulationGetClockData, simulationGetClockResponses, simulationTriggerDailyWorkerData, simulationTriggerDailyWorkerResponses, simulationUpdateClockData, simulationUpdateClockErrors, simulationUpdateClockResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -162,6 +162,176 @@ export class BankService {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
+        });
+    }
+}
+
+export class IntegrationV1Service {
+    /**
+     * List Pending Bank Requests
+     *
+     * Poll outstanding bank verification requests.
+     */
+    public static listPendingBankRequests<ThrowOnError extends boolean = true>(options?: Options<integrationV1ListPendingBankRequestsData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationV1ListPendingBankRequestsResponses, integrationV1ListPendingBankRequestsErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/bank/requests/pending',
+            ...options
+        });
+    }
+    
+    /**
+     * Submit Bank Confirmation
+     *
+     * Submit cryptographically signed bank verification reply.
+     */
+    public static submitBankConfirmation<ThrowOnError extends boolean = true>(options: Options<integrationV1SubmitBankConfirmationData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationV1SubmitBankConfirmationResponses, integrationV1SubmitBankConfirmationErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/bank/confirmations',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Sandbox Bank Sign
+     *
+     * Generate a sample signed bank verification letter for sandbox curl testing.
+     */
+    public static sandboxBankSign<ThrowOnError extends boolean = true>(options: Options<integrationV1SandboxBankSignData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationV1SandboxBankSignResponses, integrationV1SandboxBankSignErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/sandbox/bank/sign',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * List Institutions
+     *
+     * List technical institutions with cursor pagination.
+     */
+    public static listInstitutions<ThrowOnError extends boolean = true>(options?: Options<integrationV1ListInstitutionsData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationV1ListInstitutionsResponses, integrationV1ListInstitutionsErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/institutions',
+            ...options
+        });
+    }
+    
+    /**
+     * List Instruments
+     *
+     * List fixed deposit instruments with lifecycle and badge filters.
+     */
+    public static listInstruments<ThrowOnError extends boolean = true>(options?: Options<integrationV1ListInstrumentsData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationV1ListInstrumentsResponses, integrationV1ListInstrumentsErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/instruments',
+            ...options
+        });
+    }
+    
+    /**
+     * List Events
+     *
+     * Stream outbox lifecycle events with cursor pagination.
+     */
+    public static listEvents<ThrowOnError extends boolean = true>(options?: Options<integrationV1ListEventsData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationV1ListEventsResponses, integrationV1ListEventsErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/events',
+            ...options
+        });
+    }
+    
+    /**
+     * List Webhooks
+     *
+     * List registered webhooks.
+     */
+    public static listWebhooks<ThrowOnError extends boolean = true>(options?: Options<integrationV1ListWebhooksData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationV1ListWebhooksResponses, integrationV1ListWebhooksErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/webhooks',
+            ...options
+        });
+    }
+    
+    /**
+     * Register Webhook
+     *
+     * Register a new SSRF-protected webhook subscription.
+     */
+    public static registerWebhook<ThrowOnError extends boolean = true>(options: Options<integrationV1RegisterWebhookData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationV1RegisterWebhookResponses, integrationV1RegisterWebhookErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/webhooks',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Delete Webhook
+     *
+     * Revoke a webhook subscription.
+     */
+    public static deleteWebhook<ThrowOnError extends boolean = true>(options: Options<integrationV1DeleteWebhookData, ThrowOnError>) {
+        return (options.client ?? client).delete<integrationV1DeleteWebhookResponses, integrationV1DeleteWebhookErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/webhooks/{subscription_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Test Webhook
+     *
+     * Test webhook delivery by dispatching a ping event.
+     */
+    public static testWebhook<ThrowOnError extends boolean = true>(options: Options<integrationV1TestWebhookData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationV1TestWebhookResponses, integrationV1TestWebhookErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/webhooks/{subscription_id}/test',
+            ...options
+        });
+    }
+    
+    /**
+     * Rotate Webhook Secret
+     *
+     * Rotate the HMAC secret of a webhook subscription.
+     */
+    public static rotateWebhookSecret<ThrowOnError extends boolean = true>(options: Options<integrationV1RotateWebhookSecretData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationV1RotateWebhookSecretResponses, integrationV1RotateWebhookSecretErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/webhooks/{subscription_id}/rotate-secret',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Webhook Logs
+     *
+     * List recent delivery logs for a webhook subscription.
+     */
+    public static getWebhookLogs<ThrowOnError extends boolean = true>(options: Options<integrationV1GetWebhookLogsData, ThrowOnError>) {
+        return (options.client ?? client).get<integrationV1GetWebhookLogsResponses, integrationV1GetWebhookLogsErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/integration/v1/webhooks/{subscription_id}/logs',
+            ...options
         });
     }
 }
@@ -463,6 +633,32 @@ export class UtilsService {
 }
 
 export class AuditService {
+    /**
+     * List Checkpoints
+     *
+     * Retrieve signed detached audit checkpoints and public verification key (Requirement 3.7).
+     */
+    public static listCheckpoints<ThrowOnError extends boolean = true>(options?: Options<auditListCheckpointsData, ThrowOnError>) {
+        return (options?.client ?? client).get<auditListCheckpointsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/audit/checkpoints',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Checkpoint Pubkey
+     *
+     * Retrieve public verification key for detached audit checkpoints in PEM format.
+     */
+    public static getCheckpointPubkey<ThrowOnError extends boolean = true>(options?: Options<auditGetCheckpointPubkeyData, ThrowOnError>) {
+        return (options?.client ?? client).get<auditGetCheckpointPubkeyResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/audit/checkpoints/pubkey',
+            ...options
+        });
+    }
+    
     /**
      * Verify Audit Chain
      *
@@ -963,7 +1159,7 @@ export class EvidenceService {
     /**
      * Get Evidence Summary
      *
-     * Summary of system status, DEMO disclaimers, capability coverage, and synthetic benchmarks.
+     * Summary of system status, DEMO disclaimers, capability coverage, live table counts, and synthetic benchmarks.
      */
     public static getEvidenceSummary<ThrowOnError extends boolean = true>(options?: Options<evidenceGetEvidenceSummaryData, ThrowOnError>) {
         return (options?.client ?? client).get<evidenceGetEvidenceSummaryResponses, unknown, ThrowOnError>({
@@ -997,6 +1193,142 @@ export class IntegrationService {
         return (options.client ?? client).get<integrationCoverageStatusResponses, integrationCoverageStatusErrors, ThrowOnError>({
             responseType: 'json',
             url: '/api/v1/integration/institutions/{permanent_id}/coverage-status',
+            ...options
+        });
+    }
+}
+
+export class IntegrationAdminService {
+    /**
+     * List Machine Api Keys
+     *
+     * Bureau only: List issued machine API keys.
+     */
+    public static listMachineApiKeys<ThrowOnError extends boolean = true>(options?: Options<integrationAdminListMachineApiKeysData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationAdminListMachineApiKeysResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/keys',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Machine Api Key
+     *
+     * Bureau only: Issue new machine API key.
+     */
+    public static createMachineApiKey<ThrowOnError extends boolean = true>(options: Options<integrationAdminCreateMachineApiKeyData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationAdminCreateMachineApiKeyResponses, integrationAdminCreateMachineApiKeyErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/keys',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Revoke Machine Api Key
+     *
+     * Bureau only: Revoke machine API key.
+     */
+    public static revokeMachineApiKey<ThrowOnError extends boolean = true>(options: Options<integrationAdminRevokeMachineApiKeyData, ThrowOnError>) {
+        return (options.client ?? client).delete<integrationAdminRevokeMachineApiKeyResponses, integrationAdminRevokeMachineApiKeyErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/keys/{key_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * List Admin Webhooks
+     *
+     * Bureau only: List all webhooks with recent delivery logs.
+     */
+    public static listAdminWebhooks<ThrowOnError extends boolean = true>(options?: Options<integrationAdminListAdminWebhooksData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationAdminListAdminWebhooksResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/webhooks',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Admin Webhook
+     *
+     * Bureau only: Register new webhook.
+     */
+    public static createAdminWebhook<ThrowOnError extends boolean = true>(options: Options<integrationAdminCreateAdminWebhookData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationAdminCreateAdminWebhookResponses, integrationAdminCreateAdminWebhookErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/webhooks',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Delete Admin Webhook
+     *
+     * Bureau only: Revoke webhook.
+     */
+    public static deleteAdminWebhook<ThrowOnError extends boolean = true>(options: Options<integrationAdminDeleteAdminWebhookData, ThrowOnError>) {
+        return (options.client ?? client).delete<integrationAdminDeleteAdminWebhookResponses, integrationAdminDeleteAdminWebhookErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/webhooks/{subscription_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Test Admin Webhook
+     *
+     * Bureau only: Send test ping to webhook.
+     */
+    public static testAdminWebhook<ThrowOnError extends boolean = true>(options: Options<integrationAdminTestAdminWebhookData, ThrowOnError>) {
+        return (options.client ?? client).post<integrationAdminTestAdminWebhookResponses, integrationAdminTestAdminWebhookErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/webhooks/{subscription_id}/test',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Outbox Tail
+     *
+     * Bureau only: View recent transactional outbox messages.
+     */
+    public static getOutboxTail<ThrowOnError extends boolean = true>(options?: Options<integrationAdminGetOutboxTailData, ThrowOnError>) {
+        return (options?.client ?? client).get<integrationAdminGetOutboxTailResponses, integrationAdminGetOutboxTailErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/outbox-tail',
+            ...options
+        });
+    }
+    
+    /**
+     * Test Bank Flow
+     *
+     * Try the bank flow: simulates pending challenge token, generates signed letter, passes gate.
+     */
+    public static testBankFlow<ThrowOnError extends boolean = true>(options?: Options<integrationAdminTestBankFlowData, ThrowOnError>) {
+        return (options?.client ?? client).post<integrationAdminTestBankFlowResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/integration/bank-flow-test',
             ...options
         });
     }

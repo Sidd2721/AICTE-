@@ -5,6 +5,65 @@ export type ClientOptions = {
 };
 
 /**
+ * APIKeyCreateRequest
+ */
+export type APIKeyCreateRequest = {
+    /**
+     * Client Name
+     */
+    client_name: string;
+    /**
+     * Scopes
+     */
+    scopes: Array<string>;
+    /**
+     * Expires In Days
+     */
+    expires_in_days?: number | null;
+};
+
+/**
+ * BankConfirmationFields
+ */
+export type BankConfirmationFields = {
+    /**
+     * Ref No
+     */
+    ref_no: string;
+    /**
+     * Bank Code
+     */
+    bank_code: string;
+    /**
+     * Amount Paise
+     */
+    amount_paise: number;
+    /**
+     * Maturity Date
+     */
+    maturity_date: string;
+    /**
+     * Lien Marked
+     */
+    lien_marked?: boolean;
+};
+
+/**
+ * BankConfirmationRequest
+ */
+export type BankConfirmationRequest = {
+    /**
+     * Request Token
+     */
+    request_token: string;
+    /**
+     * Signed Letter Base64
+     */
+    signed_letter_base64: string;
+    fields: BankConfirmationFields;
+};
+
+/**
  * Body_documents-upload_document
  */
 export type Body_documents_upload_document = {
@@ -132,6 +191,22 @@ export type ClockUpdate = {
      * Offset Seconds
      */
     offset_seconds: number;
+};
+
+/**
+ * CursorPage
+ */
+export type CursorPage = {
+    /**
+     * Items
+     */
+    items: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Next Cursor
+     */
+    next_cursor?: string | null;
 };
 
 /**
@@ -641,6 +716,32 @@ export type ReleaseRequestPublic = {
 };
 
 /**
+ * SandboxSignRequest
+ */
+export type SandboxSignRequest = {
+    /**
+     * Ref No
+     */
+    ref_no: string;
+    /**
+     * Amount Paise
+     */
+    amount_paise: number;
+    /**
+     * Maturity Date
+     */
+    maturity_date: string;
+    /**
+     * Bank Code
+     */
+    bank_code?: string;
+    /**
+     * Lien Marked
+     */
+    lien_marked?: boolean;
+};
+
+/**
  * SimConfirmRequest
  */
 export type SimConfirmRequest = {
@@ -850,6 +951,24 @@ export type ValidationError = {
     ctx?: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * WebhookCreateRequest
+ */
+export type WebhookCreateRequest = {
+    /**
+     * Target Url
+     */
+    target_url: string;
+    /**
+     * Event Types
+     */
+    event_types?: Array<string>;
+    /**
+     * Secret
+     */
+    secret?: string | null;
 };
 
 export type clockGetClockV1Data = {
@@ -1123,6 +1242,495 @@ export type simulationTriggerDailyWorkerResponses = {
      */
     200: unknown;
 };
+
+export type integrationV1ListPendingBankRequestsData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Ifsc
+         */
+        ifsc?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+    };
+    url: '/api/integration/v1/bank/requests/pending';
+};
+
+export type integrationV1ListPendingBankRequestsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1ListPendingBankRequestsError = integrationV1ListPendingBankRequestsErrors[keyof integrationV1ListPendingBankRequestsErrors];
+
+export type integrationV1ListPendingBankRequestsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPage;
+};
+
+export type integrationV1ListPendingBankRequestsResponse = integrationV1ListPendingBankRequestsResponses[keyof integrationV1ListPendingBankRequestsResponses];
+
+export type integrationV1SubmitBankConfirmationData = {
+    body: BankConfirmationRequest;
+    headers?: {
+        /**
+         * Idempotency-Key
+         */
+        'Idempotency-Key'?: string | null;
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/integration/v1/bank/confirmations';
+};
+
+export type integrationV1SubmitBankConfirmationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1SubmitBankConfirmationError = integrationV1SubmitBankConfirmationErrors[keyof integrationV1SubmitBankConfirmationErrors];
+
+export type integrationV1SubmitBankConfirmationResponses = {
+    /**
+     * Response Integration V1-Submit Bank Confirmation
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1SubmitBankConfirmationResponse = integrationV1SubmitBankConfirmationResponses[keyof integrationV1SubmitBankConfirmationResponses];
+
+export type integrationV1SandboxBankSignData = {
+    body: SandboxSignRequest;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/integration/v1/sandbox/bank/sign';
+};
+
+export type integrationV1SandboxBankSignErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1SandboxBankSignError = integrationV1SandboxBankSignErrors[keyof integrationV1SandboxBankSignErrors];
+
+export type integrationV1SandboxBankSignResponses = {
+    /**
+     * Response Integration V1-Sandbox Bank Sign
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1SandboxBankSignResponse = integrationV1SandboxBankSignResponses[keyof integrationV1SandboxBankSignResponses];
+
+export type integrationV1ListInstitutionsData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Region
+         */
+        region?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+    };
+    url: '/api/integration/v1/institutions';
+};
+
+export type integrationV1ListInstitutionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1ListInstitutionsError = integrationV1ListInstitutionsErrors[keyof integrationV1ListInstitutionsErrors];
+
+export type integrationV1ListInstitutionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPage;
+};
+
+export type integrationV1ListInstitutionsResponse = integrationV1ListInstitutionsResponses[keyof integrationV1ListInstitutionsResponses];
+
+export type integrationV1ListInstrumentsData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Lifecycle
+         */
+        lifecycle?: string | null;
+        /**
+         * Badge
+         */
+        badge?: string | null;
+        /**
+         * Updated Since
+         */
+        updated_since?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+    };
+    url: '/api/integration/v1/instruments';
+};
+
+export type integrationV1ListInstrumentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1ListInstrumentsError = integrationV1ListInstrumentsErrors[keyof integrationV1ListInstrumentsErrors];
+
+export type integrationV1ListInstrumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPage;
+};
+
+export type integrationV1ListInstrumentsResponse = integrationV1ListInstrumentsResponses[keyof integrationV1ListInstrumentsResponses];
+
+export type integrationV1ListEventsData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+    };
+    url: '/api/integration/v1/events';
+};
+
+export type integrationV1ListEventsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1ListEventsError = integrationV1ListEventsErrors[keyof integrationV1ListEventsErrors];
+
+export type integrationV1ListEventsResponses = {
+    /**
+     * Successful Response
+     */
+    200: CursorPage;
+};
+
+export type integrationV1ListEventsResponse = integrationV1ListEventsResponses[keyof integrationV1ListEventsResponses];
+
+export type integrationV1ListWebhooksData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/integration/v1/webhooks';
+};
+
+export type integrationV1ListWebhooksErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1ListWebhooksError = integrationV1ListWebhooksErrors[keyof integrationV1ListWebhooksErrors];
+
+export type integrationV1ListWebhooksResponses = {
+    /**
+     * Response Integration V1-List Webhooks
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1ListWebhooksResponse = integrationV1ListWebhooksResponses[keyof integrationV1ListWebhooksResponses];
+
+export type integrationV1RegisterWebhookData = {
+    body: WebhookCreateRequest;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/integration/v1/webhooks';
+};
+
+export type integrationV1RegisterWebhookErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1RegisterWebhookError = integrationV1RegisterWebhookErrors[keyof integrationV1RegisterWebhookErrors];
+
+export type integrationV1RegisterWebhookResponses = {
+    /**
+     * Response Integration V1-Register Webhook
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1RegisterWebhookResponse = integrationV1RegisterWebhookResponses[keyof integrationV1RegisterWebhookResponses];
+
+export type integrationV1DeleteWebhookData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Subscription Id
+         */
+        subscription_id: string;
+    };
+    query?: never;
+    url: '/api/integration/v1/webhooks/{subscription_id}';
+};
+
+export type integrationV1DeleteWebhookErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1DeleteWebhookError = integrationV1DeleteWebhookErrors[keyof integrationV1DeleteWebhookErrors];
+
+export type integrationV1DeleteWebhookResponses = {
+    /**
+     * Response Integration V1-Delete Webhook
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1DeleteWebhookResponse = integrationV1DeleteWebhookResponses[keyof integrationV1DeleteWebhookResponses];
+
+export type integrationV1TestWebhookData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Subscription Id
+         */
+        subscription_id: string;
+    };
+    query?: never;
+    url: '/api/integration/v1/webhooks/{subscription_id}/test';
+};
+
+export type integrationV1TestWebhookErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1TestWebhookError = integrationV1TestWebhookErrors[keyof integrationV1TestWebhookErrors];
+
+export type integrationV1TestWebhookResponses = {
+    /**
+     * Response Integration V1-Test Webhook
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1TestWebhookResponse = integrationV1TestWebhookResponses[keyof integrationV1TestWebhookResponses];
+
+export type integrationV1RotateWebhookSecretData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Subscription Id
+         */
+        subscription_id: string;
+    };
+    query?: never;
+    url: '/api/integration/v1/webhooks/{subscription_id}/rotate-secret';
+};
+
+export type integrationV1RotateWebhookSecretErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1RotateWebhookSecretError = integrationV1RotateWebhookSecretErrors[keyof integrationV1RotateWebhookSecretErrors];
+
+export type integrationV1RotateWebhookSecretResponses = {
+    /**
+     * Response Integration V1-Rotate Webhook Secret
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1RotateWebhookSecretResponse = integrationV1RotateWebhookSecretResponses[keyof integrationV1RotateWebhookSecretResponses];
+
+export type integrationV1GetWebhookLogsData = {
+    body?: never;
+    headers?: {
+        /**
+         * X-Api-Key
+         */
+        'X-API-Key'?: string | null;
+    };
+    path: {
+        /**
+         * Subscription Id
+         */
+        subscription_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/integration/v1/webhooks/{subscription_id}/logs';
+};
+
+export type integrationV1GetWebhookLogsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationV1GetWebhookLogsError = integrationV1GetWebhookLogsErrors[keyof integrationV1GetWebhookLogsErrors];
+
+export type integrationV1GetWebhookLogsResponses = {
+    /**
+     * Response Integration V1-Get Webhook Logs
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationV1GetWebhookLogsResponse = integrationV1GetWebhookLogsResponses[keyof integrationV1GetWebhookLogsResponses];
 
 export type metaGetMetaData = {
     body?: never;
@@ -1587,6 +2195,40 @@ export type utilsHealthCheckResponses = {
 };
 
 export type utilsHealthCheckResponse = utilsHealthCheckResponses[keyof utilsHealthCheckResponses];
+
+export type auditListCheckpointsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/audit/checkpoints';
+};
+
+export type auditListCheckpointsResponses = {
+    /**
+     * Response Audit-List Checkpoints
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type auditListCheckpointsResponse = auditListCheckpointsResponses[keyof auditListCheckpointsResponses];
+
+export type auditGetCheckpointPubkeyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/audit/checkpoints/pubkey';
+};
+
+export type auditGetCheckpointPubkeyResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type auditVerifyAuditChainData = {
     body?: never;
@@ -2731,6 +3373,260 @@ export type integrationCoverageStatusResponses = {
 };
 
 export type integrationCoverageStatusResponse = integrationCoverageStatusResponses[keyof integrationCoverageStatusResponses];
+
+export type integrationAdminListMachineApiKeysData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/integration/keys';
+};
+
+export type integrationAdminListMachineApiKeysResponses = {
+    /**
+     * Response Integration Admin-List Machine Api Keys
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminListMachineApiKeysResponse = integrationAdminListMachineApiKeysResponses[keyof integrationAdminListMachineApiKeysResponses];
+
+export type integrationAdminCreateMachineApiKeyData = {
+    body: APIKeyCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/integration/keys';
+};
+
+export type integrationAdminCreateMachineApiKeyErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationAdminCreateMachineApiKeyError = integrationAdminCreateMachineApiKeyErrors[keyof integrationAdminCreateMachineApiKeyErrors];
+
+export type integrationAdminCreateMachineApiKeyResponses = {
+    /**
+     * Response Integration Admin-Create Machine Api Key
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminCreateMachineApiKeyResponse = integrationAdminCreateMachineApiKeyResponses[keyof integrationAdminCreateMachineApiKeyResponses];
+
+export type integrationAdminRevokeMachineApiKeyData = {
+    body?: never;
+    path: {
+        /**
+         * Key Id
+         */
+        key_id: string;
+    };
+    query?: never;
+    url: '/api/v1/integration/keys/{key_id}';
+};
+
+export type integrationAdminRevokeMachineApiKeyErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationAdminRevokeMachineApiKeyError = integrationAdminRevokeMachineApiKeyErrors[keyof integrationAdminRevokeMachineApiKeyErrors];
+
+export type integrationAdminRevokeMachineApiKeyResponses = {
+    /**
+     * Response Integration Admin-Revoke Machine Api Key
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminRevokeMachineApiKeyResponse = integrationAdminRevokeMachineApiKeyResponses[keyof integrationAdminRevokeMachineApiKeyResponses];
+
+export type integrationAdminListAdminWebhooksData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/integration/webhooks';
+};
+
+export type integrationAdminListAdminWebhooksResponses = {
+    /**
+     * Response Integration Admin-List Admin Webhooks
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminListAdminWebhooksResponse = integrationAdminListAdminWebhooksResponses[keyof integrationAdminListAdminWebhooksResponses];
+
+export type integrationAdminCreateAdminWebhookData = {
+    body: WebhookCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/integration/webhooks';
+};
+
+export type integrationAdminCreateAdminWebhookErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationAdminCreateAdminWebhookError = integrationAdminCreateAdminWebhookErrors[keyof integrationAdminCreateAdminWebhookErrors];
+
+export type integrationAdminCreateAdminWebhookResponses = {
+    /**
+     * Response Integration Admin-Create Admin Webhook
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminCreateAdminWebhookResponse = integrationAdminCreateAdminWebhookResponses[keyof integrationAdminCreateAdminWebhookResponses];
+
+export type integrationAdminDeleteAdminWebhookData = {
+    body?: never;
+    path: {
+        /**
+         * Subscription Id
+         */
+        subscription_id: string;
+    };
+    query?: never;
+    url: '/api/v1/integration/webhooks/{subscription_id}';
+};
+
+export type integrationAdminDeleteAdminWebhookErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationAdminDeleteAdminWebhookError = integrationAdminDeleteAdminWebhookErrors[keyof integrationAdminDeleteAdminWebhookErrors];
+
+export type integrationAdminDeleteAdminWebhookResponses = {
+    /**
+     * Response Integration Admin-Delete Admin Webhook
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminDeleteAdminWebhookResponse = integrationAdminDeleteAdminWebhookResponses[keyof integrationAdminDeleteAdminWebhookResponses];
+
+export type integrationAdminTestAdminWebhookData = {
+    body?: never;
+    path: {
+        /**
+         * Subscription Id
+         */
+        subscription_id: string;
+    };
+    query?: never;
+    url: '/api/v1/integration/webhooks/{subscription_id}/test';
+};
+
+export type integrationAdminTestAdminWebhookErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationAdminTestAdminWebhookError = integrationAdminTestAdminWebhookErrors[keyof integrationAdminTestAdminWebhookErrors];
+
+export type integrationAdminTestAdminWebhookResponses = {
+    /**
+     * Response Integration Admin-Test Admin Webhook
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminTestAdminWebhookResponse = integrationAdminTestAdminWebhookResponses[keyof integrationAdminTestAdminWebhookResponses];
+
+export type integrationAdminGetOutboxTailData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/integration/outbox-tail';
+};
+
+export type integrationAdminGetOutboxTailErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type integrationAdminGetOutboxTailError = integrationAdminGetOutboxTailErrors[keyof integrationAdminGetOutboxTailErrors];
+
+export type integrationAdminGetOutboxTailResponses = {
+    /**
+     * Response Integration Admin-Get Outbox Tail
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminGetOutboxTailResponse = integrationAdminGetOutboxTailResponses[keyof integrationAdminGetOutboxTailResponses];
+
+export type integrationAdminTestBankFlowData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/integration/bank-flow-test';
+};
+
+export type integrationAdminTestBankFlowResponses = {
+    /**
+     * Response Integration Admin-Test Bank Flow
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type integrationAdminTestBankFlowResponse = integrationAdminTestBankFlowResponses[keyof integrationAdminTestBankFlowResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;
