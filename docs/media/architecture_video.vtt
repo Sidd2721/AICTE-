@@ -1,0 +1,115 @@
+WEBVTT - AICTE Security Deposit & FDR Portal (SIH PS 26265) Architecture Tour
+
+00:00.000 --> 00:04.000
+Hello everyone.
+
+00:04.000 --> 00:11.000
+In this video, I will explain the technical architecture of our AICTE Security Deposit and FDR Verification Portal.
+
+00:11.000 --> 00:20.000
+We will follow one request through the system to understand how our APIs, database, technologies, data pipelines and routing work together to create a secure and reliable workflow.
+
+00:20.000 --> 00:24.000
+First, let's understand the API architecture.
+
+00:24.000 --> 00:31.000
+Our frontend uses React and TypeScript, while our backend is built with FastAPI and Python.
+
+00:31.000 --> 00:39.000
+When a user submits an FDR, the request passes through the secure entry point and reaches the appropriate API endpoint.
+
+00:39.000 --> 00:47.000
+The backend checks the user's identity, validates the incoming data and verifies whether the requested action is allowed.
+
+00:47.000 --> 00:57.000
+We organize APIs by responsibility: instruments API, deposits API, bank API, release API, and audit API.
+
+00:57.000 --> 01:04.000
+A key feature is our server-driven workflow: the backend determines the next valid action based on state, permissions, and business rules.
+
+01:04.000 --> 01:10.000
+Backend idempotency protection ensures network retries never create duplicate deposits or repeat releases.
+
+01:10.000 --> 01:15.000
+Next, let's look at the database architecture built on PostgreSQL.
+
+01:15.000 --> 01:22.000
+Institutions connect to FDR records, and FDR records connect to verification logs and approval workflows.
+
+01:22.000 --> 01:31.000
+We enforce strict Row-Level Security: colleges only access their own records, regional officers see their jurisdiction, and head office views consolidated national reports.
+
+01:31.000 --> 01:37.000
+All financial amounts are stored as integer paise to prevent floating-point rounding errors.
+
+01:37.000 --> 01:44.000
+Role segregation is enforced at the database level: the user who prepares a submission can never approve or release it.
+
+01:44.000 --> 01:55.000
+Every action is recorded in a cryptographically linked append-only audit trail with SHA-256 hashes for total tamper detection.
+
+01:55.000 --> 01:59.000
+Now let's examine our technology choices and external connections.
+
+01:59.000 --> 02:06.000
+The frontend is built with React, Vite, and Tailwind CSS. The backend uses FastAPI, Python, SQLAlchemy, and Alembic.
+
+02:06.000 --> 02:13.000
+PostgreSQL handles data storage while Redis and Celery manage background tasks such as bank verification polling and reminders.
+
+02:13.000 --> 02:22.000
+For external systems, we integrate with Core Banking Solutions, the AICTE Institution Master Database, and notification services for email and SMS.
+
+02:22.000 --> 02:35.000
+Security layers protect every connection: JWT tokens, role-based access control, TLS encryption in transit, AES-256 at rest, and digital signature verification.
+
+02:35.000 --> 02:40.000
+Let's follow a deposit through its entire lifecycle across eight automated stages.
+
+02:40.000 --> 02:48.000
+Stage 1: The college submits deposit details. Stage 2: The system validates bank IFSC, amount against AICTE regulation tables, and required formats.
+
+02:48.000 --> 02:56.000
+Stage 3: An automated verification request is sent to the bank. Stage 4: The bank confirms lien marked in favor of AICTE, sealing the tripartite agreement.
+
+02:56.000 --> 03:05.000
+Stage 5: The FDR enters active monitoring with interest tracking. Stage 6: Automated maturity alerts trigger at T-90, T-60, and T-30 days.
+
+03:05.000 --> 03:14.000
+Stage 7: The college applies for release and uploads necessary compliance certificates.
+
+03:14.000 --> 03:24.000
+Stage 8: Regional officers review, Finance Bureau validates, and an automated release order is issued with digital signature verification.
+
+03:24.000 --> 03:40.000
+Every state transition is locked, audited, and mathematically verified without manual paper chasing.
+
+03:40.000 --> 03:45.000
+Next, let's look at production network routing and interface structure.
+
+03:45.000 --> 03:53.000
+Client requests enter through Caddy reverse proxy, providing automatic HTTPS, compression, and rate limiting.
+
+03:53.000 --> 04:01.000
+Requests for the API route to the FastAPI backend, while other requests serve the static React single-page application.
+
+04:01.000 --> 04:10.000
+Our frontend architecture uses modular route-based structures with TanStack Router, responsive layouts, and accessible components.
+
+04:10.000 --> 04:20.000
+Real-time updates keep dashboards synchronized across Colleges, Bank Officers, Regional Officers, and National Administrators.
+
+04:20.000 --> 04:25.000
+To summarize, our architecture provides four core advantages:
+
+04:25.000 --> 04:31.000
+First, Scalability: Stateless APIs and asynchronous task processing handle peak workloads during annual approval cycles.
+
+04:31.000 --> 04:37.000
+Second, Security: Row-level security, role separation, and cryptographic audit trails protect sensitive financial data.
+
+04:37.000 --> 04:43.000
+Third, Reliability: Idempotent operations, automated retries, and comprehensive error handling prevent data loss.
+
+04:43.000 --> 04:50.000
+Fourth, Regulatory Compliance: Strict enforcement of AICTE norms with automated validation and complete auditability. Thank you.

@@ -42,3 +42,6 @@ backend/app/vault/
 backend/app/keys/*.pem
 .timebox
 .goal/
+
+docs/media/*.webm
+docs/media/*.mp4

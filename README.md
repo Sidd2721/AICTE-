@@ -84,20 +84,28 @@ Imagine an AICTE security deposit as a high-security bank vault deposit locker:
 
 ## 3. Interactive Walkthrough Video & Player Guide
 
-The repository includes a recorded walkthrough demonstration and a dedicated offline HTML5 player:
+The repository includes complete recorded walkthrough demonstrations and dedicated offline HTML5 visual players:
 
+### Video 1 — End-to-End Operational Walkthrough (7-Step Demo)
 - **Recorded Walkthrough Video:** Located at [`docs/demo_video.mp4`](docs/demo_video.mp4) (H.264 MP4, ~2.1 MB).
 - **Interactive Player with HUD Callouts:** Open [`docs/video_player.html`](docs/video_player.html) in any standard web browser.
 - **Video Generator Script:** Re-recordable on demand via [`scripts/record_full_demo_video.js`](scripts/record_full_demo_video.js) using Playwright.
 
+### Video 2 — Complete Technical Architecture Deep Dive (4m 50s Motion Graphics & 90s Judge Cut)
+- **Interactive Motion Graphics Stage (1080p 60fps):** Open [`docs/video2_architecture_motion_graphics.html`](docs/video2_architecture_motion_graphics.html) in any browser (interactive scrubber, voice synthesis narrator toggle, live packet flow animation).
+- **Recorded Video (90s Judge Cut):** [`docs/media/architecture_video_90s_1080p.mp4`](docs/media/architecture_video_90s_1080p.mp4) (1080p H.264, 2.92 MB, SHA-256: `8f5463f3c4ad18dbdba331452ee80da9b6571e5f2088c0de3289312ddf4a701c`).
+- **Synchronized Closed Captions:** [`docs/media/architecture_video.vtt`](docs/media/architecture_video.vtt).
+- **Architectural Storyboard & Script Walkthrough:** [`docs/VIDEO2_ARCHITECTURE_WALKTHROUGH.md`](docs/VIDEO2_ARCHITECTURE_WALKTHROUGH.md).
+- **Automated Recording Script:** Re-recordable on demand via `node scripts/record_architecture_video.js [preview|full]`.
+
 ### Video Scene Breakdown
-1. **Scene 1 (0:00–0:10):** Institution Table 1.4 Coverage Calculator & FDR Instrument Intake.
-2. **Scene 2 (0:10–0:20):** Regional Officer Case Scrutiny & 6-Point Cryptographic Bank Gate.
-3. **Scene 3 (0:20–0:30):** The Break-Me Workbench (Appended Bytes & Forged Letter Defense).
-4. **Scene 4 (0:30–0:40):** Amount Shortfall (D1 Discrepancy) & Mandatory Scrutiny Waiver Note.
-5. **Scene 5 (0:40–0:50):** Virtual Clock Time Machine & Scheduled Obligation Worker Alerts.
-6. **Scene 6 (0:50–1:00):** Custody Renewal Linking & Coverage Gap Analysis.
-7. **Scene 7 (1:00–1:15):** Dual-Custody Release Authorization & Offline Cryptographic Receipt Verification.
+1. **Scene 1 (0:00–0:10 / 0:00-0:20 in Video 2):** System Architecture Overview & Table 1.4 Coverage Calculator.
+2. **Scene 2 (0:10–0:20 / 0:20-01:10 in Video 2):** API Architecture, Idempotency & 6-Point Cryptographic Bank Gate.
+3. **Scene 3 (0:20–0:30 / 01:10-01:55 in Video 2):** Database Architecture, PostgreSQL RLS & Integer-Paise Arithmetic.
+4. **Scene 4 (0:30–0:40 / 01:55-02:35 in Video 2):** Technology Stack Matrix & Core Banking / AICTE Simulators.
+5. **Scene 5 (0:40–0:50 / 02:35-03:40 in Video 2):** 8-Stage Deposit Lifecycle Circuit & T-90/60/30 Maturity Alerts.
+6. **Scene 6 (0:50–1:00 / 03:40-04:20 in Video 2):** Caddy Edge Routing & Multi-Role User Interface Flow.
+7. **Scene 7 (1:00–1:15 / 04:20-04:50 in Video 2):** Architecture Summary, 4 Core Pillars & Verification Scoreboard.
 
 ---
 

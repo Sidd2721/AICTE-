@@ -153,3 +153,18 @@
 | **Generator Script** | `scripts/record_full_demo_video.js` | Headless Playwright scripted automation | Reproducible recording from clean state |
 | **Playwright E2E Suite** | `frontend/tests/` | **43 passed (42.2s)** | Chromium E2E suite |
 | **Backend Test Suite** | `backend/tests/` | **186 passed (64.0s)** | Pytest suite against `app_test` |
+
+---
+
+## 9. Video 2 — Complete System Architecture & Motion Graphics Tour
+
+| Deliverable Asset | File Location | Specifications | Verification Details |
+| :--- | :--- | :--- | :--- |
+| **Interactive Motion Graphics Stage** | [`docs/video2_architecture_motion_graphics.html`](file:///C:/Users/avadu/26265/docs/video2_architecture_motion_graphics.html) | Standalone HTML5/Canvas 1080p 60fps player with timeline scrubber, audio narration toggle & live packet animation | Zero external CDN dependencies, self-contained vector graphic scenes |
+| **Architecture Video (Judge 90s MP4)** | [`docs/media/architecture_video_90s_1080p.mp4`](file:///C:/Users/avadu/26265/docs/media/architecture_video_90s_1080p.mp4) | 1920x1080 H.264, 2.92 MB, 25fps, yuv420p | `SHA-256: 8f5463f3c4ad18dbdba331452ee80da9b6571e5f2088c0de3289312ddf4a701c` |
+| **Architecture Video (Full 290s MP4)** | `docs/media/architecture_video_full_1080p.mp4` | 1920x1080 H.264, 9.83 MB, 25fps, yuv420p | `SHA-256: 77e2b79c560fb9c4153ea3f5a9ecda963903ddaed0d82725cd4fbe682386df6f` |
+| **Architecture Video (Judge 90s WebM)**| [`docs/media/architecture_video_90s_1080p.webm`](file:///C:/Users/avadu/26265/docs/media/architecture_video_90s_1080p.webm) | 1920x1080 VP8, 3.14 MB | Raw Playwright capture |
+| **Closed Captions (VTT)** | [`docs/media/architecture_video.vtt`](file:///C:/Users/avadu/26265/docs/media/architecture_video.vtt) | WebVTT format synchronized to all 7 architectural scenes (0:00 to 4:50) | Full verbatim script |
+| **Technical Walkthrough Spec** | [`docs/VIDEO2_ARCHITECTURE_WALKTHROUGH.md`](file:///C:/Users/avadu/26265/docs/VIDEO2_ARCHITECTURE_WALKTHROUGH.md) | 7 scene storyboards, timing, visual tokens, and voiceover text | Complete architectural script specification |
+| **Automated Recorder Script** | [`scripts/record_architecture_video.js`](file:///C:/Users/avadu/26265/scripts/record_architecture_video.js) | Playwright headless recorder + FFmpeg 1080p transcode runner | Reproducible CLI runner |
+

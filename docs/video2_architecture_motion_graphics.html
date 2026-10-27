@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+  <title>AICTE PS 26265 - Complete System Architecture Video</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(56, 189, 248, 0.2);
+      --card-hover: rgba(56, 189, 248, 0.4);
+      --navy: #0f172a;
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.35);
+      --blue: #2563eb;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.3);
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --purple: #8b5cf6;
+      --purple-glow: rgba(139, 92, 246, 0.3);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Consolas', 'Courier New', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: #020617;
+      color: var(--text);
+      font-family: var(--font);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #stage-container {
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      background: radial-gradient(circle at 50% 30%, #0f1d38 0%, #070b14 70%, #02050b 100%);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(56,189,248,0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient animated grid */
+    .grid-background {
+      position: absolute;
+      inset: 0;
+      background-size: 60px 60px;
+      background-image: 
+        linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Top Broadcast Bar */
+    header.broadcast-header {
+      position: relative;
+      z-index: 10;
+      height: 72px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      box-shadow: 0 0 18px rgba(2, 132, 199, 0.5);
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #f8fafc;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--cyan);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .header-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--emerald);
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 10px var(--emerald);
+      animation: pulse-dot 1.8s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .demo-tag {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* Main Video Viewport Canvas */
+    main#viewport {
+      flex: 1;
+      position: relative;
+      z-index: 5;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 40px 14px 40px;
+    }
+
+    .scene-view {
+      position: absolute;
+      inset: 20px 40px;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.98);
+      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scene-view.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* Scene header row */
+    .scene-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+
+    .scene-number-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+
+    .scene-headline {
+      font-size: 32px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .scene-time-badge {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: #cbd5e1;
+      background: rgba(30, 41, 59, 0.7);
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Scene 1: Overall System Architecture */
+    .arch-overview-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr 280px;
+      gap: 28px;
+      height: calc(100% - 85px);
+      align-items: center;
+      position: relative;
+    }
+
+    .arch-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+      justify-content: center;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .card-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .card-body {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .center-cluster {
+      background: radial-gradient(circle at center, rgba(30, 58, 138, 0.35) 0%, rgba(15, 23, 42, 0.8) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 20px;
+      height: 100%;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: 0 0 50px rgba(56, 189, 248, 0.12);
+    }
+
+    .cluster-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+      padding-bottom: 12px;
+    }
+
+    .cluster-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: -0.01em;
+    }
+
+    .cluster-submodules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 18px 0;
+    }
+
+    .submodule-box {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      position: relative;
+    }
+
+    .submodule-box.active {
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .submodule-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+
+    .submodule-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .cluster-flow-canvas {
+      width: 100%;
+      height: 230px;
+      background: rgba(2, 6, 23, 0.6);
+      border-radius: 12px;
+      border: 1px dashed rgba(56, 189, 248, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Scene 2: API Pipeline */
+    .api-pipeline-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      height: calc(100% - 85px);
+      justify-content: center;
+    }
+
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .flow-step-node {
+      width: 210px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      transition: all 0.4s ease;
+    }
+
+    .flow-step-node.active-step {
+      border-color: var(--cyan);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px var(--cyan-glow);
+    }
+
+    .step-order {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1e293b;
+      color: var(--cyan);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .step-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .step-subtext {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .flow-connector {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .flow-connector-packet {
+      position: absolute;
+      top: -3px;
+      width: 14px;
+      height: 10px;
+      border-radius: 4px;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+      animation: packet-stream 2s infinite linear;
+    }
+
+    @keyframes packet-stream {
+      0% { left: 0%; opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { left: 100%; opacity: 0; }
+    }
+
+    .api-details-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      height: 380px;
+    }
+
+    .code-console {
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #93c5fd;
+      line-height: 1.6;
+      overflow-y: auto;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+    }
+
+    .console-header {
+      color: var(--cyan);
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .idempotency-badge {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--emerald);
+      color: var(--emerald);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* Scene 3: Database & RLS */
+    .db-rls-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      height: calc(100% - 85px);
+    }
+
+    .schema-entities {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      height: 100%;
+    }
+
+    .entity-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .entity-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--cyan);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .entity-field {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: #cbd5e1;
+      padding: 3px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .field-key {
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .field-type {
+      color: var(--text-dim);
+    }
+
+    .rls-demo-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .role-row {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .role-row.active-role {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.12);
+      transform: translateX(6px);
+    }
+
+    .role-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #ffffff;
+    }
+
+    .role-scope {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .integer-paise-calc {
+      background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .paise-value {
+      font-size: 32px;
+      font-weight: 900;
+      color: #38bdf8;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+      margin: 8px 0;
+      text-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    /* Scene 4: Stack & External Integrations */
+    .stack-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      height: calc(100% - 85px);
+    }
+
+    .stack-quadrants {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .quadrant-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .quadrant-box:hover {
+      border-color: var(--cyan);
+    }
+
+    .quad-header {
+      font-size: 15px;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quad-pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .quad-pill {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+
+    .integrations-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      justify-content: space-between;
+    }
+
+    .integration-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .integ-info h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 2px;
+    }
+
+    .integ-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-simulated {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--amber);
+      color: var(--amber);
+    }
+
+    .badge-verified {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--emerald);
+      color: var(--emerald);
+    }
+
+    /* Scene 5: End-to-End Lifecycle */
+    .lifecycle-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 85px);
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .timeline-track-wrapper {
+      position: relative;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 16px;
+      padding: 30px 24px;
+      overflow: hidden;
+    }
+
+    .timeline-circuit-line {
+      position: absolute;
+      top: 50%;
+      left: 60px;
+      right: 60px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+
+    .timeline-circuit-active {
+      position: absolute;
+      top: 50%;
+      left: 60px;
+      height: 6px;
+      background: linear-gradient(90deg, #0284c7, #38bdf8, #10b981);
+      transform: translateY(-50%);
+      z-index: 2;
+      box-shadow: 0 0 16px var(--cyan);
+      transition: width 0.3s linear;
+      width: 0%;
+    }
+
+    .timeline-nodes-row {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lifecycle-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 140px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .node-bubble {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #090d16;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.6);
+      transition: all 0.3s ease;
+    }
+
+    .lifecycle-node.active-node .node-bubble {
+      border-color: var(--cyan);
+      background: var(--navy);
+      color: #ffffff;
+      transform: scale(1.15);
+      box-shadow: 0 0 24px var(--cyan-glow);
+    }
+
+    .lifecycle-node.completed-node .node-bubble {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--emerald);
+    }
+
+    .node-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #cbd5e1;
+      line-height: 1.3;
+    }
+
+    .lifecycle-details-card {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      padding: 24px 32px;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .stage-callout-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .stage-callout-body {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .milestone-box {
+      background: rgba(30, 41, 59, 0.7);
+      border-radius: 10px;
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .milestone-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .milestone-badges {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .milestone-badge {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fde68a;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+    }
+
+    /* Scene 6: Network & UI Flow */
+    .network-ui-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      height: calc(100% - 85px);
+    }
+
+    .network-topology {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .topology-flow-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .topo-node {
+      background: rgba(2, 6, 23, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topo-node.caddy-edge {
+      border-color: #38bdf8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    .ui-showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .ui-screen-card {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .ui-screen-card.highlight-screen {
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .ui-screen-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ui-mockup-frame {
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      height: 120px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mockup-bar {
+      height: 10px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .mockup-bar.accent {
+      background: var(--cyan);
+      width: 60%;
+    }
+
+    .mockup-table-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mockup-table-row div {
+      height: 8px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.07);
+      flex: 1;
+    }
+
+    /* Scene 7: Summary & Verification */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      height: calc(100% - 85px);
+    }
+
+    .pillars-quad {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .pillar-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    .pillar-num {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 32px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.06);
+    }
+
+    .pillar-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+
+    .pillar-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .verification-scoreboard {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(7, 11, 20, 0.98));
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.1);
+    }
+
+    .score-headline {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .score-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .score-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(2, 6, 23, 0.5);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .score-label {
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .score-val {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--emerald);
+    }
+
+    .closing-credits {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Subtitle & Presenter Bar */
+    .presenter-subtitle-bar {
+      position: relative;
+      z-index: 10;
+      min-height: 110px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .presenter-avatar-tag {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding-right: 28px;
+      min-width: 260px;
+    }
+
+    .presenter-badge-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #1e3a8a);
+      border: 2px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .presenter-meta h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+    }
+
+    .presenter-meta p {
+      font-size: 11px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .caption-transcript-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .caption-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .caption-text {
+      font-size: 19px;
+      font-weight: 500;
+      line-height: 1.45;
+      color: #f1f5f9;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      min-height: 52px;
+    }
+
+    /* Bottom Scrubber & Control Deck */
+    footer.controls-deck {
+      position: relative;
+      z-index: 10;
+      height: 60px;
+      background: #060911;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      gap: 20px;
+    }
+
+    .deck-btn {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .deck-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--cyan);
+    }
+
+    .deck-btn.primary {
+      background: var(--blue);
+      border-color: #60a5fa;
+    }
+
+    .progress-bar-container {
+      flex: 1;
+      height: 10px;
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 5px;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8, #10b981);
+      border-radius: 5px;
+      transition: width 0.1s linear;
+    }
+
+    .time-readout {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: #cbd5e1;
+      min-width: 120px;
+      text-align: right;
+    }
+
+    .scene-jump-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .scene-pill-btn {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .scene-pill-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--cyan);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+<div id="stage-container">
+  <div class="grid-background"></div>
+
+  <!-- Top Header -->
+  <header class="broadcast-header">
+    <div class="brand-section">
+      <div class="brand-badge">AICTE PS 26265</div>
+      <div>
+        <div class="brand-title">Security Deposit &amp; FDR Verification Portal</div>
+        <div class="brand-subtitle">Complete Technical Architecture Deep Dive (Video 2)</div>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="demo-tag">SIMULATED INTEGRATIONS &bull; DEMO RULES</div>
+      <div class="header-status-pill">
+        <div class="status-dot"></div>
+        <span>ARCHITECTURAL VERIFICATION PASS (100%)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Viewport for 7 Scenes -->
+  <main id="viewport">
+    
+    <!-- SCENE 1: Introduction to Architecture (0:00 - 0:20) -->
+    <section class="scene-view" id="scene-1">
+      <div class="scene-header-row">
+        <div>
+          <div class="scene-number-label">Scene 01 of 07</div>
+          <h2 class="scene-headline">End-to-End System Architecture Overview</h2>
+        </div>
+        <div class="scene-time-badge">00:00 - 00:20 (20s)</div>
+      </div>
+
+      <div class="arch-overview-grid">
+        <!-- Left: Clients -->
+        <div class="arch-col">
+          <div class="glass-card">
+            <div class="card-title">
+              <span class="card-icon">&lang;/&rang;</span>
+              Frontend Web Clients
+            </div>
+            <div class="card-body">
+              React 19 + TypeScript SPA built with Vite. Responsive portal for Institutions, Regional Offices, Head Office &amp; Bank Branches.
+            </div>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">
+              <span class="card-icon">&telrec;</span>
+              Edge Ingress &amp; Caddy
+            </div>
+            <div class="card-body">
+              TLS Termination, Brotli/Gzip compression, DDoS rate-limiting, and microsecond reverse-proxy path routing.
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Core Application Platform -->
+        <div class="center-cluster">
+          <div class="cluster-banner">
+            <div>
+              <div class="cluster-title">FastAPI High-Performance Application Cluster</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Python 3.14 &bull; Async Asyncpg &bull; Server-Driven Workflow</div>
+            </div>
+            <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid var(--cyan); color: var(--cyan); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+              Zero Floating-Point Error
+            </div>
+          </div>
+
+          <div class="cluster-submodules">
+            <div class="submodule-box active">
+              <div class="submodule-name">Deposits Engine</div>
+              <div class="submodule-desc">Mandate &amp; shortfall calculation</div>
+            </div>
+            <div class="submodule-box active">
+              <div class="submodule-name">Bank Gateway</div>
+              <div class="submodule-desc">Tripartite verification gate</div>
+            </div>
+            <div class="submodule-box active">
+              <div class="submodule-name">Audit Hash-Chain</div>
+              <div class="submodule-desc">Immutable append-only ledger</div>
+            </div>
+          </div>
+
+          <!-- Animated Canvas for System Particle Flow -->
+          <canvas id="archCanvas" class="cluster-flow-canvas" width="780" height="230"></canvas>
+        </div>
+
+        <!-- Right: Storage & Integrations -->
+        <div class="arch-col">
+          <div class="glass-card">
+            <div class="card-title">
+              <span class="card-icon">&db;</span>
+              PostgreSQL &amp; Redis
+            </div>
+            <div class="card-body">
+              PostgreSQL 17 with strict Row-Level Security (RLS). Redis cache for async celery queues and bank polling.
+            </div>
+          </div>
+          <div class="glass-card">
+            <div class="card-title">
+              <span class="card-icon">&cloud;</span>
+              Simulated Integrations
+            </div>
+            <div class="card-body">
+              CBS Banking APIs (SFTP, REST, Webhooks), AICTE Master database, DigiLocker, and SMS/Email gateways.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 2: API Architecture (0:20 - 1:10) -->
+    <section class="scene-view" id="scene-2">
+      <div class="scene-header-row">
+        <div>
+          <div class="scene-number-label">Scene 02 of 07</div>
+          <h2 class="scene-headline">API Architecture: How The System Processes Requests</h2>
+        </div>
+        <div class="scene-time-badge">00:20 - 01:10 (50s)</div>
+      </div>
+
+      <div class="api-pipeline-container">
+        <!-- Step Flow -->
+        <div class="pipeline-flow">
+          <div class="flow-step-node" id="pnode-1">
+            <div class="step-order">1</div>
+            <div class="step-label">Client Request</div>
+            <div class="step-subtext">POST /api/v1/fdr</div>
+          </div>
+          <div class="flow-connector"><div class="flow-connector-packet"></div></div>
+          
+          <div class="flow-step-node" id="pnode-2">
+            <div class="step-order">2</div>
+            <div class="step-label">Caddy Edge</div>
+            <div class="step-subtext">TLS + Rate Limit</div>
+          </div>
+          <div class="flow-connector"><div class="flow-connector-packet" style="animation-delay: 0.4s;"></div></div>
+
+          <div class="flow-step-node" id="pnode-3">
+            <div class="step-order">3</div>
+            <div class="step-label">FastAPI Auth</div>
+            <div class="step-subtext">JWT + RLS Context</div>
+          </div>
+          <div class="flow-connector"><div class="flow-connector-packet" style="animation-delay: 0.8s;"></div></div>
+
+          <div class="flow-step-node" id="pnode-4">
+            <div class="step-order">4</div>
+            <div class="step-label">Pydantic &amp; Logic</div>
+            <div class="step-subtext">Strict Validation</div>
+          </div>
+          <div class="flow-connector"><div class="flow-connector-packet" style="animation-delay: 1.2s;"></div></div>
+
+          <div class="flow-step-node" id="pnode-5">
+            <div class="step-order">5</div>
+            <div class="step-label">Server Next-Action</div>
+            <div class="step-subtext">Idempotent Commit</div>
+          </div>
+        </div>
+
+        <!-- Details Split -->
+        <div class="api-details-split">
+          <div class="code-console">
+            <div class="console-header">
+              <span>Server-Driven Workflow &amp; Idempotency Engine</span>
+              <span class="idempotency-badge">Idempotency-Key: Verified</span>
+            </div>
+<pre>
+# Server determines permitted client transitions (Server-Driven)
+@router.post("/instruments/{id}/claim")
+async def claim_instrument(
+    id: UUID, 
+    idempotency_key: str = Header(..., alias="X-Idempotency-Key"),
+    db: Session = Depends(get_db_with_rls)
+):
+    # 1. Atomic Idempotency Check prevents duplicate transactions
+    existing = await check_idempotency(db, idempotency_key)
+    if existing:
+        return existing.response_payload
+
+    # 2. Next Action Evaluation
+    allowed_actions = compute_next_actions(instrument, user_role)
+    if Action.CLAIM not in allowed_actions:
+        raise HTTPException(status_code=403, detail="Action prohibited by state machine")
+    
+    # 3. State transition & Audit append
+    audit_append(db, event_type="INSTRUMENT_CLAIMED", payload={...})
+    return {"status": "CLAIMED", "next_actions": ["VERIFY_BANK_RECEIPT"]}
+</pre>
+          </div>
+
+          <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="card-title" style="color: var(--cyan); font-size: 18px;">Modular API Domain Segregation</div>
+              <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                APIs are partitioned strictly by operational bounded contexts with explicit RBAC scopes:
+              </p>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+                <li style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <span style="font-family: var(--font-mono); color: #38bdf8;">/api/v1/instruments</span>
+                  <span style="color: #94a3b8;">FDR submission, claim &amp; lifecycle</span>
+                </li>
+                <li style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <span style="font-family: var(--font-mono); color: #38bdf8;">/api/v1/deposits</span>
+                  <span style="color: #94a3b8;">Regulatory norms &amp; shortfall calculation</span>
+                </li>
+                <li style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <span style="font-family: var(--font-mono); color: #38bdf8;">/api/v1/bank-portal</span>
+                  <span style="color: #94a3b8;">Branch verification &amp; tripartite signoff</span>
+                </li>
+                <li style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+                  <span style="font-family: var(--font-mono); color: #38bdf8;">/api/v1/release</span>
+                  <span style="color: #94a3b8;">Maker-checker approval &amp; DSC discharge</span>
+                </li>
+                <li style="display: flex; justify-content: space-between; padding-bottom: 6px;">
+                  <span style="font-family: var(--font-mono); color: #38bdf8;">/api/v1/audit</span>
+                  <span style="color: #94a3b8;">Cryptographic Merkle log verification</span>
+                </li>
+              </ul>
+            </div>
+            <div style="background: rgba(56, 189, 248, 0.1); border-left: 3px solid var(--cyan); padding: 10px 14px; font-size: 12px; color: #cbd5e1;">
+              <strong>Server-Driven Workflow:</strong> Primary buttons in the React UI are directly computed by backend <code style="color: #38bdf8;">next_action()</code>. No security logic lives on the client.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 3: Database & RLS (1:10 - 1:55) -->
+    <section class="scene-view" id="scene-3">
+      <div class="scene-header-row">
+        <div>
+          <div class="scene-number-label">Scene 03 of 07</div>
+          <h2 class="scene-headline">Database Architecture: PostgreSQL, RLS &amp; Ledger</h2>
+        </div>
+        <div class="scene-time-badge">01:10 - 01:55 (45s)</div>
+      </div>
+
+      <div class="db-rls-layout">
+        <!-- Schema -->
+        <div class="schema-entities">
+          <div class="entity-card">
+            <div class="entity-name">
+              <span>institutions</span>
+              <span style="font-size: 11px; color: var(--emerald);">RLS Active</span>
+            </div>
+            <div class="entity-field"><span class="field-key">id</span><span class="field-type">UUID PK</span></div>
+            <div class="entity-field"><span class="field-key">aicte_permanent_id</span><span class="field-type">VARCHAR(32)</span></div>
+            <div class="entity-field"><span class="field-key">region</span><span class="field-type">VARCHAR(32)</span></div>
+            <div class="entity-field"><span class="field-key">trust_name</span><span class="field-type">TEXT</span></div>
+          </div>
+
+          <div class="entity-card">
+            <div class="entity-name">
+              <span>fdr_records</span>
+              <span style="font-size: 11px; color: var(--emerald);">RLS Active</span>
+            </div>
+            <div class="entity-field"><span class="field-key">id</span><span class="field-type">UUID PK</span></div>
+            <div class="entity-field"><span class="field-key">principal_paise</span><span class="field-type">BIGINT NOT NULL</span></div>
+            <div class="entity-field"><span class="field-key">bank_ifsc</span><span class="field-type">VARCHAR(11)</span></div>
+            <div class="entity-field"><span class="field-key">status</span><span class="field-type">fdr_status_enum</span></div>
+          </div>
+
+          <div class="entity-card">
+            <div class="entity-name">
+              <span>verification_events</span>
+              <span style="font-size: 11px; color: var(--emerald);">Audited</span>
+            </div>
+            <div class="entity-field"><span class="field-key">id</span><span class="field-type">UUID PK</span></div>
+            <div class="entity-field"><span class="field-key">fdr_id</span><span class="field-type">UUID FK</span></div>
+            <div class="entity-field"><span class="field-key">gate_checks_passed</span><span class="field-type">INT NOT NULL</span></div>
+            <div class="entity-field"><span class="field-key">tripartite_signed</span><span class="field-type">BOOLEAN</span></div>
+          </div>
+
+          <div class="entity-card">
+            <div class="entity-name">
+              <span>audit_event</span>
+              <span style="font-size: 11px; color: #fbbf24;">Append-Only</span>
+            </div>
+            <div class="entity-field"><span class="field-key">sequence_num</span><span class="field-type">BIGSERIAL PK</span></div>
+            <div class="entity-field"><span class="field-key">prev_hash</span><span class="field-type">BYTEA (SHA-256)</span></div>
+            <div class="entity-field"><span class="field-key">curr_hash</span><span class="field-type">BYTEA (SHA-256)</span></div>
+            <div class="entity-field"><span class="field-key">event_type</span><span class="field-type">VARCHAR(64)</span></div>
+          </div>
+        </div>
+
+        <!-- RLS & Paise Engine -->
+        <div class="rls-demo-panel">
+          <div class="integer-paise-calc">
+            <div style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Financial Precision Rule</div>
+            <div style="font-size: 15px; font-weight: 700; color: #ffffff; margin-top: 4px;">Zero Floating-Point Representation</div>
+            <div class="paise-value" id="paiseNumberDisplay">350,000,000 PAISE</div>
+            <div style="font-size: 13px; color: var(--emerald); font-weight: 600;">Exact Regulatory Equivalent: ₹35,00,000.00</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 13px; font-weight: 700; color: #ffffff;">Row-Level Security (RLS) Isolation Modes:</div>
+
+            <div class="role-row active-role" id="role-college">
+              <div>
+                <div class="role-title">College / Institution Role</div>
+                <div class="role-scope">WHERE institution_id = current_setting('app.inst_id')</div>
+              </div>
+              <span class="idempotency-badge">Restricted</span>
+            </div>
+
+            <div class="role-row" id="role-ro">
+              <div>
+                <div class="role-title">Regional Officer (RO) Role</div>
+                <div class="role-scope">WHERE region = current_setting('app.region')</div>
+              </div>
+              <span class="idempotency-badge" style="border-color: #38bdf8; color: #38bdf8;">Regional View</span>
+            </div>
+
+            <div class="role-row" id="role-maker">
+              <div>
+                <div class="role-title">Maker &ne; Checker Separation</div>
+                <div class="role-scope">CHECK (checker_id != maker_id) ENFORCED AT DB LEVEL</div>
+              </div>
+              <span class="idempotency-badge" style="border-color: #fbbf24; color: #fbbf24;">Statutory</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 4: Technology Stack & Integrations (1:55 - 2:35) -->
+    <section class="scene-view" id="scene-4">
+      <div class="scene-header-row">
+        <div>
+          <div class="scene-number-label">Scene 04 of 07</div>
+          <h2 class="scene-headline">Technology Stack &amp; External Integrations</h2>
+        </div>
+        <div class="scene-time-badge">01:55 - 02:35 (40s)</div>
+      </div>
+
+      <div class="stack-layout">
+        <div class="stack-quadrants">
+          <div class="quadrant-box">
+            <div class="quad-header"><span style="color: var(--cyan);">&loz;</span> Frontend Engineering</div>
+            <div class="quad-pill-list">
+              <span class="quad-pill">React 19</span>
+              <span class="quad-pill">TypeScript</span>
+              <span class="quad-pill">Vite 6</span>
+              <span class="quad-pill">TanStack Router</span>
+              <span class="quad-pill">Tailwind CSS</span>
+              <span class="quad-pill">Biome Linter</span>
+            </div>
+          </div>
+
+          <div class="quadrant-box">
+            <div class="quad-header"><span style="color: var(--emerald);">&loz;</span> Backend Engine</div>
+            <div class="quad-pill-list">
+              <span class="quad-pill">FastAPI</span>
+              <span class="quad-pill">Python 3.14</span>
+              <span class="quad-pill">SQLAlchemy 2.0</span>
+              <span class="quad-pill">Alembic</span>
+              <span class="quad-pill">Pydantic v2</span>
+              <span class="quad-pill">uv Package Tool</span>
+            </div>
+          </div>
+
+          <div class="quadrant-box">
+            <div class="quad-header"><span style="color: #fbbf24;">&loz;</span> Persistence &amp; Cache</div>
+            <div class="quad-pill-list">
+              <span class="quad-pill">PostgreSQL 17</span>
+              <span class="quad-pill">Row-Level Security</span>
+              <span class="quad-pill">Redis 7 In-Memory</span>
+              <span class="quad-pill">Celery Background</span>
+              <span class="quad-pill">NOSUPERUSER Role</span>
+            </div>
+          </div>
+
+          <div class="quadrant-box">
+            <div class="quad-header"><span style="color: var(--rose);">&loz;</span> Security &amp; Cryptography</div>
+            <div class="quad-pill-list">
+              <span class="quad-pill">SHA-256 Merkle Ledger</span>
+              <span class="quad-pill">AES-256 at Rest</span>
+              <span class="quad-pill">JWT RS256 Tokens</span>
+              <span class="quad-pill">DSC Signature Gate</span>
+              <span class="quad-pill">TLS 1.3 Caddy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="integrations-panel">
+          <div class="integration-card">
+            <div class="integ-info">
+              <h4>Core Banking System (CBS) Gateway</h4>
+              <p>Simulated SFTP batch parsing, REST confirmation &amp; tripartite lien marking</p>
+            </div>
+            <span class="status-badge badge-simulated">Simulator Active</span>
+          </div>
+
+          <div class="integration-card">
+            <div class="integ-info">
+              <h4>AICTE National Institution Master</h4>
+              <p>Mandate deposit validation based on Approval Process Handbook (APH)</p>
+            </div>
+            <span class="status-badge badge-verified">Rules Verified</span>
+          </div>
+
+          <div class="integration-card">
+            <div class="integ-info">
+              <h4>DigiLocker &amp; National Academic Depository</h4>
+              <p>Digital certificate issuance and verification for trust deeds</p>
+            </div>
+            <span class="status-badge badge-simulated">Mock Sandbox</span>
+          </div>
+
+          <div class="integration-card">
+            <div class="integ-info">
+              <h4>Statutory Notification Engine</h4>
+              <p>Automated SMS and SMTP dispatch for T-90, T-60 &amp; T-30 maturity alerts</p>
+            </div>
+            <span class="status-badge badge-verified">Event Queued</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 5: End-to-End Lifecycle (2:35 - 3:40) -->
+    <section class="scene-view" id="scene-5">
+      <div class="scene-header-row">
+        <div>
+          <div class="scene-number-label">Scene 05 of 07</div>
+          <h2 class="scene-headline">Deposit Lifecycle: From Submission to DSC Release</h2>
+        </div>
+        <div class="scene-time-badge">02:35 - 03:40 (65s)</div>
+      </div>
+
+      <div class="lifecycle-container">
+        <!-- 8-Stage Circuit -->
+        <div class="timeline-track-wrapper">
+          <div class="timeline-circuit-line"></div>
+          <div class="timeline-circuit-active" id="lifecycleProgressLine"></div>
+          
+          <div class="timeline-nodes-row">
+            <div class="lifecycle-node active-node" id="lnode-1">
+              <div class="node-bubble">1</div>
+              <div class="node-title">FDR<br>Submission</div>
+            </div>
+            <div class="lifecycle-node" id="lnode-2">
+              <div class="node-bubble">2</div>
+              <div class="node-title">Format<br>Validation</div>
+            </div>
+            <div class="lifecycle-node" id="lnode-3">
+              <div class="node-bubble">3</div>
+              <div class="node-title">Bank<br>Request</div>
+            </div>
+            <div class="lifecycle-node" id="lnode-4">
+              <div class="node-bubble">4</div>
+              <div class="node-title">Tripartite<br>Confirm</div>
+            </div>
+            <div class="lifecycle-node" id="lnode-5">
+              <div class="node-bubble">5</div>
+              <div class="node-title">Active<br>Monitoring</div>
+            </div>
+            <div class="lifecycle-node" id="lnode-6">
+              <div class="node-bubble">6</div>
+              <div class="node-title">Maturity<br>Alerts</div>
+            </div>
+            <div class="lifecycle-node" id="lnode-7">
+              <div class="node-bubble">7</div>
+              <div class="node-title">Release<br>Claim</div>
+            </div>
+            <div class="lifecycle-node" id="lnode-8">
+              <div class="node-bubble">8</div>
+              <div class="node-title">DSC<br>Discharge</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Callout Card -->
+        <div class="lifecycle-details-card">
+          <div>
+            <div style="font-size: 12px; color: var(--cyan); text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 4px;" id="stageCounterLabel">
+              LIFECYCLE STAGE 1 / 8
+            </div>
+            <div class="stage-callout-title" id="stageHeadline">FDR Submission &amp; Initial Ingestion</div>
+            <div class="stage-callout-body" id="stageBody">
+              The institution submits fixed deposit certificate details via the portal. The system reads the FDR number, branch IFSC, joint-account lien wording, and converts the amount into exact integer paise.
+            </div>
+          </div>
+
+          <div class="milestone-box">
+            <div class="milestone-title">Maturity Alert Engine</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Automated notification triggers</div>
+            <div class="milestone-badges">
+              <div class="milestone-badge">T - 90D</div>
+              <div class="milestone-badge">T - 60D</div>
+              <div class="milestone-badge">T - 30D</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 6: Network Routing & UI Flow (3:40 - 4:20) -->
+    <section class="scene-view" id="scene-6">
+      <div class="scene-header-row">
+        <div>
+          <div class="scene-number-label">Scene 06 of 07</div>
+          <h2 class="scene-headline">Network Routing &amp; Multi-Role UI Architecture</h2>
+        </div>
+        <div class="scene-time-badge">03:40 - 04:20 (40s)</div>
+      </div>
+
+      <div class="network-ui-grid">
+        <div class="network-topology">
+          <div>
+            <div class="card-title" style="color: var(--cyan); font-size: 18px; margin-bottom: 14px;">Production Network Topology</div>
+            <div class="topology-flow-stack">
+              <div class="topo-node">
+                <div>
+                  <div style="font-weight: 700; color: #fff;">Client Browser Request</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">HTTPS :443 TLS 1.3</div>
+                </div>
+                <span class="idempotency-badge">Client Tier</span>
+              </div>
+
+              <div class="topo-node caddy-edge">
+                <div>
+                  <div style="font-weight: 700; color: #38bdf8;">Caddy Reverse Proxy</div>
+                  <div style="font-size: 11px; color: #94a3b8;">Automatic SSL &bull; Compression &bull; Rate Limiting</div>
+                </div>
+                <span class="idempotency-badge" style="border-color: #38bdf8; color: #38bdf8;">Edge Gateway</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="topo-node">
+                  <div>
+                    <div style="font-weight: 700; color: #fff;">/api/* &rarr; FastAPI</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">ASGI Port 8000</div>
+                  </div>
+                </div>
+                <div class="topo-node">
+                  <div>
+                    <div style="font-weight: 700; color: #fff;">/* &rarr; Vite SPA</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Static Assets</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: rgba(56, 189, 248, 0.08); border-left: 3px solid var(--cyan); padding: 10px 14px; font-size: 12px; color: #cbd5e1;">
+            <strong>Standards Compliance:</strong> Fully compliant with WCAG 2.1 AA accessibility, keyboard navigation, high-contrast tokens, and TanStack Router type safety.
+          </div>
+        </div>
+
+        <div class="ui-showcase-grid">
+          <div class="ui-screen-card highlight-screen">
+            <div class="ui-screen-title">
+              <span>Institution Portal</span>
+              <span style="color: var(--cyan); font-size: 11px;">Maker View</span>
+            </div>
+            <div class="ui-mockup-frame">
+              <div class="mockup-bar accent"></div>
+              <div class="mockup-table-row"><div></div><div></div><div></div></div>
+              <div class="mockup-table-row"><div></div><div></div><div></div></div>
+              <div class="mockup-bar" style="width: 40%; background: rgba(16, 185, 129, 0.4);"></div>
+            </div>
+          </div>
+
+          <div class="ui-screen-card">
+            <div class="ui-screen-title">
+              <span>Bank Officer Portal</span>
+              <span style="color: var(--amber); font-size: 11px;">Verification Gate</span>
+            </div>
+            <div class="ui-mockup-frame">
+              <div class="mockup-bar" style="width: 70%; background: var(--amber);"></div>
+              <div class="mockup-table-row"><div></div><div></div><div></div></div>
+              <div class="mockup-bar" style="width: 50%; background: rgba(245, 158, 11, 0.4);"></div>
+            </div>
+          </div>
+
+          <div class="ui-screen-card">
+            <div class="ui-screen-title">
+              <span>Regional Officer</span>
+              <span style="color: #8b5cf6; font-size: 11px;">Jurisdiction RLS</span>
+            </div>
+            <div class="ui-mockup-frame">
+              <div class="mockup-bar" style="width: 65%; background: #8b5cf6;"></div>
+              <div class="mockup-table-row"><div></div><div></div><div></div></div>
+              <div class="mockup-table-row"><div></div><div></div><div></div></div>
+            </div>
+          </div>
+
+          <div class="ui-screen-card">
+            <div class="ui-screen-title">
+              <span>National Head Office</span>
+              <span style="color: var(--emerald); font-size: 11px;">National Audit</span>
+            </div>
+            <div class="ui-mockup-frame">
+              <div class="mockup-bar" style="width: 80%; background: var(--emerald);"></div>
+              <div class="mockup-table-row"><div></div><div></div><div></div></div>
+              <div class="mockup-bar" style="width: 45%; background: rgba(56, 189, 248, 0.4);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 7: Architecture Summary & Key Advantages (4:20 - 4:50) -->
+    <section class="scene-view" id="scene-7">
+      <div class="scene-header-row">
+        <div>
+          <div class="scene-number-label">Scene 07 of 07</div>
+          <h2 class="scene-headline">Architectural Summary &amp; Verification Evidence</h2>
+        </div>
+        <div class="scene-time-badge">04:20 - 04:50 (30s)</div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="pillars-quad">
+          <div class="pillar-card">
+            <div class="pillar-num">01</div>
+            <div class="pillar-name">1. Scalability</div>
+            <div class="pillar-desc">
+              Stateless FastAPI application tier, async DB pool, and Redis task workers gracefully handle peak institutional approval cycles across India.
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-num">02</div>
+            <div class="pillar-name">2. Security</div>
+            <div class="pillar-desc">
+              PostgreSQL Row-Level Security, strict Maker-Checker segregation, AES-256 storage, and SHA-256 cryptographic audit logs prevent data tampering.
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-num">03</div>
+            <div class="pillar-name">3. Reliability</div>
+            <div class="pillar-desc">
+              Idempotent mutation keys, zero floating-point integer paise calculations, and automatic retry policies prevent duplicate deposits and loss.
+            </div>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-num">04</div>
+            <div class="pillar-name">4. Compliance</div>
+            <div class="pillar-desc">
+              Strict statutory alignment with AICTE Approval Process Handbook (APH), tripartite digital lien agreements, and legal DSC release gates.
+            </div>
+          </div>
+        </div>
+
+        <div class="verification-scoreboard">
+          <div>
+            <div class="score-headline">
+              <span>Verification Gate Evidence</span>
+              <span class="status-badge badge-verified">ALL PASS</span>
+            </div>
+            <div class="score-list">
+              <div class="score-item">
+                <span class="score-label">Backend Unit &amp; Integration Tests</span>
+                <span class="score-val">192 / 192 PASS</span>
+              </div>
+              <div class="score-item">
+                <span class="score-label">Playwright E2E User Scenarios</span>
+                <span class="score-val">43 / 43 PASS</span>
+              </div>
+              <div class="score-item">
+                <span class="score-label">Mutation Proofs (Bank Gate Invariants)</span>
+                <span class="score-val">7 / 7 RED-VERIFIED</span>
+              </div>
+              <div class="score-item">
+                <span class="score-label">Accessibility Compliance (axe-core)</span>
+                <span class="score-val">0 VIOLATIONS</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="closing-credits">
+            <div style="font-weight: 800; color: #ffffff; margin-bottom: 2px;">Team Sentinel Hubz &bull; AICTE PS 26265</div>
+            <div>GitHub: <span style="color: var(--cyan); font-family: var(--font-mono);">github.com/Sidd2721/AICTE-</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Presenter Subtitle & Transcript Card -->
+  <div class="presenter-subtitle-bar">
+    <div class="presenter-avatar-tag">
+      <div class="presenter-badge-circle">AI</div>
+      <div class="presenter-meta">
+        <h3>TECHNICAL NARRATOR</h3>
+        <p>SYSTEM ARCHITECTURE</p>
+      </div>
+    </div>
+    <div class="caption-transcript-box">
+      <div class="caption-eyebrow">
+        <span id="captionSceneTag">SCENE 1: INTRODUCTION TO ARCHITECTURE</span>
+        <span style="color: var(--text-dim);">&bull;</span>
+        <span id="captionDurationTag">00:00 - 00:20</span>
+      </div>
+      <div class="caption-text" id="liveCaptionText">
+        Hello everyone. In this video, I will explain the technical architecture of our AICTE Security Deposit and FDR Verification Portal.
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Control Deck & Scrubber -->
+  <footer class="controls-deck">
+    <button class="deck-btn primary" id="playPauseBtn" onclick="togglePlay()">
+      <span id="playIcon">&xutri; Play</span>
+    </button>
+
+    <div class="progress-bar-container" id="progressBar" onclick="seekByClick(event)">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+
+    <div class="time-readout" id="timeDisplay">00:00 / 04:50</div>
+
+    <div class="scene-jump-pills">
+      <button class="scene-pill-btn active" onclick="jumpTo(0)">1. Overview</button>
+      <button class="scene-pill-btn" onclick="jumpTo(20)">2. API Flow</button>
+      <button class="scene-pill-btn" onclick="jumpTo(70)">3. Database</button>
+      <button class="scene-pill-btn" onclick="jumpTo(115)">4. Tech Stack</button>
+      <button class="scene-pill-btn" onclick="jumpTo(155)">5. Lifecycle</button>
+      <button class="scene-pill-btn" onclick="jumpTo(220)">6. Network</button>
+      <button class="scene-pill-btn" onclick="jumpTo(260)">7. Summary</button>
+    </div>
+
+    <button class="deck-btn" id="speedBtn" onclick="cycleSpeed()">1.0x Speed</button>
+    <button class="deck-btn" id="voiceBtn" onclick="toggleVoice()">Voice: Off</button>
+  </footer>
+</div>
+
+<script>
+  // Timeline Data: 7 Scenes, 290 seconds total
+  const SCENES = [
+    {
+      id: 1,
+      startTime: 0,
+      endTime: 20,
+      title: "SCENE 1: INTRODUCTION TO ARCHITECTURE",
+      dialogues: [
+        { start: 0, end: 4, text: "Hello everyone." },
+        { start: 4, end: 11, text: "In this video, I will explain the technical architecture of our AICTE Security Deposit and FDR Verification Portal." },
+        { start: 11, end: 20, text: "We will follow one request through the system to understand how our APIs, database, technologies, data pipelines and routing work together to create a secure and reliable workflow." }
+      ]
+    },
+    {
+      id: 2,
+      startTime: 20,
+      endTime: 70,
+      title: "SCENE 2: API ARCHITECTURE: HOW THE SYSTEM PROCESSES REQUESTS",
+      dialogues: [
+        { start: 20, end: 24, text: "First, let's understand the API architecture." },
+        { start: 24, end: 31, text: "Our frontend uses React and TypeScript, while our backend is built with FastAPI and Python." },
+        { start: 31, end: 39, text: "When a user submits an FDR, the request passes through the secure entry point and reaches the appropriate API endpoint." },
+        { start: 39, end: 47, text: "The backend checks the user's identity, validates the incoming data and verifies whether the requested action is allowed." },
+        { start: 47, end: 57, text: "We organize APIs by responsibility: instruments API, deposits API, bank API, release API, and audit API." },
+        { start: 57, end: 64, text: "A key feature is our server-driven workflow: the backend determines the next valid action based on state, permissions, and business rules." },
+        { start: 64, end: 70, text: "Backend idempotency protection ensures network retries never create duplicate deposits or repeat releases." }
+      ]
+    },
+    {
+      id: 3,
+      startTime: 70,
+      endTime: 115,
+      title: "SCENE 3: DATABASE ARCHITECTURE & SECURE DATA STORAGE",
+      dialogues: [
+        { start: 70, end: 75, text: "Next, let's look at the database architecture built on PostgreSQL." },
+        { start: 75, end: 82, text: "Institutions connect to FDR records, and FDR records connect to verification logs and approval workflows." },
+        { start: 82, end: 91, text: "We enforce strict Row-Level Security: colleges only access their own records, regional officers see their jurisdiction, and head office views consolidated national reports." },
+        { start: 91, end: 97, text: "All financial amounts are stored as integer paise to prevent floating-point rounding errors." },
+        { start: 97, end: 104, text: "Role segregation is enforced at the database level: the user who prepares a submission can never approve or release it." },
+        { start: 104, end: 115, text: "Every action is recorded in a cryptographically linked append-only audit trail with SHA-256 hashes for total tamper detection." }
+      ]
+    },
+    {
+      id: 4,
+      startTime: 115,
+      endTime: 155,
+      title: "SCENE 4: TECHNOLOGY STACK & EXTERNAL INTEGRATIONS",
+      dialogues: [
+        { start: 115, end: 119, text: "Now let's examine our technology choices and external connections." },
+        { start: 119, end: 126, text: "The frontend is built with React, Vite, and Tailwind CSS. The backend uses FastAPI, Python, SQLAlchemy, and Alembic." },
+        { start: 126, end: 133, text: "PostgreSQL handles data storage while Redis and Celery manage background tasks such as bank verification polling and reminders." },
+        { start: 133, end: 142, text: "For external systems, we integrate with Core Banking Solutions, the AICTE Institution Master Database, and notification services for email and SMS." },
+        { start: 142, end: 155, text: "Security layers protect every connection: JWT tokens, role-based access control, TLS encryption in transit, AES-256 at rest, and digital signature verification." }
+      ]
+    },
+    {
+      id: 5,
+      startTime: 155,
+      endTime: 220,
+      title: "SCENE 5: END-TO-END DATA FLOW: THE LIFECYCLE OF A DEPOSIT",
+      dialogues: [
+        { start: 155, end: 160, text: "Let's follow a deposit through its entire lifecycle across eight automated stages." },
+        { start: 160, end: 168, text: "Stage 1: The college submits deposit details. Stage 2: The system validates bank IFSC, amount against AICTE regulation tables, and required formats." },
+        { start: 168, end: 176, text: "Stage 3: An automated verification request is sent to the bank. Stage 4: The bank confirms lien marked in favor of AICTE, sealing the tripartite agreement." },
+        { start: 176, end: 185, text: "Stage 5: The FDR enters active monitoring with interest tracking. Stage 6: Automated maturity alerts trigger at T-90, T-60, and T-30 days." },
+        { start: 185, end: 194, text: "Stage 7: The college applies for release and uploads necessary compliance certificates." },
+        { start: 194, end: 204, text: "Stage 8: Regional officers review, Finance Bureau validates, and an automated release order is issued with digital signature verification." },
+        { start: 204, end: 220, text: "Every state transition is locked, audited, and mathematically verified without manual paper chasing." }
+      ]
+    },
+    {
+      id: 6,
+      startTime: 220,
+      endTime: 260,
+      title: "SCENE 6: NETWORK ROUTING & USER INTERFACE FLOW",
+      dialogues: [
+        { start: 220, end: 225, text: "Next, let's look at production network routing and interface structure." },
+        { start: 225, end: 233, text: "Client requests enter through Caddy reverse proxy, providing automatic HTTPS, compression, and rate limiting." },
+        { start: 233, end: 241, text: "Requests for the API route to the FastAPI backend, while other requests serve the static React single-page application." },
+        { start: 241, end: 250, text: "Our frontend architecture uses modular route-based structures with TanStack Router, responsive layouts, and accessible components." },
+        { start: 250, end: 260, text: "Real-time updates keep dashboards synchronized across Colleges, Bank Officers, Regional Officers, and National Administrators." }
+      ]
+    },
+    {
+      id: 7,
+      startTime: 260,
+      endTime: 290,
+      title: "SCENE 7: ARCHITECTURE SUMMARY & KEY ADVANTAGES",
+      dialogues: [
+        { start: 260, end: 265, text: "To summarize, our architecture provides four core advantages:" },
+        { start: 265, end: 271, text: "First, Scalability: Stateless APIs and asynchronous task processing handle peak workloads during annual approval cycles." },
+        { start: 271, end: 277, text: "Second, Security: Row-level security, role separation, and cryptographic audit trails protect sensitive financial data." },
+        { start: 277, end: 283, text: "Third, Reliability: Idempotent operations, automated retries, and comprehensive error handling prevent data loss." },
+        { start: 283, end: 290, text: "Fourth, Regulatory Compliance: Strict enforcement of AICTE norms with automated validation and complete auditability. Thank you." }
+      ]
+    }
+  ];
+
+  const TOTAL_DURATION = 290; // 4m 50s
+  let currentTime = 0;
+  let isPlaying = false;
+  let playbackRate = 1.0;
+  let voiceEnabled = false;
+  let lastTimestamp = 0;
+  let animFrameId = null;
+
+  // DOM elements
+  const progressFill = document.getElementById('progressFill');
+  const timeDisplay = document.getElementById('timeDisplay');
+  const liveCaptionText = document.getElementById('liveCaptionText');
+  const captionSceneTag = document.getElementById('captionSceneTag');
+  const captionDurationTag = document.getElementById('captionDurationTag');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const playIcon = document.getElementById('playIcon');
+  const speedBtn = document.getElementById('speedBtn');
+  const voiceBtn = document.getElementById('voiceBtn');
+  const scenePillBtns = document.querySelectorAll('.scene-pill-btn');
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function updateTimeline(time) {
+    currentTime = Math.min(Math.max(time, 0), TOTAL_DURATION);
+
+    // Update Progress Bar
+    const pct = (currentTime / TOTAL_DURATION) * 100;
+    progressFill.style.width = `${pct}%`;
+    timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(TOTAL_DURATION)}`;
+
+    // Identify current scene
+    const currentScene = SCENES.find(s => currentTime >= s.startTime && currentTime < s.endTime) || SCENES[SCENES.length - 1];
+
+    // Toggle Scene views
+    for (let i = 1; i <= 7; i++) {
+      const el = document.getElementById(`scene-${i}`);
+      if (el) {
+        if (i === currentScene.id) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      }
+    }
+
+    // Update scene pills
+    scenePillBtns.forEach((btn, idx) => {
+      if (idx === currentScene.id - 1) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Update Captions
+    captionSceneTag.textContent = currentScene.title;
+    captionDurationTag.textContent = `${formatTime(currentScene.startTime)} - ${formatTime(currentScene.endTime)}`;
+
+    let activeDialogue = currentScene.dialogues.find(d => currentTime >= d.start && currentTime <= d.end);
+    if (!activeDialogue && currentScene.dialogues.length > 0) {
+      activeDialogue = currentScene.dialogues[currentScene.dialogues.length - 1];
+    }
+
+    if (activeDialogue) {
+      if (liveCaptionText.textContent !== activeDialogue.text) {
+        liveCaptionText.textContent = activeDialogue.text;
+        if (voiceEnabled && isPlaying) {
+          speakCaption(activeDialogue.text);
+        }
+      }
+    }
+
+    // Dynamic Scene Specific Updates
+    updateSceneDynamics(currentScene.id, currentTime);
+
+    if (currentTime >= TOTAL_DURATION) {
+      pause();
+    }
+  }
+
+  function updateSceneDynamics(sceneId, time) {
+    if (sceneId === 2) {
+      // Highlight steps in API pipeline
+      const stepIdx = Math.floor(((time - 20) / 50) * 5) + 1;
+      for (let s = 1; s <= 5; s++) {
+        const node = document.getElementById(`pnode-${s}`);
+        if (node) {
+          if (s === stepIdx) node.classList.add('active-step');
+          else node.classList.remove('active-step');
+        }
+      }
+    } else if (sceneId === 3) {
+      // Animate paise counter & roles
+      const paiseVal = 350000000 + Math.floor(Math.sin(time * 3) * 5000);
+      const disp = document.getElementById('paiseNumberDisplay');
+      if (disp) disp.textContent = paiseVal.toLocaleString('en-IN') + ' PAISE';
+      
+      const roleIdx = Math.floor((time - 70) / 15) % 3;
+      const roles = ['role-college', 'role-ro', 'role-maker'];
+      roles.forEach((r, idx) => {
+        const el = document.getElementById(r);
+        if (el) {
+          if (idx === roleIdx) el.classList.add('active-role');
+          else el.classList.remove('active-role');
+        }
+      });
+    } else if (sceneId === 5) {
+      // Lifecycle 8-stage circuit animation
+      const stagePct = ((time - 155) / 65);
+      const stageIdx = Math.min(Math.floor(stagePct * 8) + 1, 8);
+      const line = document.getElementById('lifecycleProgressLine');
+      if (line) line.style.width = `${Math.min(stagePct * 100, 100)}%`;
+
+      const stagesData = [
+        { title: "FDR Submission & Initial Ingestion", body: "Institution submits fixed deposit certificate details. The portal captures principal, IFSC, lien declaration and stores integer paise." },
+        { title: "Format Validation & Schema Gate", body: "FastAPI checks Pydantic v2 constraints, validates IFSC regex, and calculates AICTE mandate amounts." },
+        { title: "Automated Bank Verification Request", body: "Verification request payload dispatched to Core Banking System (CBS) simulator via API & SFTP." },
+        { title: "Tripartite Agreement & Lien Confirmation", body: "Bank marks institutional lien in favor of AICTE and returns cryptographic confirmation tokens." },
+        { title: "Active Monitoring & Accrual Engine", body: "System monitors deposit status, quarterly interest accruals, and regulatory sufficiency continuously." },
+        { title: "Statutory Maturity Alert Schedule", body: "Automated notification engine dispatches warning alerts at T-90, T-60, and T-30 days to the college." },
+        { title: "College Release Claim & Compliance", body: "College uploads final completion certificates and applies for fund discharge via the portal." },
+        { title: "Multi-Tier Maker-Checker DSC Discharge", body: "Regional officer reviews, Finance Bureau checks, and automated release order signed via Digital Signature Certificate." }
+      ];
+
+      for (let n = 1; n <= 8; n++) {
+        const node = document.getElementById(`lnode-${n}`);
+        if (node) {
+          if (n < stageIdx) {
+            node.classList.remove('active-node');
+            node.classList.add('completed-node');
+          } else if (n === stageIdx) {
+            node.classList.add('active-node');
+            node.classList.remove('completed-node');
+          } else {
+            node.classList.remove('active-node');
+            node.classList.remove('completed-node');
+          }
+        }
+      }
+
+      const curData = stagesData[stageIdx - 1];
+      if (curData) {
+        document.getElementById('stageCounterLabel').textContent = `LIFECYCLE STAGE ${stageIdx} / 8`;
+        document.getElementById('stageHeadline').textContent = curData.title;
+        document.getElementById('stageBody').textContent = curData.body;
+      }
+    }
+  }
+
+  // Animation Loop
+  function tick(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const delta = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+
+    if (isPlaying) {
+      updateTimeline(currentTime + delta * playbackRate);
+    }
+
+    drawOverviewCanvas();
+    animFrameId = requestAnimationFrame(tick);
+  }
+
+  // Canvas particles in Scene 1
+  const canvas = document.getElementById('archCanvas');
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  for (let i = 0; i < 40; i++) {
+    particles.push({
+      x: Math.random() * 780,
+      y: Math.random() * 230,
+      vx: 1 + Math.random() * 2.5,
+      vy: (Math.random() - 0.5) * 0.8,
+      rad: 1.5 + Math.random() * 2,
+      color: Math.random() > 0.5 ? '#38bdf8' : '#10b981'
+    });
+  }
+
+  function drawOverviewCanvas() {
+    ctx.clearRect(0, 0, 780, 230);
+    
+    // Draw interconnect lines
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(40, 115);
+    ctx.lineTo(740, 115);
+    ctx.stroke();
+
+    // Nodes
+    const nodes = [
+      { x: 120, y: 115, label: "Client Ingress" },
+      { x: 280, y: 115, label: "FastAPI Engine" },
+      { x: 440, y: 115, label: "RLS Security" },
+      { x: 600, y: 115, label: "Audit Ledger" }
+    ];
+
+    nodes.forEach(n => {
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 20, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '10px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(n.label, n.x, n.y + 36);
+    });
+
+    // Animate data flow particles
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x > 780) p.x = 0;
+      if (p.y < 40 || p.y > 190) p.vy *= -1;
+
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.rad, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  // Playback Controls
+  function togglePlay() {
+    if (isPlaying) pause();
+    else play();
+  }
+
+  function play() {
+    isPlaying = true;
+    playIcon.innerHTML = '&#10074;&#10074; Pause';
+    playPauseBtn.classList.remove('primary');
+    lastTimestamp = performance.now();
+  }
+
+  function pause() {
+    isPlaying = false;
+    playIcon.innerHTML = '&xutri; Play';
+    playPauseBtn.classList.add('primary');
+  }
+
+  function jumpTo(seconds) {
+    updateTimeline(seconds);
+  }
+
+  function seekByClick(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = clickX / rect.width;
+    jumpTo(ratio * TOTAL_DURATION);
+  }
+
+  function cycleSpeed() {
+    const speeds = [1.0, 1.5, 2.0, 4.0];
+    let nextIdx = (speeds.indexOf(playbackRate) + 1) % speeds.length;
+    playbackRate = speeds[nextIdx];
+    speedBtn.textContent = `${playbackRate.toFixed(1)}x Speed`;
+  }
+
+  function toggleVoice() {
+    voiceEnabled = !voiceEnabled;
+    voiceBtn.textContent = `Voice: ${voiceEnabled ? 'On' : 'Off'}`;
+    voiceBtn.style.borderColor = voiceEnabled ? 'var(--cyan)' : 'rgba(255, 255, 255, 0.15)';
+  }
+
+  let lastSpoken = "";
+  function speakCaption(text) {
+    if (!('speechSynthesis' in window)) return;
+    if (text === lastSpoken) return;
+    window.speechSynthesis.cancel();
+    lastSpoken = text;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.05 * playbackRate;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Initialize
+  updateTimeline(0);
+  animFrameId = requestAnimationFrame(tick);
+
+  // Expose global controller for Playwright recording automation
+  window.videoController = {
+    play,
+    pause,
+    jumpTo,
+    updateTimeline,
+    getCurrentTime: () => currentTime,
+    getTotalDuration: () => TOTAL_DURATION,
+    setPlaybackRate: (r) => { playbackRate = r; }
+  };
+</script>
+</body>
+</html>
