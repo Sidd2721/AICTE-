@@ -1,5 +1,6 @@
 """Authentication dependencies for machine-to-machine integration clients."""
 
+import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Annotated
@@ -20,7 +21,12 @@ def get_machine_client(
     if not api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="X-API-Key is required",
+            detail={
+                "code": "UNAUTHORIZED",
+                "message": "X-API-Key is required",
+                "details": {},
+                "request_id": f"req_{uuid.uuid4().hex[:12]}",
+            },
             headers={"WWW-Authenticate": "ApiKey"},
         )
     key_hash = hash_api_key(api_key)
@@ -28,7 +34,15 @@ def get_machine_client(
         select(MachineApiKey).where(MachineApiKey.key_hash == key_hash)
     ).first()
     if record is None or not verify_api_key(api_key, record):
-        raise HTTPException(status_code=401, detail="Invalid or expired API key")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={
+                "code": "UNAUTHORIZED",
+                "message": "Invalid or expired API key",
+                "details": {},
+                "request_id": f"req_{uuid.uuid4().hex[:12]}",
+            },
+        )
 
     # Machine clients are explicitly scoped before any tenant query. The integration
     # scope is national, so it uses the same bureau read policy as a human bureau user.
@@ -45,7 +59,12 @@ def require_scope(scope: str) -> Callable[..., MachineApiKey]:
         if scope not in set(client.scopes):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"API key lacks required scope: {scope}",
+                detail={
+                    "code": "FORBIDDEN",
+                    "message": f"API key lacks required scope: {scope}",
+                    "details": {"required_scope": scope, "granted_scopes": client.scopes},
+                    "request_id": f"req_{uuid.uuid4().hex[:12]}",
+                },
             )
         return client
 

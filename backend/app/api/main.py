@@ -9,6 +9,7 @@ from app.api.routes import (
     fraud_lab,
     instruments,
     integration,
+    integration_v1,
     login,
     meta,
     private,
@@ -34,6 +35,7 @@ api_router.include_router(reports.router)
 api_router.include_router(fraud_lab.router)
 api_router.include_router(evidence.router)
 api_router.include_router(integration.router)
+api_router.include_router(integration_v1.keys_router)
 
 
 if settings.FASTAPI_ENV in ("development", "demo"):

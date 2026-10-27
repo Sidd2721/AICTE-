@@ -563,6 +563,43 @@ class IdempotencyRecord(SQLModel, table=True):
     )
 
 
+class WebhookSubscription(SQLModel, table=True):
+    __tablename__ = "webhook_subscription"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    target_url: str = Field(max_length=500)
+    secret: str = Field(max_length=128)
+    event_types: list[str] = Field(
+        default_factory=list,
+        sa_column=Column(JSONB, nullable=False, server_default="[]"),
+    )
+    active: bool = Field(default=True)
+    created_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+    last_delivered_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
+    failure_count: int = Field(default=0)
+
+
+class WebhookDeliveryLog(SQLModel, table=True):
+    __tablename__ = "webhook_delivery_log"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    subscription_id: uuid.UUID = Field(foreign_key="webhook_subscription.id", index=True)
+    event_type: str = Field(max_length=100)
+    status_code: int | None = Field(default=None)
+    success: bool = Field(default=False)
+    error_message: str | None = Field(default=None, max_length=500)
+    latency_ms: int = Field(default=0)
+    delivered_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+
+
 # ==========================================
 # 12. Rate Limit & Generic Messages
 # ==========================================

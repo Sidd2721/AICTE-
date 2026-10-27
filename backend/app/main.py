@@ -9,7 +9,7 @@ from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
-from app.api.routes import bank, clock, worker
+from app.api.routes import bank, clock, integration_v1, worker
 from app.core.config import settings
 from app.domain.clock import today
 from app.domain.rules import RULES_DIR, load_rule, startup_guard
@@ -85,6 +85,62 @@ async def guard_docs_outside_dev(
 
 
 @app.middleware("http")
+async def integration_v1_middleware(
+    request: Request, call_next: Callable[[Request], Any]
+) -> Response:
+    if request.url.path.startswith("/api/integration/v1"):
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > 10 * 1024 * 1024:
+            return Response(
+                status_code=413,
+                content=b'{"code":"PAYLOAD_TOO_LARGE","message":"Request body exceeds 10MB limit","details":{},"request_id":"req_err"}',
+                media_type="application/json",
+            )
+
+        import uuid
+
+        from sqlmodel import Session
+
+        from app.core.db import engine
+        from app.core.rate_limit import check_rate_limit, ensure_rate_limit_table
+
+        api_key = request.headers.get("x-api-key")
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        key_id = api_key[:32] if api_key else client_ip
+        rate_key = f"rl:integration:{key_id}"
+
+        try:
+            with Session(engine) as session:
+                ensure_rate_limit_table(session)
+                allowed, retry_after = check_rate_limit(
+                    session, key=rate_key, max_requests=100, window_seconds=60
+                )
+        except Exception:
+            allowed, retry_after = True, 0
+
+        if not allowed:
+            headers = {
+                "Retry-After": str(retry_after),
+                "X-RateLimit-Limit": "100",
+                "X-RateLimit-Remaining": "0",
+                "X-RateLimit-Reset": str(retry_after),
+            }
+            body = (
+                f'{{"code":"RATE_LIMIT_EXCEEDED","message":"Rate limit exceeded. Please retry later.",'
+                f'"details":{{"retry_after":{retry_after}}},"request_id":"req_{uuid.uuid4().hex[:12]}"}}'
+            ).encode()
+            return Response(status_code=429, content=body, media_type="application/json", headers=headers)
+
+        response: Response = await call_next(request)
+        response.headers["X-RateLimit-Limit"] = "100"
+        response.headers["X-RateLimit-Remaining"] = "99"
+        response.headers["X-RateLimit-Reset"] = "60"
+        return response
+
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def add_security_headers(
     request: Request, call_next: Callable[[Request], Any]
 ) -> Response:
@@ -116,6 +172,7 @@ app.add_middleware(
 app.include_router(clock.router)
 app.include_router(bank.router)
 app.include_router(worker.router)
+app.include_router(integration_v1.router)
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 

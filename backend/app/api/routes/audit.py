@@ -1,13 +1,74 @@
+import json
+from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, status
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from fastapi import APIRouter, HTTPException, Query, Response, status
 from sqlalchemy import text
 from sqlmodel import col, select
 
 from app.api.deps import CurrentUser, SessionDep
+from app.integration.checkpoints import (
+    AuditCheckpointSigner,
+    write_latest_audit_checkpoint,
+)
 from app.models import AuditEvent
 
 router = APIRouter(prefix="/audit", tags=["audit"])
+
+CHECKPOINT_DIR = Path(__file__).resolve().parents[4] / "data" / "checkpoints"
+CHECKPOINT_KEY_PATH = CHECKPOINT_DIR / "ed25519_checkpoint.key"
+
+
+def get_checkpoint_signer() -> AuditCheckpointSigner:
+    CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
+    if CHECKPOINT_KEY_PATH.exists():
+        return AuditCheckpointSigner.from_private_key_file(CHECKPOINT_DIR, CHECKPOINT_KEY_PATH)
+    key = Ed25519PrivateKey.generate()
+    CHECKPOINT_KEY_PATH.write_bytes(
+        key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8,
+            serialization.NoEncryption(),
+        )
+    )
+    return AuditCheckpointSigner(CHECKPOINT_DIR, key)
+
+
+@router.get("/checkpoints")
+def list_checkpoints(session: SessionDep) -> dict[str, Any]:
+    """Retrieve signed detached audit checkpoints and public verification key (Requirement 3.7)."""
+    signer = get_checkpoint_signer()
+    try:
+        write_latest_audit_checkpoint(session, signer)
+    except Exception:
+        pass
+
+    checkpoints = []
+    if CHECKPOINT_DIR.exists():
+        for cp_file in sorted(CHECKPOINT_DIR.glob("checkpoint-*.json"), key=lambda f: f.stat().st_mtime, reverse=True):
+            try:
+                data = json.loads(cp_file.read_text(encoding="utf-8"))
+                checkpoints.append(data)
+            except Exception:
+                pass
+
+    return {
+        "checkpoints": checkpoints[:20],
+        "public_key_pem": signer.public_key_pem().decode("utf-8"),
+        "note": "A demo key on the same host demonstrates the cryptographic protocol, but does NOT constitute independent trust; production anchors externally to an independent transparency log or HSM.",
+    }
+
+
+@router.get("/checkpoints/pubkey")
+def get_checkpoint_pubkey() -> Response:
+    """Retrieve public verification key for detached audit checkpoints in PEM format."""
+    signer = get_checkpoint_signer()
+    return Response(
+        content=signer.public_key_pem(),
+        media_type="application/x-pem-file",
+    )
 
 
 @router.get("/verify")

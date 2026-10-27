@@ -3,6 +3,7 @@ import {
   FileSpreadsheet,
   History,
   Home,
+  Network,
   ShieldCheck,
   TrendingUp,
   Users,
@@ -27,6 +28,7 @@ const baseItems: Item[] = [
   { icon: History, title: "Audit Ledger", path: "/audit" },
   { icon: TrendingUp, title: "Impact Metrics", path: "/impact" },
   { icon: ShieldCheck, title: "Evidence & Status", path: "/evidence" },
+  { icon: Network, title: "Integrate & APIs", path: "/integrate" },
 ]
 
 export function AppSidebar() {
