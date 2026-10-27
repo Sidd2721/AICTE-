@@ -137,7 +137,8 @@ async def integration_v1_middleware(
         response.headers["X-RateLimit-Reset"] = "60"
         return response
 
-    return await call_next(request)
+    res: Response = await call_next(request)
+    return res
 
 
 @app.middleware("http")

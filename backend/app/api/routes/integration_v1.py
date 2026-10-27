@@ -934,7 +934,7 @@ def test_bank_flow(
             raise HTTPException(status_code=400, detail="No instruments found in database. Load judge scenario first.")
         conf = Confirmation(
             instrument_id=ins.id,
-            method="integration",
+            method="signed_letter",
             token_hash=hashed_token,
             token_expires_at=now() + timedelta(days=30),
             status="requested",
