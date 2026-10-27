@@ -98,3 +98,14 @@ def test_security_headers_present() -> None:
     assert "Content-Security-Policy" in res.headers
     assert res.headers.get("X-Content-Type-Options") == "nosniff"
     assert res.headers.get("X-Frame-Options") == "DENY"
+
+
+@pytest.mark.parametrize("env", ENV_MATRIX)
+@pytest.mark.parametrize("auto_seed", [True, False])
+def test_autoseed_matrix(env: str, auto_seed: bool) -> None:
+    """Auto-seed only activates when env in {development, demo} AND AUTO_SEED=True; inert elsewhere."""
+    should_seed = (env in ("development", "demo")) and auto_seed
+    with patch.object(settings, "FASTAPI_ENV", env), patch.object(settings, "AUTO_SEED", auto_seed):
+        assert ((settings.FASTAPI_ENV in ("development", "demo")) and settings.AUTO_SEED) == should_seed
+        if env in ("production", "unknown"):
+            assert not ((settings.FASTAPI_ENV in ("development", "demo")) and settings.AUTO_SEED)

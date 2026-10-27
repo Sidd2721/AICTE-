@@ -1,7 +1,8 @@
+import sys
 import psycopg
 
-def set_ownership_to_migrator():
-    conn = psycopg.connect("host=localhost port=5432 dbname=app user=postgres password=changethis", autocommit=True)
+def set_ownership_to_migrator(dbname="app"):
+    conn = psycopg.connect(f"host=localhost port=5432 dbname={dbname} user=postgres password=changethis", autocommit=True)
     cur = conn.cursor()
     cur.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
     tables = [row[0] for row in cur.fetchall()]
@@ -18,7 +19,8 @@ def set_ownership_to_migrator():
         cur.execute(f'GRANT USAGE, SELECT ON SEQUENCE public."{s}" TO app;')
         
     conn.close()
-    print(f"Ownership of {len(tables)} tables and {len(seqs)} sequences successfully transferred to migrator.")
+    print(f"[{dbname}] Ownership of {len(tables)} tables and {len(seqs)} sequences successfully transferred to migrator.")
 
 if __name__ == "__main__":
-    set_ownership_to_migrator()
+    db = sys.argv[1] if len(sys.argv) > 1 else "app"
+    set_ownership_to_migrator(db)

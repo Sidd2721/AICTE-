@@ -34,7 +34,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
             raise RuntimeError(f"Startup guard failed: {e}") from e
 
     # Ensure demo database has initial seed data if unseeded in dev/demo
-    if settings.FASTAPI_ENV in ("development", "demo"):
+    if settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
         try:
             from sqlmodel import Session, select
 

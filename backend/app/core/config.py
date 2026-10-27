@@ -33,8 +33,10 @@ class Settings(BaseSettings):
     SENTRY_DSN: HttpUrl | None = None
     DATABASE_URL: PostgresDsn
     MIGRATION_DATABASE_URL: PostgresDsn | None = None
+    TEST_DATABASE_URL: PostgresDsn | None = None
+    AUTO_SEED: bool = False
 
-    @field_validator("DATABASE_URL", "MIGRATION_DATABASE_URL", mode="before")
+    @field_validator("DATABASE_URL", "MIGRATION_DATABASE_URL", "TEST_DATABASE_URL", mode="before")
     @classmethod
     def _use_psycopg_driver(cls, value: str | PostgresDsn | None) -> str | None:
         if value is None:

@@ -16,17 +16,19 @@ import uuid
 import psycopg
 import pytest
 
+TEST_DB = os.environ.get("TEST_DB_NAME", "app_test")
+
 MIG = os.environ.get(
     "MIGRATION_PG_URL",
-    "host=localhost port=5432 dbname=app user=migrator password=change-me-migrator",
+    f"host=localhost port=5432 dbname={TEST_DB} user=migrator password=change-me-migrator",
 )
 APP = os.environ.get(
     "APP_PG_URL",
-    "host=localhost port=5432 dbname=app user=app password=change-me-app",
+    f"host=localhost port=5432 dbname={TEST_DB} user=app password=change-me-app",
 )
 SUPER = os.environ.get(
     "SUPERUSER_PG_URL",
-    f"host=localhost port=5432 dbname=app user=postgres password={os.environ.get('POSTGRES_PASSWORD', 'changethis')}",
+    f"host=localhost port=5432 dbname={TEST_DB} user=postgres password={os.environ.get('POSTGRES_PASSWORD', 'changethis')}",
 )
 
 
@@ -213,9 +215,12 @@ def test_sql_behaviour_checks(setup_test_data: tuple[str, str, str, str, str, st
     c.close()
 
     # 16. owner UPDATE/DELETE/TRUNCATE blocked by triggers
+    target_row = m.execute("SELECT id FROM audit_event ORDER BY id LIMIT 1").fetchone()
+    assert target_row is not None, "audit_event should have at least one row"
+    target_id = target_row[0]
     for sql in (
-        "UPDATE audit_event SET action='x' WHERE id=2",
-        "DELETE FROM audit_event WHERE id=2",
+        f"UPDATE audit_event SET action='x' WHERE id={target_id}",
+        f"DELETE FROM audit_event WHERE id={target_id}",
         "TRUNCATE audit_event",
     ):
         try:
@@ -226,24 +231,26 @@ def test_sql_behaviour_checks(setup_test_data: tuple[str, str, str, str, str, st
         assert blocked, f"Trigger failed to block: {sql}"
 
     # 17. superuser tamper detection
+    all_ids = [r[0] for r in m.execute("SELECT id FROM audit_event ORDER BY id").fetchall()]
+    tamper_id = all_ids[len(all_ids) // 2]
     su = psycopg.connect(SUPER, autocommit=True)
-    su.execute("ALTER TABLE audit_event DISABLE TRIGGER USER")
-    su.execute("UPDATE audit_event SET payload='{\"k\":\"EVIL\"}' WHERE id=5")
-    su.execute("ALTER TABLE audit_event ENABLE TRIGGER USER")
-    su.close()
-
-    c = app_conn("bureau")
-    bad = c.execute("SELECT audit_verify()").fetchone()[0]
-    c.rollback()
-    c.close()
-    assert bad == 5, f"tamper by superuser should be detected at id 5, got {bad}"
-
-    # Restore the tampered row so chain is valid again for remaining tests
-    su = psycopg.connect(SUPER, autocommit=True)
-    su.execute("ALTER TABLE audit_event DISABLE TRIGGER USER")
-    su.execute("UPDATE audit_event SET payload='{\"k\":\"v\"}' WHERE id=5")
-    su.execute("ALTER TABLE audit_event ENABLE TRIGGER USER")
-    su.close()
+    orig_payload = su.execute("SELECT payload FROM audit_event WHERE id=%s", (tamper_id,)).fetchone()[0]
+    import json
+    try:
+        su.execute("ALTER TABLE audit_event DISABLE TRIGGER USER")
+        su.execute("UPDATE audit_event SET payload='{\"k\":\"EVIL\"}' WHERE id=%s", (tamper_id,))
+        su.execute("ALTER TABLE audit_event ENABLE TRIGGER USER")
+        c = app_conn("bureau")
+        bad = c.execute("SELECT audit_verify()").fetchone()[0]
+        c.rollback()
+        c.close()
+        assert bad == tamper_id, f"tamper by superuser should be detected at id {tamper_id}, got {bad}"
+    finally:
+        su.execute("ALTER TABLE audit_event DISABLE TRIGGER USER")
+        payload_val = json.dumps(orig_payload) if isinstance(orig_payload, dict) else orig_payload
+        su.execute("UPDATE audit_event SET payload=%s WHERE id=%s", (payload_val, tamper_id))
+        su.execute("ALTER TABLE audit_event ENABLE TRIGGER USER")
+        su.close()
 
     # 18. release: verifier != approver CHECK
     try:
