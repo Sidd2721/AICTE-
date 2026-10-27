@@ -42,12 +42,11 @@ export async function logOutUser(page: Page) {
 }
 
 export async function signUpNewUser(
-  page: Page,
-  name: string,
+  _page: Page,
+  _name: string,
   email: string,
   password: string,
 ) {
   const { createUser } = await import("./privateApi")
   await createUser({ email, password })
 }
-
