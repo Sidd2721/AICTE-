@@ -121,3 +121,17 @@
 - Not certified as statutory regulatory authority software (contains DEMO values and synthetic datasets).
 - Does not initiate financial disbursements or wire money.
 - Digital signature certificates (DSC) prove document signers, not external bank confirmation.
+
+---
+
+## 8. Video Demonstration Artifacts & Verification Assets (C13)
+
+| Asset | File Location | Specifications | Cryptographic Fingerprint |
+| :--- | :--- | :--- | :--- |
+| **Demo Video (MP4)** | `docs/demo_video.mp4` | 3,474,139 bytes (~3.47 MB), 1440x900 H.264 | `SHA-256: 7B76F19BA6E0B8DA2BAA3D31BE66E15E94FB23E8E9390E0D041498DA039DE255` |
+| **Closed Captions (VTT)**| `docs/demo_video.vtt` | WebVTT closed captions synced with video cues | Standard UTF-8 WebVTT file |
+| **Master Video Script** | `docs/VIDEO_PITCH_AND_SCRIPT_MASTER.md` | 10 scene cues, timing, visual cues, voiceover | Complete presentation transcript |
+| **HTML Player** | `docs/video_player.html` | In-browser zero-dependency HTML5 player | Plays video with captions and timeline |
+| **Generator Script** | `scripts/record_full_demo_video.js` | Headless Playwright scripted automation | Reproducible recording from clean state |
+| **Playwright E2E Suite** | `frontend/tests/` | **43 passed (42.2s)** | Chromium E2E suite |
+| **Backend Test Suite** | `backend/tests/` | **186 passed (64.0s)** | Pytest suite against `app_test` |

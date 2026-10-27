@@ -1,0 +1,31 @@
+WEBVTT - AICTE FDR Regulatory Portal Demo Captions
+
+00:00:00.000 --> 00:00:25.000
+Welcome to the AICTE Fixed Deposit Receipt Regulatory Portal for Problem Statement 26265. Instant 1-click persona access for judges and evaluators.
+
+00:00:25.000 --> 00:00:50.000
+The 6-minute guided tour walks evaluators through all statutory capabilities based on docs/guide.json with zero jargon.
+
+00:00:50.000 --> 00:01:20.000
+Approval Process Handbook Table 1.4 calculations are loaded dynamically from dated JSON rules. All monetary values stored as integer paise.
+
+00:01:20.000 --> 00:01:50.000
+Institutions file instruments with scanned PDF certificates. Files are hashed with SHA-256 and stored in the AES-256 encrypted vault.
+
+00:01:50.000 --> 00:02:20.000
+The simulated bank confirmation gate applies a 6-stage cryptographic check: byte integrity, PDF signature coverage, and bank records.
+
+00:02:20.000 --> 00:02:50.000
+Automatic discrepancy flags detect shortfalls. Officers must enter mandatory digital scrutiny notes before any flag can be waived.
+
+00:02:50.000 --> 00:03:30.000
+Dual-custody release authorization enforces separation of duties: the Regional Officer verifies, but only the Bureau Head can approve.
+
+00:03:30.000 --> 00:03:55.000
+The Break-Me security workbench tests replay attacks and forged certificates in real time, failing closed on any invalid payload.
+
+00:03:55.000 --> 00:04:20.000
+Every mutation is etched into a cryptographic SHA-256 append-only ledger protected by PostgreSQL triggers against tampering.
+
+00:04:20.000 --> 00:04:45.000
+186 backend tests, 43 Playwright E2E tests, and 4 mutation proofs verify every claim. Hackathon-final ready.
