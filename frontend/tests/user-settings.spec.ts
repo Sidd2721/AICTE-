@@ -45,7 +45,9 @@ test.describe("Edit user profile", () => {
     await page.getByLabel("Full name").fill(updatedName)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User updated successfully")).toBeVisible()
+    await expect(
+      page.getByText("User updated successfully").first(),
+    ).toBeVisible()
     await expect(
       page.locator("form").getByText(updatedName, { exact: true }),
     ).toBeVisible()
@@ -79,7 +81,9 @@ test.describe("Edit user email", () => {
     await page.getByLabel("Email").fill(updatedEmail)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User updated successfully")).toBeVisible()
+    await expect(
+      page.getByText("User updated successfully").first(),
+    ).toBeVisible()
     await expect(
       page.locator("form").getByText(updatedEmail, { exact: true }),
     ).toBeVisible()
@@ -142,7 +146,9 @@ test.describe("Change password", () => {
     await page.getByTestId("confirm-password-input").fill(newPassword)
     await page.getByRole("button", { name: "Update Password" }).click()
 
-    await expect(page.getByText("Password updated successfully")).toBeVisible()
+    await expect(
+      page.getByText("Password updated successfully").first(),
+    ).toBeVisible()
 
     await logOutUser(page)
     await logInUser(page, email, newPassword)
@@ -175,7 +181,7 @@ test.describe("Change password validation", () => {
     await page.getByRole("button", { name: "Update Password" }).click()
 
     await expect(
-      page.getByText("Password must be at least 8 characters"),
+      page.getByText("Password must be at least 8 characters").first(),
     ).toBeVisible()
   })
 
@@ -187,7 +193,9 @@ test.describe("Change password validation", () => {
     await page.getByTestId("confirm-password-input").fill(randomPassword())
     await page.getByRole("button", { name: "Update Password" }).click()
 
-    await expect(page.getByText("The passwords don't match")).toBeVisible()
+    await expect(
+      page.getByText("The passwords don't match").first(),
+    ).toBeVisible()
   })
 
   test("Current password and new password are the same", async ({ page }) => {
@@ -197,7 +205,9 @@ test.describe("Change password validation", () => {
     await page.getByRole("button", { name: "Update Password" }).click()
 
     await expect(
-      page.getByText("New password cannot be the same as the current one"),
+      page
+        .getByText("New password cannot be the same as the current one")
+        .first(),
     ).toBeVisible()
   })
 })

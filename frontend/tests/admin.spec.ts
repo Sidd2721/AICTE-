@@ -18,6 +18,8 @@ test("Add User button is visible", async ({ page }) => {
 })
 
 test.describe("Admin user management", () => {
+  test.describe.configure({ mode: "serial" })
+
   test("Create a new user successfully", async ({ page }) => {
     await page.goto("/admin")
 
@@ -34,7 +36,9 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
+    await expect(
+      page.getByText("User created successfully").first(),
+    ).toBeVisible()
 
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
@@ -58,7 +62,9 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
+    await expect(
+      page.getByText("User created successfully").first(),
+    ).toBeVisible()
 
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
@@ -81,7 +87,9 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
+    await expect(
+      page.getByText("User created successfully").first(),
+    ).toBeVisible()
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
@@ -92,7 +100,9 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Full name").fill(updatedName)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User updated successfully")).toBeVisible()
+    await expect(
+      page.getByText("User updated successfully").first(),
+    ).toBeVisible()
     await expect(page.getByText(updatedName)).toBeVisible()
   })
 
@@ -108,7 +118,9 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
+    await expect(
+      page.getByText("User created successfully").first(),
+    ).toBeVisible()
 
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
@@ -120,7 +132,7 @@ test.describe("Admin user management", () => {
     await page.getByRole("button", { name: "Delete" }).click()
 
     await expect(
-      page.getByText("The user was deleted successfully"),
+      page.getByText("The user was deleted successfully").first(),
     ).toBeVisible()
 
     await expect(
