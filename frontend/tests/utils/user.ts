@@ -40,3 +40,14 @@ export async function logOutUser(page: Page) {
   await page.getByRole("menuitem", { name: "Log out" }).click()
   await page.goto("/login")
 }
+
+export async function signUpNewUser(
+  page: Page,
+  name: string,
+  email: string,
+  password: string,
+) {
+  const { createUser } = await import("./privateApi")
+  await createUser({ email, password })
+}
+
