@@ -602,6 +602,60 @@ function InstrumentCaseView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-xs">
+            {/* Stepper Visualization */}
+            <div className="py-2">
+              <div className="flex items-center justify-between relative">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-1" />
+                <div className="flex flex-col items-center gap-1 bg-background px-1 z-10">
+                  <div
+                    className={`size-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      relReq
+                        ? "bg-emerald-600 text-white"
+                        : "bg-primary text-primary-foreground"
+                    }`}
+                  >
+                    1
+                  </div>
+                  <span className="text-[10px] font-medium text-muted-foreground">
+                    Request
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-1 bg-background px-1 z-10">
+                  <div
+                    className={`size-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      relReq?.status === "verified" ||
+                      relReq?.status === "released"
+                        ? "bg-emerald-600 text-white"
+                        : relReq?.status === "submitted"
+                          ? "bg-primary text-primary-foreground animate-pulse"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    2
+                  </div>
+                  <span className="text-[10px] font-medium text-muted-foreground">
+                    Verify (RO)
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-1 bg-background px-1 z-10">
+                  <div
+                    className={`size-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                      relReq?.status === "released"
+                        ? "bg-emerald-600 text-white"
+                        : relReq?.status === "verified"
+                          ? "bg-primary text-primary-foreground animate-pulse"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    3
+                  </div>
+                  <span className="text-[10px] font-medium text-muted-foreground">
+                    Approve (HQ)
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div className="p-3 bg-muted rounded-md space-y-1">
               <div>
                 <strong>Status:</strong>{" "}
