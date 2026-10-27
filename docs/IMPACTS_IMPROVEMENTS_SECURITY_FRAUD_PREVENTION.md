@@ -3,13 +3,13 @@
 
 > **Document Classification**: Comprehensive Technical Research & Strategic Blueprint  
 > **Target Audience**: AICTE Leadership, Ministry of Education, National Informatics Centre (NIC), Banking Technology Consortiums (IBA, NPCI, NeSL), and Enterprise Security Architects.  
-> **Status**: Verified Production-Ready Blueprint | **Underlying Engine Baseline**: 172/172 Pytest Tests Passing, Clean Mypy, Zero Dist Leaks, Dual-Custody DB Engine.
+> **Status**: Verified Prototype Blueprint | **Underlying Engine Baseline**: 172/172 Pytest Tests Passing, Clean Mypy, Zero Dist Leaks, Dual-Custody DB Engine.
 
 ---
 
 ## Executive Summary
 
-The All India Council for Technical Education (AICTE), under the Ministry of Education, mandates that technical institutions (Engineering, Management, Pharmacy, Architecture, Design, Applied Arts) maintain Fixed Deposit Receipts (FDRs) or Security Deposits in joint accounts with AICTE for lock-in periods of up to 10 years. Across India’s **10,000+ technical institutions**, this represents an estimated cumulative sovereign regulatory corpus exceeding **₹15,000+ Crore ($1.8+ Billion USD)**.
+The All India Council for Technical Education (AICTE), under the Ministry of Education, mandates that technical institutions (Engineering, Management, Architecture, Design, Applied Arts) maintain Fixed Deposit Receipts (FDRs) or Security Deposits in joint accounts with AICTE for lock-in periods of up to 10 years. Across India’s **10,000+ technical institutions**, this represents an estimated cumulative sovereign regulatory corpus exceeding **₹15,000+ Crore ($1.8+ Billion USD)**.
 
 Historically, this multi-crore deposit ecosystem has operated via physical paper letters, scanned PDFs sent over unauthenticated emails, manual branch visits, and physical courier correspondence. This asymmetric information gap between the statutory regulator, financial institutions (Scheduled Commercial Banks), and educational societies has resulted in recurring vulnerabilities: forged bank confirmation letters, unauthorized premature liquidations, double-pledged instruments, and phantom trust diversions.
 
@@ -26,7 +26,7 @@ This research paper provides an exhaustive, multi-perspective examination of:
 ```mermaid
 flowchart TD
     subgraph Regulatory ["1. Regulatory & Governance Impact"]
-        R1["100% Real-Time Visibility across 8 Regions"]
+        R1["Real-Time Visibility across 8 Regions"]
         R2["Zero Missing Physical Dossiers"]
         R3["Automated Parliament & CAG Audit Reporting"]
     end
@@ -59,7 +59,7 @@ flowchart TD
 1. **Total Elimination of Information Asymmetry**:
    - Currently, AICTE headquarters in New Delhi and its 8 Regional Offices (ROs) rely on paper registers and disparate spreadsheets. The portal establishes a single immutable record per deposit, where every attribute is classified as `claimed`, `confirmed`, `stale`, or `changed` (Invariant I1).
 2. **Instantaneous Parliamentary & CAG Audit Readiness**:
-   - Compliance audits by the Comptroller and Auditor General (CAG) historically require months of compiling physical bank certificates across 8 regional offices. With the portal's SHA-256 Merkle-chained audit ledger (`audit_event`) and `audit_verify()` integrity check, regulatory verification drops from **180 days to 3.2 seconds**.
+   - Compliance audits by the Comptroller and Auditor General (CAG) historically require months of compiling physical bank certificates across 8 regional offices. With the portal's SHA-256 linear hash-chained audit ledger (`audit_event`) and `audit_verify()` integrity check, regulatory verification executes in automated batch runs.
 3. **Eradication of File Tampering & Discretionary Delays**:
    - The server-driven Finite State Machine (`next_action()`) and strict Role-Based Access Control eliminate administrative discretion. Files cannot be held indefinitely; statutory SLAs trigger automated visual escalations (Warning at 30 days, Critical at 7 days).
 
@@ -201,7 +201,7 @@ flowchart LR
         direction TB
         ABAC["Open Policy Agent (OPA)<br/>(Fine-Grained Context Policies)"]
         Vault["HashiCorp Vault<br/>(Ephemeral Dynamic Credentials)"]
-        AuditChain["Merkle Tree Time-Stamping<br/>(RFC 3161 External Notary)"]
+        AuditChain["Audit Hash Tree Time-Stamping<br/>(RFC 3161 External Notary)"]
     end
 
     mTLS --> Enclave
@@ -343,13 +343,13 @@ flowchart TD
   - The system automatically triggers the **Amount Discrepancy Gate (D1)** and **Validity Gate (D2)**: If the bank-reported principal differs by even 1 paisa from Table 1.4 requirements, the badge immediately flips to `DISCREPANCY` and blocks workflow progression.
 
 #### Vector 4: Multi-Regulatory Double-Pledging
-- **The Attack Vector**: A multi-disciplinary educational trust operates an Engineering college (AICTE), a Pharmacy college (Pharmacy Council of India - PCI), and a Law institute (Bar Council of India - BCI) on the same campus. The trust creates a single ₹50 Lakh FDR and submits certified copies to all three independent regulatory bodies simultaneously, effectively obtaining approvals worth ₹1.5 Crore on a single ₹50 Lakh reserve.
+- **The Attack Vector**: A multi-disciplinary educational trust operates an Engineering college (AICTE), an allied Medical college (NMC), and a Law institute (Bar Council of India - BCI) on the same campus. The trust creates a single ₹50 Lakh FDR and submits certified copies to all three independent regulatory bodies simultaneously, effectively obtaining approvals worth ₹1.5 Crore on a single ₹50 Lakh reserve.
 - **The Portal Defense**:
   - **Cross-Regulatory National Lien Registry (CRNLR)**:
     - Every confirmed FDR's unique parameters (Bank IFSC + Sanitized Account Hash) are published to an immutable cross-regulatory verification ledger.
     - Before confirmation, the portal queries the shared directory:
       $$\text{Token} = \text{SHA256}(\text{IFSC} \parallel \text{Account\_Number\_Salted})$$
-    - If the token is already registered under an active lien with PCI, BCI, or UGC, the portal rejects the instrument with `COLLATERAL_ALREADY_ENCUMBERED` and flags the institution for audit.
+    - If the token is already registered under an active lien with allied regulators or UGC, the portal rejects the instrument with `COLLATERAL_ALREADY_ENCUMBERED` and flags the institution for audit.
 
 #### Vector 5: PDF Polyglots & Trailing Byte Tampering
 - **The Attack Vector**: An attacker crafts a "polyglot" PDF. They obtain a digitally signed verification letter from a bank for a small ₹5 Lakh deposit. Using PDF incremental update specifications, they append an uncompressed trailing revision table that alters the visible text to "₹50 Lakh", while leaving the original cryptographic signature technically valid over the original byte offset.
@@ -473,12 +473,12 @@ def validate_bank_reply_gate(
 ```
 
 ### 5.2 Immutable Audit Ledger Verification Engine
-Demonstrating the mathematical verification of the SHA-256 Merkle chain:
+Demonstrating the mathematical verification of the SHA-256 linear hash chain:
 
 ```sql
 -- backend/app/sql/audit_verification.sql
 -- Function to cryptographically verify the integrity of the audit_event table
--- Returns NULL if the chain is 100% pristine; returns the first broken sequence_id if tampered.
+-- Returns NULL if the chain is fully intact; returns the first broken sequence_id if tampered.
 
 CREATE OR REPLACE FUNCTION verify_audit_ledger_integrity()
 RETURNS bigint AS $$
@@ -515,7 +515,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 # SECTION 6: Strategic Roadmap, Feasibility & Regulatory Rollout
 
-Transitioning from the current production-ready MVP to a nationwide deployed system involves a phased 4-stage rollout aligned with the AICTE academic calendar:
+Transitioning from the current prototype MVP to a nationwide deployed system involves a phased 4-stage rollout aligned with the AICTE academic calendar:
 
 ```mermaid
 timeline
