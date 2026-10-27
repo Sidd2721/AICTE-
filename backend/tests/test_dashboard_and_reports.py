@@ -93,6 +93,22 @@ def test_dashboard_api_counters_and_search(client: TestClient, tokens: dict[str,
     search_res = client.get(f"/api/v1/dashboard/search?q={ref_no}", headers=tokens["bureau"])
     assert search_res.status_code == 200
     search_data = search_res.json()
+    assert search_data["count"] >= 1
+    assert search_data["results"][0]["ref_no"] == ref_no
+
+    # 3. Fetch impact metrics
+    impact_res = client.get("/api/v1/dashboard/impact", headers=tokens["bureau"])
+    assert impact_res.status_code == 200, impact_res.text
+    impact_data = impact_res.json()
+    assert impact_data["status"] == "computed"
+    metrics = impact_data["metrics"]
+    assert len(metrics) >= 5
+    metric_ids = {m["id"] for m in metrics}
+    assert "corpus_protected_inr" in metric_ids
+    assert "active_lien_paise" in metric_ids
+    assert "verified_bank_confirmations" in metric_ids
+    assert "participating_banks" in metric_ids
+    assert "immutable_audit_events" in metric_ids
     assert len(search_data["results"]) >= 1
     assert search_data["results"][0]["ref_no"] == ref_no
 
