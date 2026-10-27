@@ -60,9 +60,9 @@ function AuditLedgerView() {
     mutationFn: async () => {
       const res = await client.get({ url: "/api/v1/audit/verify" })
       return res.data as {
-        valid: boolean
-        total_events: number
-        first_corrupted_id: number | null
+        status: "clean" | "corrupted"
+        tampered_event_id: number | null
+        message: string
       }
     },
   })
@@ -71,6 +71,7 @@ function AuditLedgerView() {
   const total = data?.total || 0
   const maxPage = Math.max(0, Math.ceil(total / PAGE_SIZE) - 1)
   const verifyResult = verifyMutation.data
+  const isClean = verifyResult?.status === "clean"
 
   return (
     <div className="space-y-6 pb-12">
@@ -98,21 +99,19 @@ function AuditLedgerView() {
       <AboutThisPage pageKey="audit" />
 
       {verifyResult && (
-        <Alert variant={verifyResult.valid ? "default" : "destructive"}>
-          {verifyResult.valid ? (
+        <Alert variant={isClean ? "default" : "destructive"}>
+          {isClean ? (
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
           ) : (
             <AlertCircle className="h-4 w-4" />
           )}
           <AlertTitle>
-            {verifyResult.valid
-              ? "Hash Chain Intact"
-              : "Chain Integrity Tampered"}
+            {isClean ? "Hash Chain Intact" : "Chain Integrity Tampered"}
           </AlertTitle>
           <AlertDescription>
-            {verifyResult.valid
-              ? `All ${verifyResult.total_events} events verified. SHA-256 links form a valid, unbroken chain.`
-              : `Tampering detected at event ID ${verifyResult.first_corrupted_id}. Hash mismatch violates append-only invariant.`}
+            {isClean
+              ? `${verifyResult.message}. All sequential SHA-256 links form a valid, unbroken chain.`
+              : `${verifyResult.message}. Hash mismatch violates append-only invariant.`}
           </AlertDescription>
         </Alert>
       )}
