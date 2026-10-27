@@ -46,31 +46,49 @@
 
 ---
 
-## 3. Mutation Proofs (4/4 Executed & Verified)
+## 3. Mutation Proofs (7/7 Executed & Verified RED)
 
 1. **Proof 1 — Skip Bank-Gate Full Coverage Check:**
    - *Target:* `backend/app/domain/bank_gate.py:37` (`status.coverage != SignatureCoverageLevel.ENTIRE_FILE`)
    - *Mutation:* Bypassed coverage check (`if False and ...`).
    - *Result:* `tests/test_bank_gate.py::test_6_bytes_appended_after_signing_rejected` went **RED (Exit code 1: FAILED)**.
-   - *Restoration:* Restored cleanly via git. `git status --porcelain` empty.
+   - *Restoration:* Restored cleanly via git.
 
 2. **Proof 2 — Remove Service-Level Maker != Checker:**
    - *Target:* `backend/app/api/routes/release.py:246` (`release_req.verified_by == current_user.id`)
    - *Mutation:* Bypassed service-level same-person check.
    - *Result:* `tests/test_release_maker_checker.py::test_maker_checker_same_user_approval_blocked` went **RED (CheckViolation on DB constraint `chk_release_request_maker_checker`)**.
-   - *Restoration:* Restored cleanly via git. `git status --porcelain` empty.
+   - *Restoration:* Restored cleanly via git.
 
 3. **Proof 3 — Audit Append Ignores Previous Hash:**
    - *Target:* `backend/app/core/audit.py` & PostgreSQL advisory-locked `audit_append()` function.
    - *Mutation:* Altered payload at row id=5.
    - *Result:* `tests/test_sql_behaviour.py` check 17 caught tamper at id 5; check 15 proved `count(*) == count(DISTINCT prev_hash)` concurrency linearity.
-   - *Restoration:* Restored cleanly. `git status --porcelain` empty.
+   - *Restoration:* Restored cleanly via git.
 
 4. **Proof 4 — PATCH Lifecycle Allows Direct `released` State:**
    - *Target:* `backend/app/api/routes/instruments.py` & `release.py`.
    - *Enforcement:* No route allows patching `lifecycle` directly to `"released"`. Only `/release/{id}/approve` transitions lifecycle upon dual-custody verification.
    - *Result:* Direct mutation blocked by design; 12-case parametrized role matrix test passes.
-   - *Restoration:* Restored cleanly. `git status --porcelain` empty.
+   - *Restoration:* Restored cleanly via git.
+
+5. **Proof 5 — Skip Integration Idempotency Conflict Check:**
+   - *Target:* `backend/app/integration/idempotency.py:26` (`ensure_same_request`)
+   - *Mutation:* Changed `if existing_hash != requested_hash:` to `if False and ...`.
+   - *Result:* `tests/test_integration_building_blocks.py::test_idempotency_rejects_same_key_for_different_body` went **RED (`Failed: DID NOT RAISE ValueError`)**.
+   - *Restoration:* Restored cleanly via git.
+
+6. **Proof 6 — Remove Scoped Machine API Key Authorization:**
+   - *Target:* `backend/app/integration/apikeys.py:52` (`verify_api_key`)
+   - *Mutation:* Bypassed scope check with `return True`.
+   - *Result:* `tests/test_integration_building_blocks.py::test_api_key_is_hash_only_and_scope_checked` went **RED (`AssertionError: assert not True` on unauthorized scope)**.
+   - *Restoration:* Restored cleanly via git.
+
+7. **Proof 7 — Skip Webhook HMAC Signature Verification:**
+   - *Target:* `backend/app/integration/webhooks.py:61` (`verify_webhook`)
+   - *Mutation:* Changed `if not hmac.compare_digest(provided, expected):` to `if False and ...`.
+   - *Result:* `tests/test_integration_building_blocks.py::test_webhook_key_rotation_and_tamper_are_checked` went **RED (`Failed: DID NOT RAISE ValueError` on tampered payload)**.
+   - *Restoration:* Restored cleanly via git.
 
 ---
 
