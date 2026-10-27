@@ -65,4 +65,13 @@ export const ABOUT_PAGES: Record<string, AboutPageContent> = {
     whatToNotice:
       "Every number and assertion is computed or generated; zero hand-typed metrics appear in reports or documentation.",
   },
+  impact: {
+    title: "Regulatory & Economic Impact Dashboard",
+    whatThisIs:
+      "A live, server-computed metrics portal tracking total regulatory deposit corpus, bank confirmation throughput, and audit integrity under AICTE PS 26265.",
+    whatToDoHere:
+      "Examine live-computed metrics across protected corpus, joint-lien coverage, and banking integrations, and verify system assurance guarantees.",
+    whatToNotice:
+      "All metrics are calculated directly from active database state; zero values are hardcoded or simulated static numbers.",
+  },
 }

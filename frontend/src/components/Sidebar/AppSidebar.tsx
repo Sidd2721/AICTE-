@@ -4,6 +4,7 @@ import {
   History,
   Home,
   ShieldCheck,
+  TrendingUp,
   Users,
 } from "lucide-react"
 
@@ -24,6 +25,7 @@ const baseItems: Item[] = [
   { icon: Briefcase, title: "Deposits", path: "/deposits" },
   { icon: FileSpreadsheet, title: "Reports", path: "/reports" },
   { icon: History, title: "Audit Ledger", path: "/audit" },
+  { icon: TrendingUp, title: "Impact Metrics", path: "/impact" },
   { icon: ShieldCheck, title: "Evidence & Status", path: "/evidence" },
 ]
 
