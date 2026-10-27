@@ -2397,6 +2397,26 @@ export type dashboardUpdateInstrumentMetadataResponses = {
     200: unknown;
 };
 
+export type dashboardGetImpactMetricsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/dashboard/impact';
+};
+
+export type dashboardGetImpactMetricsResponses = {
+    /**
+     * Response Dashboard-Get Impact Metrics
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type dashboardGetImpactMetricsResponse = dashboardGetImpactMetricsResponses[keyof dashboardGetImpactMetricsResponses];
+
 export type reportsReportPendingVerificationsData = {
     body?: never;
     path?: never;
