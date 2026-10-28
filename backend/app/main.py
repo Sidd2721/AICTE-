@@ -22,11 +22,32 @@ def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{tag}-{route.name}"
 
 
+# In-memory seeding flag (V3): protects /ready until initial demo data completes
+_seed_completed: bool = True
+
+
+def is_seed_completed() -> bool:
+    return _seed_completed
+
+
+def set_seed_completed(val: bool) -> None:
+    global _seed_completed
+    _seed_completed = val
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     import asyncio
     import logging
     import time
+
+    global _seed_completed
+    import os
+    is_testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+    if not is_testing and settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+        _seed_completed = False
+    else:
+        _seed_completed = True
 
     t_start = time.perf_counter()
     logger = logging.getLogger("uvicorn.info")
@@ -67,6 +88,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
         pass
 
     def _sync_seed_worker() -> None:
+        global _seed_completed
         if settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
             try:
                 from sqlmodel import Session, select
@@ -88,6 +110,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
                         logger.info("[lifespan] Database already seeded; skipping redundant seed.")
             except Exception as e:
                 logger.warning("[lifespan] Background seed notice: %s", e)
+            finally:
+                _seed_completed = True
+        else:
+            _seed_completed = True
 
     import os
     is_testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
@@ -213,7 +239,7 @@ async def add_security_headers(
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob: https:; font-src 'self'; "
-        "connect-src 'self' https://*.onrender.com https://*.supabase.co; "
+        "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.onrender.com https://*.supabase.co; "
         "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
     )
     response.headers["Strict-Transport-Security"] = (
@@ -281,6 +307,16 @@ def readiness_check() -> Response:
 
     if not check_vault_writable():
         return JSONResponse(status_code=503, content={"status": "unready"})
+
+    if (
+        settings.FASTAPI_ENV in ("development", "demo")
+        and settings.AUTO_SEED
+        and not _seed_completed
+    ):
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unready", "reason": "seeding_in_progress"},
+        )
 
     return JSONResponse(status_code=200, content={"status": "ready"})
 

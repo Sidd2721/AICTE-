@@ -78,3 +78,26 @@ def test_pool_recovery_after_drop_and_rls_integrity():
         region_applied = session.execute(text("SELECT current_setting('app.region', true)")).scalar()
         assert role_applied == "regional"
         assert region_applied == "NR"
+
+
+def test_readiness_returns_503_while_seeding(monkeypatch: pytest.MonkeyPatch):
+    """Verify /ready returns 503 while background demo seeding is in progress."""
+    from app.core.config import settings
+    from app.main import set_seed_completed
+
+    monkeypatch.setattr(settings, "FASTAPI_ENV", "demo")
+    monkeypatch.setattr(settings, "AUTO_SEED", True)
+    set_seed_completed(False)
+
+    try:
+        res = client.get("/ready")
+        assert res.status_code == 503
+        assert res.json()["status"] == "unready"
+        assert res.json()["reason"] == "seeding_in_progress"
+
+        set_seed_completed(True)
+        res_after = client.get("/ready")
+        assert res_after.status_code == 200
+        assert res_after.json() == {"status": "ready"}
+    finally:
+        set_seed_completed(True)
