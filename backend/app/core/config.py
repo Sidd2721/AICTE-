@@ -24,6 +24,7 @@ class Settings(BaseSettings):
         "demo-regulatory-portal-secret-key-32chars-min-change-in-prod"
     )
     VAULT_KEY: str = ""
+    VAULT_PATH: str | None = None
     # Token life: 60 minutes
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     FRONTEND_HOST: str = "http://localhost:5173"

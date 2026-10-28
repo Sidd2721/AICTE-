@@ -1,13 +1,87 @@
+"""Encrypted document vault using AES-256-GCM envelope encryption.
+
+SECURITY AND IMMUTABILITY RULES (FT3):
+- The vault directory is configurable via the VAULT_PATH environment variable (defaults to ./vault).
+- At start, the directory must be verified writable by the application process.
+- Missing or non-distinct VAULT_KEY: logs a loud warning in development/demo, and strictly refuses
+  to start in production.
+- Key Immutability: Never rotate or re-encrypt existing documents automatically. Changing VAULT_KEY
+  will render all previously stored documents permanently unreadable!
+"""
 import base64
 import hashlib
+import logging
 import os
+import uuid
 from pathlib import Path
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from app.core.config import settings
 
-VAULT_DIR = Path(__file__).resolve().parent.parent / "vault"
+logger = logging.getLogger(__name__)
+
+
+def get_vault_dir() -> Path:
+    """Return the configured vault directory or default to ./vault.
+
+    Configurable via the VAULT_PATH environment variable.
+    """
+    if settings.VAULT_PATH and settings.VAULT_PATH.strip():
+        return Path(settings.VAULT_PATH.strip()).resolve()
+    return Path(__file__).resolve().parent.parent / "vault"
+
+
+# Backward-compatible module-level reference
+VAULT_DIR = get_vault_dir()
+
+
+def validate_vault_security(env: str | None = None) -> None:
+    """Validate vault key configuration and immutability rules at startup.
+
+    Rules:
+    - Missing or identical vault key: loud warning in demo, refuse to start in production.
+    - Never rotate or re-encrypt anything.
+    - Changing the key makes existing files permanently unreadable.
+    """
+    current_env = env or settings.FASTAPI_ENV
+    vault_raw = settings.VAULT_KEY.strip() if settings.VAULT_KEY else ""
+    secret_raw = settings.SECRET_KEY.strip() if settings.SECRET_KEY else ""
+
+    if not vault_raw:
+        msg = (
+            "CRITICAL SECURITY WARNING: VAULT_KEY is unset! Falling back to SECRET_KEY. "
+            "Changing or rotating this key later will render all previously stored documents permanently unreadable."
+        )
+        if current_env == "production":
+            raise RuntimeError(f"Production startup aborted: {msg}")
+        logger.warning("****************************************************************")
+        logger.warning(msg)
+        logger.warning("****************************************************************")
+        return
+
+    if vault_raw == secret_raw:
+        msg = (
+            "SECURITY NOTICE: VAULT_KEY is identical to SECRET_KEY. "
+            "In production, a dedicated separate key must be used for AES-256-GCM vault encryption."
+        )
+        if current_env == "production":
+            raise RuntimeError(f"Production startup aborted: {msg}")
+        logger.warning(msg)
+
+
+def check_vault_writable(vault_path: Path | None = None) -> bool:
+    """Verify that the vault directory exists (or can be created) and is writable by the app user."""
+    target_dir = vault_path or get_vault_dir()
+    try:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        probe_file = target_dir / f".write_probe_{uuid.uuid4().hex[:8]}"
+        probe_file.write_bytes(b"probe")
+        probe_file.unlink()
+        return True
+    except Exception as e:
+        logger.error("Vault directory '%s' is not writable: %s", target_dir, e)
+        return False
 
 
 def get_vault_key() -> bytes:
@@ -65,8 +139,9 @@ def detect_dsc(data: bytes, mime_type: str) -> bool:
 
 def store_in_vault(storage_key: str, data: bytes) -> Path:
     """Encrypt and store data in the vault directory and Supabase Storage."""
-    VAULT_DIR.mkdir(parents=True, exist_ok=True)
-    target_path = VAULT_DIR / f"{storage_key}.enc"
+    vault_dir = get_vault_dir()
+    vault_dir.mkdir(parents=True, exist_ok=True)
+    target_path = vault_dir / f"{storage_key}.enc"
     encrypted = encrypt_bytes(data)
     target_path.write_bytes(encrypted)
 
@@ -80,16 +155,15 @@ def store_in_vault(storage_key: str, data: bytes) -> Path:
         if is_supabase_configured():
             upload_to_supabase_vault(f"{storage_key}.enc", encrypted)
     except Exception as exc:
-        import logging
-
-        logging.getLogger(__name__).warning("Supabase vault upload skipped: %s", exc)
+        logger.warning("Supabase vault upload skipped: %s", exc)
 
     return target_path
 
 
 def read_from_vault(storage_key: str) -> bytes:
     """Read and decrypt data from local vault directory or Supabase Storage."""
-    target_path = VAULT_DIR / f"{storage_key}.enc"
+    vault_dir = get_vault_dir()
+    target_path = vault_dir / f"{storage_key}.enc"
     if target_path.exists():
         encrypted = target_path.read_bytes()
         return decrypt_bytes(encrypted)

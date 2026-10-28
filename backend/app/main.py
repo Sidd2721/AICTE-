@@ -40,6 +40,24 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
         if settings.FASTAPI_ENV != "development":
             raise RuntimeError(f"Startup guard failed: {e}") from e
 
+    # FT3: Vault key security and directory writability guard
+    try:
+        from app.domain.vault import check_vault_writable, validate_vault_security
+
+        validate_vault_security(settings.FASTAPI_ENV)
+        if not check_vault_writable():
+            if settings.FASTAPI_ENV == "production":
+                raise PermissionError(
+                    "Production startup aborted: Vault directory is not writable."
+                )
+            logger.warning(
+                "[lifespan] Warning: Vault directory is not writable by current user."
+            )
+    except Exception as e:
+        if settings.FASTAPI_ENV == "production":
+            raise RuntimeError(f"Vault security check failed: {e}") from e
+        logger.warning("[lifespan] Vault initialization notice: %s", e)
+
     # Ensure Supabase storage bucket exists if configured
     try:
         from app.integration.supabase_storage import ensure_bucket_exists
