@@ -139,10 +139,14 @@ async def integration_v1_middleware(
         from sqlmodel import Session
 
         from app.core.db import engine
-        from app.core.rate_limit import check_rate_limit, ensure_rate_limit_table
+        from app.core.rate_limit import (
+            check_rate_limit,
+            ensure_rate_limit_table,
+            get_client_ip,
+        )
 
         api_key = request.headers.get("x-api-key")
-        client_ip = request.client.host if request.client else "127.0.0.1"
+        client_ip = get_client_ip(request)
         key_id = api_key[:32] if api_key else client_ip
         rate_key = f"rl:integration:{key_id}"
 
