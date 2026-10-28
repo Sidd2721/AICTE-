@@ -24,6 +24,13 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+    import asyncio
+    import logging
+    import time
+
+    t_start = time.perf_counter()
+    logger = logging.getLogger("uvicorn.info")
+
     # Invariant I7: outside development, refuse to start while any rule is DEMO
     names = ["deposit", "timelines", "release_paths"]
     try:
@@ -41,26 +48,48 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     except Exception:
         pass
 
-    # Ensure demo database has initial seed data if unseeded in dev/demo
-    if settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
-        try:
-            from sqlmodel import Session, select
+    def _sync_seed_worker() -> None:
+        if settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+            try:
+                from sqlmodel import Session, select
 
-            from app.core.db import engine, init_db
-            from app.models import User
-            from app.seed_rich_synthetic_data import seed_rich_data
+                from app.core.db import engine, init_db
+                from app.models import User
+                from app.seed_rich_synthetic_data import seed_rich_data
 
-            with Session(engine) as session:
-                has_demo = session.exec(
-                    select(User).where(User.email == "inst.north1@example.com")
-                ).first()
-                if not has_demo:
-                    init_db(session)
-                    seed_rich_data()
-        except Exception:
-            pass
+                with Session(engine) as session:
+                    has_demo = session.exec(
+                        select(User.id).where(User.email == "inst.north1@example.com")
+                    ).first()
+                    if not has_demo:
+                        logger.info("[lifespan] Unseeded database detected; seeding initial demo data...")
+                        init_db(session)
+                        seed_rich_data()
+                        logger.info("[lifespan] Initial demo data seeded successfully.")
+                    else:
+                        logger.info("[lifespan] Database already seeded; skipping redundant seed.")
+            except Exception as e:
+                logger.warning("[lifespan] Background seed notice: %s", e)
+
+    import os
+    is_testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+    seed_task = None
+    if not is_testing and settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+        seed_task = asyncio.create_task(asyncio.to_thread(_sync_seed_worker))
+
+    t_ready = time.perf_counter()
+    logger.info(
+        "[lifespan] Startup initialization complete in %.3fs; listening for traffic.",
+        t_ready - t_start,
+    )
 
     yield
+
+    if seed_task is not None:
+        try:
+            await seed_task
+        except Exception:
+            pass
 
 
 if settings.SENTRY_DSN and settings.FASTAPI_ENV != "development":
