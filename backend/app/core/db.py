@@ -8,8 +8,9 @@ from app.models import User, UserCreate
 engine = create_engine(
     str(settings.DATABASE_URL),
     pool_pre_ping=True,
+    pool_recycle=300,
     pool_size=5,
-    max_overflow=10,
+    max_overflow=5,
 )
 
 

@@ -249,6 +249,42 @@ def health_check() -> dict[str, str]:
     return {"status": "ok", "app": settings.PROJECT_NAME}
 
 
+@app.get("/ready", include_in_schema=False)
+@app.get("/api/ready", include_in_schema=False)
+def readiness_check() -> Response:
+    """Readiness probe checking database connectivity, migration head, and vault writability.
+
+    Returns 200 {"status": "ready"} if all systems are ready, or 503 {"status": "unready"} otherwise.
+    Excluded from public OpenAPI schema to preserve client contract stability.
+    """
+    from fastapi.responses import JSONResponse
+    from sqlalchemy import text
+    from sqlmodel import Session
+
+    from app.core.db import engine
+    from app.domain.vault import check_vault_writable
+
+    try:
+        with Session(engine) as session:
+            db_res = session.execute(text("SELECT 1")).scalar()
+            if db_res != 1:
+                return JSONResponse(status_code=503, content={"status": "unready"})
+
+            ver_res = session.execute(
+                text("SELECT version_num FROM alembic_version LIMIT 1")
+            ).scalar()
+            expected_head = "d812bd6c915d"
+            if ver_res != expected_head:
+                return JSONResponse(status_code=503, content={"status": "unready"})
+    except Exception:
+        return JSONResponse(status_code=503, content={"status": "unready"})
+
+    if not check_vault_writable():
+        return JSONResponse(status_code=503, content={"status": "unready"})
+
+    return JSONResponse(status_code=200, content={"status": "ready"})
+
+
 app.include_router(clock.router)
 app.include_router(bank.router)
 app.include_router(worker.router)
