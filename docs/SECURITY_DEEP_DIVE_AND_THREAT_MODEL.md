@@ -60,7 +60,7 @@ flowchart TD
 
 ## 2. Tier 1: Transport & Network Ingress Security
 
-### A. Strict HTTP Security Headers ([`main.py`](file:///c:/Users/avadu/26265/backend/app/main.py))
+### A. Strict HTTP Security Headers ([`main.py`](backend/app/main.py))
 Every HTTP response is stamped by the `add_security_headers` middleware:
 - **`Strict-Transport-Security: max-age=31536000; includeSubDomains`**: Enforces HTTPS for all client connections for a full year; prevents SSL-stripping attacks.
 - **`Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'`**: Restricts asset loading strictly to the origin server. Prevents cross-site scripting (XSS), data exfiltration, and malicious external script injection.
@@ -69,10 +69,10 @@ Every HTTP response is stamped by the `add_security_headers` middleware:
 - **`Referrer-Policy: strict-origin-when-cross-origin`**: Protects path information from leaking in external requests.
 
 ### B. Zero External CDNs (Offline-Audit Invariant)
-The portal bundles 100% of its static assets (JavaScript, CSS, web fonts, SVG icons). There is **zero external dependency** on Google Fonts, unpkg, cdnjs, or third-party CDNs. If external networks fail or are blocked in government intranets, the portal operates with 100% fidelity.
+The portal bundles all of its static assets (JavaScript, CSS, web fonts, SVG icons). There is **zero external dependency** on Google Fonts, unpkg, cdnjs, or third-party CDNs. If external networks fail or are blocked in government intranets, the portal operates with complete fidelity.
 
 ### C. Rate Limiting & Denial-of-Service (DoS) Defense
-- Implemented in [`security.py`](file:///c:/Users/avadu/26265/backend/app/core/security.py) and verified in [`test_m9_hardening_and_demo.py`](file:///c:/Users/avadu/26265/backend/tests/test_m9_hardening_and_demo.py).
+- Implemented in [`security.py`](backend/app/core/security.py) and verified in [`test_m9_hardening_and_demo.py`](backend/tests/test_m9_hardening_and_demo.py).
 - Authentication routes enforce sliding-window rate limits (10 attempts/minute per IP, 5 attempts/minute per target account).
 - 25 rapid bad logins automatically trigger HTTP 429 Too Many Requests, blocking brute-force credential stuffing.
 
@@ -96,7 +96,7 @@ Defeats GPU-accelerated       Requires 64MB RAM per hash;    Resists FPGA & ASIC
 brute-force dictionaries.     blocks mass parallel cracking. brute-force hardware.
 ```
 
-### A. Argon2id Password Hashing ([`security.py`](file:///c:/Users/avadu/26265/backend/app/core/security.py))
+### A. Argon2id Password Hashing ([`security.py`](backend/app/core/security.py))
 - Passwords are encrypted using **Argon2id** (the winner of the Password Hashing Competition), combining Argon2d (data-dependent, memory-hard against GPU/ASIC attacks) and Argon2i (data-independent, resistant to side-channel timing attacks).
 - Imposes an intentional **~250ms computation delay** per login attempt, mathematically rendering high-speed credential enumeration infeasible.
 
@@ -131,7 +131,7 @@ flowchart TD
 
 ### A. The Non-Superuser Runtime Role (Invariant I4)
 - The application database user (`app`) is provisioned with `NOSUPERUSER` and `NOBYPASSRLS`.
-- Even if a developer writes `SELECT * FROM instrument`, the PostgreSQL database engine physically filters rows according to the session variables set by [`rls_context.py`](file:///c:/Users/avadu/26265/backend/app/core/rls_context.py):
+- Even if a developer writes `SELECT * FROM instrument`, the PostgreSQL database engine physically filters rows according to the session variables set by [`rls_context.py`](backend/app/core/rls_context.py):
   - **Institution**: Can query and mutate only records matching its own `institution_id`.
   - **Regional Officer**: Can query and verify records only within its assigned geographic `region` (e.g. `NR`). Cross-tenant IDs yield a strict HTTP 404.
   - **Bureau Approver**: Nationwide access across all regions; authorized exclusively for release approval and clock adjustment.
@@ -139,7 +139,7 @@ flowchart TD
 
 ---
 
-## 5. Tier 4: The 6-Point Cryptographic Bank Gate ([`bank_gate.py`](file:///c:/Users/avadu/26265/backend/app/domain/bank_gate.py))
+## 5. Tier 4: The 6-Point Cryptographic Bank Gate ([`bank_gate.py`](backend/app/domain/bank_gate.py))
 
 A scanned letterhead or simple digital signature is insufficient to prove a deposit exists. Our 6-point cryptographic gate evaluates every bank confirmation response:
 
@@ -151,7 +151,7 @@ A scanned letterhead or simple digital signature is insufficient to prove a depo
     ┌───────────────────────────────┼───────────────────────────────┐
     ▼                               ▼                               ▼
 1. BYTE-PREFIX CHECK          2. SIGNATURE AUTHENTICITY     3. ENTIRE-FILE COVERAGE
-   Validates %PDF-1.4 header    Verifies authorized bank      Mandates 100% byte coverage.
+   Validates %PDF-1.4 header    Verifies authorized bank      Mandates full byte coverage.
    and stream boundaries.       digital signature cert.       Appended pages cause rejection.
     │                               │                               │
     └───────────────────────────────┼───────────────────────────────┘
@@ -175,7 +175,7 @@ A scanned letterhead or simple digital signature is insufficient to prove a depo
   if status.coverage != SignatureCoverageLevel.ENTIRE_FILE:
       raise BankGateError("Appended trailing bytes detected post-signing")
   ```
-  If even a single byte exists after the cryptographic signature container, the transaction is rejected immediately (`INTEGRITY_FAIL`). Verified via mutation testing proof in [`EVIDENCE.md`](file:///c:/Users/avadu/26265/docs/EVIDENCE.md).
+  If even a single byte exists after the cryptographic signature container, the transaction is rejected immediately (`INTEGRITY_FAIL`). Verified via mutation testing proof in [`EVIDENCE.md`](docs/EVIDENCE.md).
 
 ### Cryptographic Challenge Nonces (Anti-Replay Defense)
 - Each bank confirmation request generates a 14-day cryptographic nonce stored as a SHA-256 hash.
@@ -190,7 +190,7 @@ Insider threat is the most dangerous regulatory risk. A single compromised regio
 
 ### The 3-Layer Defense
 1. **Layer 1: Frontend UI State Machine**: Primary release approval button is hidden or disabled when `verified_by == current_user.id`.
-2. **Layer 2: Service-Level Route Guard ([`release.py`](file:///c:/Users/avadu/26265/backend/app/api/routes/release.py))**:
+2. **Layer 2: Service-Level Route Guard ([`release.py`](backend/app/api/routes/release.py))**:
    ```python
    if release_req.verified_by == current_user.id:
        raise HTTPException(
@@ -198,7 +198,7 @@ Insider threat is the most dangerous regulatory risk. A single compromised regio
            detail="Maker cannot be checker. A different officer must approve."
        )
    ```
-3. **Layer 3: Physical Database Constraint ([`models.py`](file:///c:/Users/avadu/26265/backend/app/models.py))**:
+3. **Layer 3: Physical Database Constraint ([`models.py`](backend/app/models.py))**:
    ```sql
    CONSTRAINT chk_release_request_maker_checker CHECK (verified_by != approved_by)
    ```
@@ -206,7 +206,7 @@ Insider threat is the most dangerous regulatory risk. A single compromised regio
 
 ---
 
-## 7. Tier 6: Immutable Append-Only Audit Ledger ([`audit.py`](file:///c:/Users/avadu/26265/backend/app/core/audit.py))
+## 7. Tier 6: Immutable Append-Only Audit Ledger ([`audit.py`](backend/app/core/audit.py))
 
 Standard application logs written to files or regular SQL tables can be edited or deleted by database administrators. Our audit trail is mathematically immutable.
 
@@ -248,15 +248,15 @@ Mathematically traverses the ledger from genesis (event ID 1) to the head. If an
 
 When external Core Banking Systems and AICTE Central ERP systems communicate with the portal:
 
-1. **Scoped Machine API Keys ([`apikeys.py`](file:///c:/Users/avadu/26265/backend/app/integration/apikeys.py))**:
+1. **Scoped Machine API Keys ([`apikeys.py`](backend/app/integration/apikeys.py))**:
    - API keys are generated as 32-byte cryptographically random tokens prefixed with `fdr_live_`.
    - The database stores **only salted SHA-256 hashes**; the plaintext key is shown once during creation.
    - Enforces scope checking (`institutions:write`, `coverage:read`).
-2. **HMAC-SHA256 Webhook Verification ([`webhooks.py`](file:///c:/Users/avadu/26265/backend/app/integration/webhooks.py))**:
+2. **HMAC-SHA256 Webhook Verification ([`webhooks.py`](backend/app/integration/webhooks.py))**:
    - Outbound webhooks include `X-FDR-Signature: key_id=HMAC-SHA256(timestamp + payload)`.
    - Enforces a **5-minute replay window** via `X-FDR-Timestamp`.
    - Supports dual-key overlapping validation during secret rotation.
-3. **Idempotency Fingerprinting ([`idempotency.py`](file:///c:/Users/avadu/26265/backend/app/integration/idempotency.py))**:
+3. **Idempotency Fingerprinting ([`idempotency.py`](backend/app/integration/idempotency.py))**:
    - Machine calls accept `Idempotency-Key` headers.
    - The SHA-256 digest of the request body is cached. If a client retries with the same key but an altered payload, the system rejects it with HTTP 422 Unprocessable Entity.
 

@@ -3,11 +3,11 @@
 System design document detailing architectural layers, trust boundaries, cryptographic invariants, and privacy compliance.
 
 > **Master Architecture Blueprints**:
-> - Complete Engineering Blueprint: [`docs/COMPLETE_SYSTEM_ARCHITECTURE_DEEP_DIVE.md`](file:///c:/Users/avadu/26265/docs/COMPLETE_SYSTEM_ARCHITECTURE_DEEP_DIVE.md)
-> - All Workable Architecture & Component Diagrams: [`docs/DIAGRAMS.md`](file:///c:/Users/avadu/26265/docs/DIAGRAMS.md) and [`diagrams/README.md`](file:///c:/Users/avadu/26265/diagrams/README.md)
-> - Real On-Ground Reality & Solution Research: [`docs/ONGROUND_REALITY_AND_SOLUTION.md`](file:///c:/Users/avadu/26265/docs/ONGROUND_REALITY_AND_SOLUTION.md)
-> - Security Threat Model & Defense-in-Depth: [`docs/SECURITY_DEEP_DIVE_AND_THREAT_MODEL.md`](file:///c:/Users/avadu/26265/docs/SECURITY_DEEP_DIVE_AND_THREAT_MODEL.md)
-> - Enterprise Feasibility & Scalability Report: [`docs/ENTERPRISE_PRODUCTION_AND_SCALABILITY_REPORT.md`](file:///c:/Users/avadu/26265/docs/ENTERPRISE_PRODUCTION_AND_SCALABILITY_REPORT.md)
+> - Complete Engineering Blueprint: [`docs/COMPLETE_SYSTEM_ARCHITECTURE_DEEP_DIVE.md`](docs/COMPLETE_SYSTEM_ARCHITECTURE_DEEP_DIVE.md)
+> - All Workable Architecture & Component Diagrams: [`docs/DIAGRAMS.md`](docs/DIAGRAMS.md) and [`diagrams/README.md`](diagrams/README.md)
+> - Real On-Ground Reality & Solution Research: [`docs/ONGROUND_REALITY_AND_SOLUTION.md`](docs/ONGROUND_REALITY_AND_SOLUTION.md)
+> - Security Threat Model & Defense-in-Depth: [`docs/SECURITY_DEEP_DIVE_AND_THREAT_MODEL.md`](docs/SECURITY_DEEP_DIVE_AND_THREAT_MODEL.md)
+> - Enterprise Feasibility & Scalability Report: [`docs/ENTERPRISE_PRODUCTION_AND_SCALABILITY_REPORT.md`](docs/ENTERPRISE_PRODUCTION_AND_SCALABILITY_REPORT.md)
 
 ---
 

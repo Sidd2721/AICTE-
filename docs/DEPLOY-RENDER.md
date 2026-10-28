@@ -123,3 +123,81 @@ Execute these checks 30 minutes before evaluating or presenting:
 3. [ ] **Disk Attached**: In Render Dashboard **Disks** tab, confirm `fdr-vault-disk` is mounted at `/app/backend/vault`.
 4. [ ] **Demo Personas**: Access `https://your-service.onrender.com/login` and verify 1-click persona buttons are visible.
 5. [ ] **Audit Trail Continuity**: Navigate to `/audit` and click **Verify Hash Chain** to confirm mathematical integrity.
+
+---
+
+## 9. Offline Secret Backups & Key Loss Warnings
+> [!CAUTION]
+> **VAULT_KEY is Unrecoverable**: Store copies of `VAULT_KEY` and `SECRET_KEY` in a secure offline password manager (e.g. Bitwarden, 1Password, or encrypted HSM). If `VAULT_KEY` is lost or rotated, all existing encrypted documents in the vault become permanently lost.
+
+---
+
+## 10. Database Backups & Point-in-Time Restore
+Render managed PostgreSQL on paid plans (`0.1c-256mb` / Starter) includes automated daily backups:
+1. **Backups Tab**: Navigate to `aicte-fdr-db` in the Render dashboard and click **Backups**.
+2. **Snapshot Retention**: Daily automated snapshots are retained for 7 days.
+3. **Manual Backup**: Trigger an ad-hoc backup anytime via the dashboard before applying major operational changes.
+4. **Restore Procedure**:
+   - To restore, select the backup timestamp and choose **Restore to a New Database**.
+   - Update `DATABASE_URL` in your web service to point to the newly restored instance.
+
+---
+
+## 11. Production Smoke Verification Script
+Run the automated production verification suite from any terminal with `curl`:
+```bash
+bash scripts/smoke_prod.sh https://aicte-1-59pn.onrender.com
+```
+This script verifies:
+1. HTTP 200 on `/health` (Liveness)
+2. HTTP 200 on `/ready` (Readiness)
+3. HTTP 200 on persona authentication (`inst.north1@example.com`)
+4. HTTP 401/403 authorization guard on protected endpoints (`/api/v1/instruments/`)
+5. Presence of mandatory HTTP security headers (`x-content-type-options`, `x-frame-options`, `referrer-policy`)
+
+---
+
+## 12. External Monitoring Configuration
+- **Liveness Ping**: Configure UptimeRobot (or BetterStack) to ping `https://your-service.onrender.com/health` every 5 minutes. This keeps the service warm and tracks true uptime.
+- **Readiness Diagnostic**: Optionally configure an alert-only probe on `https://your-service.onrender.com/ready` every 5 minutes.
+- **Alert Routing**: Direct failure notifications to your platform operations email or Slack channel.
+
+---
+
+## 13. Managed PostgreSQL RLS Role Setup (BLOCKER for Owner)
+> [!IMPORTANT]
+> **Owner RLS Bypass Guard**: In PostgreSQL, the role that owns a table automatically bypasses Row-Level Security policies unless `FORCE ROW LEVEL SECURITY` is set.
+> On Render, the default connection string connects as the database owner.
+> To enforce Invariant I4 (NOSUPERUSER, NOBYPASSRLS) and prevent RLS bypass, execute this one-time SQL script connected as the database owner (`psql <RENDER_POSTGRES_DIRECT_URL>`):
+
+```sql
+-- 1. Create dedicated restricted application runtime role
+CREATE ROLE app LOGIN PASSWORD 'replace_with_strong_runtime_password' NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
+GRANT CONNECT ON DATABASE app TO app;
+GRANT USAGE ON SCHEMA public TO app;
+
+-- 2. Grant least-privilege DML access to app (no TRUNCATE, no DDL)
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app;
+
+-- 3. Set default privileges for tables created during future migrations
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO app;
+
+-- 4. Verify role attributes (both rolsuper and rolbypassrls MUST be false)
+SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = 'app';
+```
+
+After creating the role, update the `DATABASE_URL` environment variable in the web service:
+```
+postgresql://app:replace_with_strong_runtime_password@dpg-xxxx-a.singapore-postgres.render.com/app
+```
+
+---
+
+## 14. First Superuser Password Rotation
+After initial deployment:
+1. Log in to `https://your-service.onrender.com/login` using `FIRST_SUPERUSER` (`admin@example.com`).
+2. Navigate to **Settings** -> **Change Password**.
+3. Update the administrator credentials to a strong unique passphrase.
+4. In the Render Dashboard **Environment** tab, update `FIRST_SUPERUSER_PASSWORD` to match or revoke the initial seed value.

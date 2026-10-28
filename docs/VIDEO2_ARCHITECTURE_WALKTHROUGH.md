@@ -4,9 +4,9 @@
 **Team:** Sentinel Hubz  
 **Target Duration:** 4 minutes 50 seconds (290s) | 90s Judge Cut  
 **Format:** Interactive 1080p 60fps Motion Graphics Presentation with Timed Narration & Vector Schematics  
-**Artifact Path:** [`docs/video2_architecture_motion_graphics.html`](file:///C:/Users/avadu/26265/docs/video2_architecture_motion_graphics.html)  
-**Closed Captions:** [`docs/media/architecture_video.vtt`](file:///C:/Users/avadu/26265/docs/media/architecture_video.vtt)  
-**Automation Script:** [`scripts/record_architecture_video.js`](file:///C:/Users/avadu/26265/scripts/record_architecture_video.js)  
+**Artifact Path:** [`docs/video2_architecture_motion_graphics.html`](docs/video2_architecture_motion_graphics.html)  
+**Closed Captions:** [`docs/media/architecture_video.vtt`](docs/media/architecture_video.vtt)  
+**Automation Script:** [`scripts/record_architecture_video.js`](scripts/record_architecture_video.js)  
 
 ---
 
@@ -52,7 +52,7 @@
   - College Role: restricted to own institution ID
   - Regional Officer: filtered by regional jurisdiction
   - Statutory Rule: Database-level `CHECK (checker_id != maker_id)` constraint
-  - Append-only audit trail with SHA-256 Merkle hash chain
+  - Append-only audit trail with SHA-256 cryptographic hash chain
 - **Narrator Audio:** *"Next, let's look at the database architecture built on PostgreSQL. Institutions connect to FDR records, and FDR records connect to verification logs and approval workflows. We enforce strict Row-Level Security: colleges only access their own records, regional officers see their jurisdiction, and head office views consolidated national reports. All financial amounts are stored as integer paise to prevent floating-point rounding errors. Role segregation is enforced at the database level: the user who prepares a submission can never approve or release it. Every action is recorded in a cryptographically linked append-only audit trail with SHA-256 hashes for total tamper detection."*
 
 ### Scene 4 — Technology Stack & External Integrations (01:55 – 02:35 | 40s)
@@ -60,7 +60,7 @@
   1. Frontend: React 19, TypeScript, Vite 6, TanStack Router, Tailwind CSS, Biome
   2. Backend: FastAPI, Python 3.14, SQLAlchemy 2.0, Alembic, Pydantic v2, uv
   3. Persistence: PostgreSQL 17, RLS, Redis 7 In-Memory, Celery queues, NOSUPERUSER role
-  4. Security: SHA-256 Merkle ledger, AES-256 at rest, JWT RS256, DSC signature gate, TLS 1.3
+  4. Security: SHA-256 cryptographic ledger, AES-256 at rest, JWT RS256, DSC signature gate, TLS 1.3
   External integrations status cards: CBS Banking Gateway (Simulated), AICTE Institution Master, DigiLocker / NAD, and Statutory Notification Engine.
 - **Narrator Audio:** *"Now let's examine our technology choices and external connections. The frontend is built with React, Vite, and Tailwind CSS. The backend uses FastAPI, Python, SQLAlchemy, and Alembic. PostgreSQL handles data storage while Redis and Celery manage background tasks such as bank verification polling and reminders. For external systems, we integrate with Core Banking Solutions, the AICTE Institution Master Database, and notification services for email and SMS. Security layers protect every connection: JWT tokens, role-based access control, TLS encryption in transit, AES-256 at rest, and digital signature verification."*
 
