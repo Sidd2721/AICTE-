@@ -20,18 +20,22 @@ class Settings(BaseSettings):
         extra="ignore",
     )
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str
+    SECRET_KEY: str = (
+        "demo-regulatory-portal-secret-key-32chars-min-change-in-prod"
+    )
     VAULT_KEY: str = ""
     # Token life: 60 minutes
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     FRONTEND_HOST: str = "http://localhost:5173"
-    FASTAPI_ENV: Literal["development", "demo", "production"] | None = "development"
+    FASTAPI_ENV: Literal["development", "demo", "production"] | None = "demo"
 
-    PROJECT_NAME: str
+    PROJECT_NAME: str = "AICTE Security Deposit Portal"
     GIT_COMMIT: str | None = None
     BUILT_AT: str | None = None
     SENTRY_DSN: HttpUrl | None = None
-    DATABASE_URL: PostgresDsn
+    DATABASE_URL: PostgresDsn = (
+        "postgresql+psycopg://postgres:postgres@localhost:5432/app"
+    )
     MIGRATION_DATABASE_URL: PostgresDsn | None = None
     TEST_DATABASE_URL: PostgresDsn | None = None
     AUTO_SEED: bool = False

@@ -47,10 +47,10 @@ COPY --from=frontend-builder /app/backend/app/frontend /app/backend/app/frontend
 RUN mkdir -p /app/backend/vault && chmod +x /app/backend/scripts/*.sh && chown -R appuser:appgroup /app
 
 WORKDIR /app/backend
-EXPOSE 8000
+EXPOSE 8000 10000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+  CMD curl -f "http://localhost:${PORT:-8000}/health" || curl -f "http://localhost:8000/health" || exit 1
 
 USER appuser
 

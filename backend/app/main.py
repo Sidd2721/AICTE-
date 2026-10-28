@@ -161,7 +161,8 @@ async def add_security_headers(
     response: Response = await call_next(request)
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
+        "img-src 'self' data: blob: https:; font-src 'self'; "
+        "connect-src 'self' https://*.onrender.com https://*.supabase.co; "
         "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
     )
     response.headers["Strict-Transport-Security"] = (

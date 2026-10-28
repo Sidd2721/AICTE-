@@ -14,9 +14,9 @@ services:
       - key: WEB_CONCURRENCY
         value: "1"
       - key: SECRET_KEY
-        sync: false # Set via Render dashboard (>= 32 chars)
+        generateValue: true # Render automatically generates a 256-bit secure key
       - key: VAULT_KEY
-        sync: false # Set via Render dashboard (32-byte base64)
+        generateValue: true # Render automatically generates a 256-bit secure key
       - key: DATABASE_URL
         sync: false # Supabase session pooler (Port 5432): postgresql://postgres.<ref>:<pw>@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
       - key: SUPABASE_URL
@@ -28,6 +28,8 @@ services:
       - key: FIRST_SUPERUSER
         value: admin@example.com
       - key: FIRST_SUPERUSER_PASSWORD
-        sync: false # Set via Render dashboard
+        value: AdminSecure2026!
+      - key: AUTO_SEED
+        value: "true"
       - key: FRONTEND_HOST
         sync: false # Once deployed, set to your https://<app-name>.onrender.com

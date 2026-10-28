@@ -18,7 +18,7 @@ cd ..
 
 echo "=== [2/3] Installing Backend Dependencies ==="
 if command -v uv &> /dev/null; then
-    uv sync --frozen --no-dev --package app || uv sync --package app
+    uv sync --frozen --no-dev || uv sync --no-dev
 else
     python3 -m pip install -r backend/requirements.txt || python3 -m pip install -e backend
 fi
