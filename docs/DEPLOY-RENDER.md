@@ -7,10 +7,13 @@ This guide describes how to configure, deploy, and maintain the AICTE Security D
 ## 1. Hosting Plan & Resource Allocation
 
 ### Always-On Production Recommendation (Starter Tier or Higher)
+- **Web Service Name**: `aicte-fdr-portal`
+- **Database Resource Name**: `aicte-fdr-db`
 - **Runtime**: Docker Web Service
-- **Instance Plan**: Starter (or higher)
+- **Instance Plan**: `starter` (Web Service)
+- **Database Plan**: `0.1c-256mb` (or legacy `basic-256mb`; persistent PostgreSQL, valid Render Blueprint ID, cite: `render.com/docs/blueprint-spec#databases` and `render.com/docs/database-plans`)
 - **RAM**: 512 MB to 2 GB
-- **Persistent Disk**: 10 GB mounted at `/app/backend/vault`
+- **Persistent Disk**: 1 GB mounted at `/app/backend/vault`
 - **Region**: Singapore (`singapore` / `ap-southeast-1`), closest to Indian institutional traffic.
 
 > [!NOTE]
@@ -29,7 +32,7 @@ If deployed on Render's Free tier using `render.free-fallback.yaml`:
 On the Starter plan (or higher), attach a persistent disk to preserve encrypted deposit receipts across deployments:
 - **Disk Name**: `fdr-vault-disk`
 - **Mount Path**: `/app/backend/vault`
-- **Initial Size**: 10 GB
+- **Initial Size**: 1 GB
 - **Environment Variable**: `VAULT_PATH=/app/backend/vault`
 
 > [!WARNING]
@@ -50,7 +53,7 @@ Configure these variables in your Render Service Dashboard (**Environment** tab)
 | `TRUSTED_PROXY_HOPS` | Yes | `1` | Configures client IP resolution through Render's reverse proxy. |
 | `DATABASE_URL` | Yes | `postgresql://user:pass@host:5432/dbname` | Application connection string (Session Pooler recommended). |
 | `SECRET_KEY` | Yes | 64-character hex or base64 string | Session token signing key. |
-| `VAULT_KEY` | Yes | 32-byte base64 encoded string | Dedicated AES-256-GCM encryption key. |
+| `VAULT_KEY` | Yes | 44-character base64 string (32 raw bytes) | Dedicated AES-256-GCM encryption key. Generate via: `python -c "import secrets, base64; print(base64.b64encode(secrets.token_bytes(32)).decode())"` |
 | `AUTO_SEED` | No | `true` (demo) / `false` (prod) | Triggers background demo data seeding on initial run. |
 | `FRONTEND_HOST` | No | `https://your-service.onrender.com` | Allowed CORS origin for the browser application. |
 | `SUPABASE_URL` | Optional | `https://<ref>.supabase.co` | Optional secondary cloud vault sync. |
@@ -95,7 +98,25 @@ If a deployment exhibits degraded behavior:
 
 ---
 
-## 7. Demo-Day Pre-Flight Checklist
+## 7. Real Client IP & Header Validation
+Render's public documentation confirms that its reverse proxy appends incoming client IPs to `X-Forwarded-For`. Render does **not** officially guarantee `True-Client-IP` across all edge configurations.
+
+To validate your deployed service's client IP detection:
+1. **Two-Network Test**:
+   - Send a request from laptop broadband (Network A) and one from mobile cellular data (Network B).
+   - In Render Logs, verify that requests show two distinct public IP addresses rather than Render's internal proxy IP.
+2. **Forged Header Anti-Bypass Test**:
+   - Send a test request with a spoofed header:
+     ```bash
+     curl -H "X-Forwarded-For: 1.1.1.1" https://your-service.onrender.com/api/health
+     ```
+   - With `TRUSTED_PROXY_HOPS=1`, the application takes the last hop appended by Render's proxy, ignoring the client-supplied `1.1.1.1`.
+3. **True-Client-IP Notice**:
+   - A client-supplied `True-Client-IP` header is **never trusted** when `TRUSTED_PROXY_HOPS=0`. When `TRUSTED_PROXY_HOPS > 0`, `X-Forwarded-For` traversal remains the authoritative fallback.
+
+---
+
+## 8. Demo-Day Pre-Flight Checklist
 Execute these checks 30 minutes before evaluating or presenting:
 1. [ ] **Service Awake**: Open `https://your-service.onrender.com/health` in a browser and verify HTTP 200 with `status: ok`.
 2. [ ] **Readiness Probe**: Query `https://your-service.onrender.com/ready` and confirm `status: ready`.
