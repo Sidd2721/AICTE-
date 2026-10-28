@@ -44,3 +44,12 @@ services:
         value: "true"
       - key: FRONTEND_HOST
         sync: false
+
+databases:
+  # Free tier Render PostgreSQL (expires after 30 days)
+  - name: aicte-fdr-db-free
+    plan: free
+    region: singapore
+    databaseName: app
+    user: app
+    postgresMajorVersion: "16"

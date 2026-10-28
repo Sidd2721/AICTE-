@@ -10,7 +10,7 @@ services:
     disk:
       name: fdr-vault-disk
       mountPath: /app/backend/vault
-      sizeGB: 10
+      sizeGB: 1
     envVars:
       - key: FASTAPI_ENV
         value: demo # Set to 'production' for strict regulatory production mode
@@ -29,7 +29,9 @@ services:
       - key: VAULT_KEY
         sync: false # Set manually in Render Dashboard (AES-256-GCM 32-byte key)
       - key: DATABASE_URL
-        sync: false # Set manually in Render Dashboard
+        fromDatabase:
+          name: aicte-fdr-db
+          property: connectionString
       - key: SUPABASE_URL
         sync: false # Set manually if Supabase cloud storage is enabled
       - key: SUPABASE_SERVICE_ROLE_KEY
@@ -44,3 +46,13 @@ services:
         value: "true"
       - key: FRONTEND_HOST
         sync: false # Set to your deployed URL: https://<service-name>.onrender.com
+
+databases:
+  # Render PostgreSQL Database specification (cite: https://render.com/docs/blueprint-spec#databases & https://render.com/docs/database-plans)
+  # Plan ID options: 0.1c-256mb (legacy: basic-256mb; $7/mo persistent), free (expires in 30 days)
+  - name: aicte-fdr-db
+    plan: 0.1c-256mb
+    region: singapore
+    databaseName: app
+    user: app
+    postgresMajorVersion: "16"
