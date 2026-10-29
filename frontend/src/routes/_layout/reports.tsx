@@ -65,11 +65,13 @@ const REPORT_TABS = [
 
 function formatPaise(p: number | null | undefined): string {
   if (p == null) return "—"
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(p / 100)
+  const sign = p < 0 ? "-" : ""
+  const abs = Math.abs(Math.trunc(p))
+  const rupees = Math.floor(abs / 100)
+  const paise = abs % 100
+  const paiseStr = paise.toString().padStart(2, "0")
+  const rupeesFormatted = rupees.toLocaleString("en-IN")
+  return `${sign}₹${rupeesFormatted}.${paiseStr}`
 }
 
 function ReportsView() {
@@ -81,7 +83,12 @@ function ReportsView() {
       const res = await client.get({
         url: `/api/v1/reports/${activeTab}/preview`,
       })
-      return res.data as { report: string; count: number; items: any[] }
+      return res.data as {
+        report?: string
+        count: number
+        rows?: any[]
+        items?: any[]
+      }
     },
   })
 
@@ -107,7 +114,7 @@ function ReportsView() {
     }
   }
 
-  const items = data?.items || []
+  const items = data?.rows || data?.items || []
   const currentTabMeta =
     REPORT_TABS.find((t) => t.id === activeTab) || REPORT_TABS[0]
 
@@ -202,7 +209,11 @@ function ReportsView() {
                       <TableCell className="text-xs text-muted-foreground">
                         {row.days_to_maturity != null
                           ? `${row.days_to_maturity} days remaining`
-                          : row.reason || row.missing || "—"}
+                          : Array.isArray(row.reasons)
+                            ? row.reasons.join("; ")
+                            : Array.isArray(row.missing)
+                              ? `Missing: ${row.missing.join(", ")}`
+                              : row.reason || row.missing || "—"}
                       </TableCell>
                     </TableRow>
                   ))}
