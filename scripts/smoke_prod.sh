@@ -41,6 +41,9 @@ check_status "1. Liveness Probe (/health)" "${BASE_URL}/health" "200"
 
 # 2. Readiness Probe
 check_status "2. Readiness Probe (/ready)" "${BASE_URL}/ready" "200"
+READY_JSON=$(curl -s --max-time 15 "${BASE_URL}/ready" || echo "{}")
+READY_BUILD=$(echo "${READY_JSON}" | grep -o '"build":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
+echo "     -> Active deployment build: ${READY_BUILD}"
 
 # 3. Demo Login
 LOGIN_RESP=$(curl -s -w "\n%{http_code}" --max-time 15 -X POST \

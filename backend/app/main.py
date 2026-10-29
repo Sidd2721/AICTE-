@@ -280,9 +280,11 @@ def health_check() -> dict[str, str]:
 def readiness_check() -> Response:
     """Readiness probe checking database connectivity, migration head, and vault writability.
 
-    Returns 200 {"status": "ready"} if all systems are ready, or 503 {"status": "unready"} otherwise.
+    Returns 200 {"status": "ready", "build": ...} if all systems are ready, or 503 {"status": "unready", "build": ...} otherwise.
     Excluded from public OpenAPI schema to preserve client contract stability.
     """
+    import os
+
     from fastapi.responses import JSONResponse
     from sqlalchemy import text
     from sqlmodel import Session
@@ -290,23 +292,26 @@ def readiness_check() -> Response:
     from app.core.db import engine
     from app.domain.vault import check_vault_writable
 
+    render_commit = os.environ.get("RENDER_GIT_COMMIT")
+    build_val = render_commit[:7] if render_commit and render_commit.strip() else "unknown"
+
     try:
         with Session(engine) as session:
             db_res = session.execute(text("SELECT 1")).scalar()
             if db_res != 1:
-                return JSONResponse(status_code=503, content={"status": "unready"})
+                return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
 
             ver_res = session.execute(
                 text("SELECT version_num FROM alembic_version LIMIT 1")
             ).scalar()
             expected_head = "d812bd6c915d"
             if ver_res != expected_head:
-                return JSONResponse(status_code=503, content={"status": "unready"})
+                return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
     except Exception:
-        return JSONResponse(status_code=503, content={"status": "unready"})
+        return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
 
     if not check_vault_writable():
-        return JSONResponse(status_code=503, content={"status": "unready"})
+        return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
 
     if (
         settings.FASTAPI_ENV in ("development", "demo")
@@ -315,10 +320,10 @@ def readiness_check() -> Response:
     ):
         return JSONResponse(
             status_code=503,
-            content={"status": "unready", "reason": "seeding_in_progress"},
+            content={"status": "unready", "reason": "seeding_in_progress", "build": build_val},
         )
 
-    return JSONResponse(status_code=200, content={"status": "ready"})
+    return JSONResponse(status_code=200, content={"status": "ready", "build": build_val})
 
 
 app.include_router(clock.router)

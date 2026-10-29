@@ -72,11 +72,13 @@ Configure these variables in your Render Service Dashboard (**Environment** tab)
 ### Readiness Probe (Deep Diagnostic)
 - **Endpoint**: `/ready`
 - **Characteristics**: Excluded from the public OpenAPI schema to maintain contract stability.
-- **Response**: Returns HTTP 200 `{"status":"ready"}` only if:
+- **Response**: Returns HTTP 200 `{"status":"ready","build":"<commit_7>"}` only if:
   1. PostgreSQL responds to `SELECT 1`.
   2. The applied migration revision matches Alembic `head`.
   3. The `/app/backend/vault` directory is writable by `appuser`.
-- Returns HTTP 503 `{"status":"unready"}` if any dependency is degraded.
+- **Build Identification**: Contains `"build"` reflecting the first 7 characters of `RENDER_GIT_COMMIT` (or `"unknown"` if unset).
+- **Deployment Verification Loop**: Poll `/ready` every 30 s (max 20 min) until `"build"` equals the first 7 characters of the merge commit on `main`. A 200 with another build does not count as a completed deployment.
+- Returns HTTP 503 `{"status":"unready","build":"<commit_7>"}` if any dependency is degraded.
 
 ---
 

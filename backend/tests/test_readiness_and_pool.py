@@ -24,10 +24,28 @@ def test_existing_health_endpoints_unchanged():
 
 
 def test_readiness_endpoint_healthy():
-    """Verify /ready returns 200 with minimal body when database and vault are ready."""
+    """Verify /ready returns 200 with status and build when database and vault are ready."""
     res = client.get("/ready")
     assert res.status_code == 200
-    assert res.json() == {"status": "ready"}
+    data = res.json()
+    assert data["status"] == "ready"
+    assert "build" in data
+
+
+def test_readiness_endpoint_build_when_commit_set(monkeypatch: pytest.MonkeyPatch):
+    """Verify /ready returns first 7 chars of RENDER_GIT_COMMIT when set."""
+    monkeypatch.setenv("RENDER_GIT_COMMIT", "a1b2c3d4e5f6789")
+    res = client.get("/ready")
+    assert res.status_code == 200
+    assert res.json()["build"] == "a1b2c3d"
+
+
+def test_readiness_endpoint_build_when_commit_unset(monkeypatch: pytest.MonkeyPatch):
+    """Verify /ready returns 'unknown' when RENDER_GIT_COMMIT is unset."""
+    monkeypatch.delenv("RENDER_GIT_COMMIT", raising=False)
+    res = client.get("/ready")
+    assert res.status_code == 200
+    assert res.json()["build"] == "unknown"
 
 
 def test_readiness_endpoint_excluded_from_public_schema():
@@ -41,11 +59,13 @@ def test_readiness_endpoint_excluded_from_public_schema():
 
 
 def test_readiness_endpoint_503_on_vault_unwritable(monkeypatch: pytest.MonkeyPatch):
-    """Verify /ready returns 503 with minimal body if vault directory is not writable."""
+    """Verify /ready returns 503 with unready status and build if vault directory is not writable."""
     monkeypatch.setattr("app.domain.vault.check_vault_writable", lambda: False)
     res = client.get("/ready")
     assert res.status_code == 503
-    assert res.json() == {"status": "unready"}
+    data = res.json()
+    assert data["status"] == "unready"
+    assert "build" in data
 
 
 def test_readiness_endpoint_503_on_db_disconnect():
@@ -53,7 +73,9 @@ def test_readiness_endpoint_503_on_db_disconnect():
     with patch("sqlmodel.Session.execute", side_effect=Exception("Database connection timeout")):
         res = client.get("/ready")
         assert res.status_code == 503
-        assert res.json() == {"status": "unready"}
+        data = res.json()
+        assert data["status"] == "unready"
+        assert "build" in data
 
 
 def test_pool_recovery_after_drop_and_rls_integrity():
@@ -98,6 +120,7 @@ def test_readiness_returns_503_while_seeding(monkeypatch: pytest.MonkeyPatch):
         set_seed_completed(True)
         res_after = client.get("/ready")
         assert res_after.status_code == 200
-        assert res_after.json() == {"status": "ready"}
+        assert res_after.json()["status"] == "ready"
+        assert "build" in res_after.json()
     finally:
         set_seed_completed(True)
