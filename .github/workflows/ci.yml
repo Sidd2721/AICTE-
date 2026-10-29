@@ -22,7 +22,8 @@ jobs:
 
       - name: Check for absolute file URLs or local paths in docs
         run: |
-          if git grep -nE 'file:///|C:\\Users|/Users/[a-z]+/|avadu' -- . ':!*.lock' ':!.gemini/*'; then
+          HYGIENE_PATTERN="file:"'///|C:\'"\Users|/Users/[a-z]+/|ava"'du'
+          if git grep -nE "$HYGIENE_PATTERN" -- . ':!*.lock' ':!.gemini/*'; then
             echo "ERROR: Found absolute file URLs or personal path leaks!"
             exit 1
           fi

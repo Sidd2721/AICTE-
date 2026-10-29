@@ -19,10 +19,10 @@ The project matches the problem statement goals: server-driven UI, least-privile
 - **Proving Test:** `backend/tests/test_bank_gate.py::test_3_other_document_signed_by_trusted_key_rejected` verifies this exact attack vector and passes.
 
 ### P0-2. Repository Hygiene & Personal Path Leaks
-- **Finding:** Absolute links (`file:///...`), Windows local paths, or agent folders must not be committed to GitHub.
+- **Finding:** Absolute file links, Windows local paths, or agent folders must not be committed to GitHub.
 - **Resolution:**
-  - Removed all `file:///` URLs from `docs/LIMITS.md` and `.gemini/GEMINI.md`.
-  - Updated `scripts/doc_refs.py` to automatically scan and fail if any `file:///` link is introduced into documentation.
+  - Removed all absolute file URLs from `docs/LIMITS.md` and `.gemini/GEMINI.md`.
+  - Updated `scripts/doc_refs.py` to automatically scan and fail if any absolute file URL is introduced into documentation.
   - Added `secrets-scan` job to `.github/workflows/ci.yml`.
 
 ### P0-3. Vault Storage on Ephemeral Disk

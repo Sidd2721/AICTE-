@@ -2,7 +2,7 @@
 # The one gate an agent must run before it says "done". Run from the repository root.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export PATH="/mnt/c/Users/avadu/.local/bin:/mnt/c/Users/avadu/.bun/bin:/c/Users/avadu/.local/bin:/c/Users/avadu/.bun/bin:$HOME/.local/bin:$HOME/.bun/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 
 if ! command -v uv >/dev/null 2>&1 && command -v uv.exe >/dev/null 2>&1; then
     uv() { uv.exe "$@"; }
