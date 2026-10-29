@@ -21,9 +21,12 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
 from app.core.db import engine
+from app.core.rls_context import install_rls_context, set_rls_context
 from app.integration.apikeys import issue_api_key
 from app.main import app
 from app.models import Confirmation, Instrument, MachineApiKey
+
+install_rls_context()
 
 
 def run_tests() -> None:
@@ -35,6 +38,7 @@ def run_tests() -> None:
 
     # 1. Setup API Keys for testing
     with Session(engine) as session:
+        set_rls_context(session, role="bureau")
         # Bank client key
         raw_bank_key, bank_record = issue_api_key(
             client_name="Test Bank Integrator",

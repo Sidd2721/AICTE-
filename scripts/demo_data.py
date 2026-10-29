@@ -40,10 +40,13 @@ if str(BACKEND) not in sys.path:
 from pydantic import BaseModel, Field, ValidationError, field_validator
 from sqlalchemy import text
 from sqlmodel import Session, col, func, select
+from contextlib import contextmanager
 
 from app.core.audit import audit
 from app.core.config import settings
 from app.core.db import engine, init_db
+from app.core.rls_context import install_rls_context, set_rls_context
+install_rls_context()
 from app.domain.clock import now
 from app.models import (
     AuditCheckpoint,
@@ -63,6 +66,12 @@ from app.models import (
     ReleaseRequest,
     User,
 )
+
+@contextmanager
+def get_session():
+    with Session(engine) as session:
+        set_rls_context(session, role="bureau")
+        yield session
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("demo_data")
@@ -232,7 +241,7 @@ def detect_scenario(session: Session) -> str:
 
 def print_status_table() -> None:
     """Display clean formatted status table."""
-    with Session(engine) as session:
+    with get_session() as session:
         counts = get_table_counts(session)
         scenario = detect_scenario(session)
 
@@ -270,7 +279,7 @@ def clear_scenario_data(session: Session) -> None:
 
 def load_empty_scenario() -> None:
     """Reset to empty scenario: users and system rules only."""
-    with Session(engine) as session:
+    with get_session() as session:
         clear_scenario_data(session)
         session.exec(text('UPDATE "user" SET institution_id = NULL'))
         session.exec(text("DELETE FROM institution"))
@@ -281,7 +290,7 @@ def load_empty_scenario() -> None:
 
 def load_judge_scenario() -> None:
     """Load the deterministic 7-step story with fixed UUIDs and relative dates."""
-    with Session(engine) as session:
+    with get_session() as session:
         init_db(session)
         clear_scenario_data(session)
 
@@ -514,7 +523,7 @@ def load_rich_scenario() -> None:
     """Load the comprehensive rich seed (11 institutions / 18+ instruments)."""
     from app.seed_rich_synthetic_data import seed_rich_data
 
-    with Session(engine) as session:
+    with get_session() as session:
         clear_scenario_data(session)
     seed_rich_data()
     logger.info("Loaded scenario: RICH (11 institutions, 18+ instruments, waivers, and notices)")
@@ -529,7 +538,7 @@ def load_stress_scenario() -> None:
     banks = ["SBIN", "PNBB", "HDFC", "ICIC", "CANB"]
     amounts = [150000000, 350000000, 500000000, 700000000]
 
-    with Session(engine) as session:
+    with get_session() as session:
         init_db(session)
         clear_scenario_data(session)
 
@@ -690,7 +699,7 @@ def import_csv_data(data_dir: Path, partial: bool = False) -> None:
         sys.exit(1)
 
     # 3. Apply to Database with Cross-Institution Duplicate Reference Defense
-    with Session(engine) as session:
+    with get_session() as session:
         # Pre-fetch existing permanent IDs & instrument refs
         inst_id_map: dict[str, uuid.UUID] = {}
         for inst in session.exec(select(Institution)).all():
@@ -788,7 +797,7 @@ def export_csv_data(data_dir: Path) -> None:
     inst_file = data_dir / "institutions.csv"
     instr_file = data_dir / "instruments.csv"
 
-    with Session(engine) as session:
+    with get_session() as session:
         institutions = session.exec(select(Institution)).all()
         instruments = session.exec(select(Instrument)).all()
 
