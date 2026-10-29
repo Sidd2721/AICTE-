@@ -76,6 +76,8 @@ jobs:
           # Create migrator and app roles
           psql -h localhost -U postgres -d app -f scripts/roles.sql
           psql -h localhost -U postgres -d app -c "ALTER ROLE migrator WITH PASSWORD 'migratorpassword'; ALTER ROLE app WITH PASSWORD 'apppassword';"
+          # In PostgreSQL 16+, public schema permissions are restricted; grant migrator rights to migrate
+          psql -h localhost -U postgres -d app -c "GRANT ALL ON SCHEMA public TO migrator; GRANT ALL ON DATABASE app TO migrator; ALTER SCHEMA public OWNER TO migrator;"
           # Verify app role is NOSUPERUSER NOBYPASSRLS
           psql -h localhost -U postgres -d app -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('migrator', 'app');"
 
