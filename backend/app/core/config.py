@@ -32,6 +32,8 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "AICTE Security Deposit Portal"
     GIT_COMMIT: str | None = None
+    RENDER_GIT_COMMIT: str | None = None
+    PYTEST_CURRENT_TEST: str | None = None
     BUILT_AT: str | None = None
     SENTRY_DSN: HttpUrl | None = None
     DATABASE_URL: PostgresDsn = PostgresDsn(

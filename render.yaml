@@ -1,12 +1,17 @@
+# Blueprint Specification for Render Web Service (using Neon PostgreSQL)
+# For Render-managed PostgreSQL alternative, see render.render-postgres.yaml.
+
 services:
   - type: web
     name: aicte-fdr-portal
     runtime: docker
-    plan: starter # Starter plan or higher required for persistent disks on Render
+    plan: starter # Starter plan or higher required if mounting persistent disk; use 'free' if disk omitted
     region: singapore
     dockerfilePath: ./Dockerfile
     autoDeploy: false # Manual deploy trigger only; protects live demo environment
     healthCheckPath: /health # Lightweight liveness check; avoids DB churn on ping
+    # Disk is OPTIONAL: with disk, redeploys experience a brief stop-before-start outage;
+    # without disk, deployments are zero-downtime rolling deploys (use Supabase for persistent cloud vault).
     disk:
       name: fdr-vault-disk
       mountPath: /app/backend/vault
@@ -29,9 +34,9 @@ services:
       - key: VAULT_KEY
         sync: false # Set manually in Render Dashboard (AES-256-GCM 32-byte key)
       - key: DATABASE_URL
-        fromDatabase:
-          name: aicte-fdr-db
-          property: connectionString
+        sync: false # Manual secret: Neon DIRECT connection string with 'app' role (non-pooler)
+      - key: MIGRATION_DATABASE_URL
+        sync: false # Manual secret: Neon DIRECT connection string with 'neondb_owner' role
       - key: SUPABASE_URL
         sync: false # Set manually if Supabase cloud storage is enabled
       - key: SUPABASE_SERVICE_ROLE_KEY
@@ -46,13 +51,3 @@ services:
         value: "true"
       - key: FRONTEND_HOST
         sync: false # Set to your deployed URL: https://<service-name>.onrender.com
-
-databases:
-  # Render PostgreSQL Database specification (cite: https://render.com/docs/blueprint-spec#databases & https://render.com/docs/database-plans)
-  # Plan ID options: 0.1c-256mb (legacy: basic-256mb; $7/mo persistent), free (expires in 30 days)
-  - name: aicte-fdr-db
-    plan: 0.1c-256mb
-    region: singapore
-    databaseName: app
-    user: app
-    postgresMajorVersion: "16"

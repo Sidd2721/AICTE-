@@ -6,18 +6,19 @@ This guide describes how to configure, deploy, and maintain the AICTE Security D
 
 ## 1. Hosting Plan & Resource Allocation
 
-### Always-On Production Recommendation (Starter Tier or Higher)
+### Always-On Production Architecture (Render Web Service + Neon PostgreSQL)
 - **Web Service Name**: `aicte-fdr-portal`
-- **Database Resource Name**: `aicte-fdr-db`
 - **Runtime**: Docker Web Service
-- **Instance Plan**: `starter` (Web Service)
-- **Database Plan**: `0.1c-256mb` (or legacy `basic-256mb`; persistent PostgreSQL, valid Render Blueprint ID, cite: `render.com/docs/blueprint-spec#databases` and `render.com/docs/database-plans`)
+- **Instance Plan**: `starter` (or `free` if persistent disk is omitted)
+- **Database Engine**: Neon PostgreSQL 16 (`DB_HOST_KIND=neon-direct`)
+  - **Connection Mode**: DIRECT (non-pooler) hostname (`ep-xxxx.region.aws.neon.tech`).
+  - **CRITICAL SECURITY REQUIREMENT**: The pooled string (`-pooler.`) is **strictly unsafe** and forbidden. Neon's connection pooler uses PgBouncer transaction mode, which strips session variables (`set_config('app.role', ...)` and `set_config('app.region', ...)`) between statements. This breaks Row-Level Security (RLS) isolation and causes cross-tenant bleeding. Additionally, pooled connections cannot maintain PostgreSQL advisory locks (`pg_try_advisory_lock(847291)`). If `neon-pooler` is configured: **STOP deployment immediately**.
 - **RAM**: 512 MB to 2 GB
-- **Persistent Disk**: 1 GB mounted at `/app/backend/vault`
+- **Persistent Disk**: OPTIONAL (see Section 2).
 - **Region**: Singapore (`singapore` / `ap-southeast-1`), closest to Indian institutional traffic.
 
 > [!NOTE]
-> **Pricing Notice**: Pricing and plan specifications change over time. Please verify current rates and disk add-on costs directly on the official Render pricing page at `render.com/pricing` before provisioning resources.
+> **Render-Managed PostgreSQL Variant**: If you choose Render's built-in managed PostgreSQL database instead of Neon, use the blueprint file `render.render-postgres.yaml`.
 
 ### Free-Tier Fallback Limitations
 If deployed on Render's Free tier using `render.free-fallback.yaml`:
@@ -28,12 +29,19 @@ If deployed on Render's Free tier using `render.free-fallback.yaml`:
 
 ---
 
-## 2. Persistent Disk Configuration
-On the Starter plan (or higher), attach a persistent disk to preserve encrypted deposit receipts across deployments:
-- **Disk Name**: `fdr-vault-disk`
-- **Mount Path**: `/app/backend/vault`
-- **Initial Size**: 1 GB
-- **Environment Variable**: `VAULT_PATH=/app/backend/vault`
+## 2. Persistent Disk Configuration (Optional vs Rolling Deploys)
+Attaching a persistent disk (`fdr-vault-disk`) to the web service is **OPTIONAL**:
+- **With a persistent disk**:
+  - Provides local POSIX storage for encrypted deposit receipts at `/app/backend/vault`.
+  - **Redeploy Trade-off**: Redeployments cause a **short service outage** because Render must stop the existing instance before detaching and mounting the disk onto the new container instance.
+- **Without a persistent disk**:
+  - Deploys are **zero-downtime rolling deploys** (the new instance boots, passes `/health` and `/ready`, and only then replaces the old instance).
+  - Encrypted documents are synced directly to cloud object storage using Supabase S3 (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET=fdr-vault`).
+- **Disk Specifications (if enabled)**:
+  - **Disk Name**: `fdr-vault-disk`
+  - **Mount Path**: `/app/backend/vault`
+  - **Initial Size**: 1 GB
+  - **Environment Variable**: `VAULT_PATH=/app/backend/vault`
 
 > [!WARNING]
 > **Vault Key Immutability**: The encryption key stored in `VAULT_KEY` must never be altered or rotated after initial setup. Altering `VAULT_KEY` renders existing `.enc` files in the vault permanently unreadable.
@@ -51,7 +59,8 @@ Configure these variables in your Render Service Dashboard (**Environment** tab)
 | `WEB_CONCURRENCY` | Yes | `1` | Worker processes count. Keep at 1 for 512 MB memory footprint. |
 | `VAULT_PATH` | Yes | `/app/backend/vault` | Filesystem path for encrypted AES-256-GCM receipts. |
 | `TRUSTED_PROXY_HOPS` | Yes | `1` | Configures client IP resolution through Render's reverse proxy. |
-| `DATABASE_URL` | Yes | `postgresql://user:pass@host:5432/dbname` | Application connection string (Session Pooler recommended). |
+| `DATABASE_URL` | Yes | `postgresql://app:<app_pw>@ep-xxxx.region.aws.neon.tech/neondb` | Neon **DIRECT (non-pooler)** application connection string with restricted `app` role. Never use pooled string. |
+| `MIGRATION_DATABASE_URL` | Yes | `postgresql://neondb_owner:<owner_pw>@ep-xxxx.region.aws.neon.tech/neondb` | Neon **DIRECT** owner connection string for Alembic schema migrations. |
 | `SECRET_KEY` | Yes | 64-character hex or base64 string | Session token signing key. |
 | `VAULT_KEY` | Yes | 44-character base64 string (32 raw bytes) | Dedicated AES-256-GCM encryption key. Generate via: `python -c "import secrets, base64; print(base64.b64encode(secrets.token_bytes(32)).decode())"` |
 | `AUTO_SEED` | No | `true` (demo) / `false` (prod) | Triggers background demo data seeding on initial run. |

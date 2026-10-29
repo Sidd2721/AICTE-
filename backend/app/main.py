@@ -292,7 +292,7 @@ def readiness_check() -> Response:
     from app.core.db import engine
     from app.domain.vault import check_vault_writable
 
-    render_commit = os.environ.get("RENDER_GIT_COMMIT")
+    render_commit = settings.RENDER_GIT_COMMIT or os.environ.get("RENDER_GIT_COMMIT")
     build_val = render_commit[:7] if render_commit and render_commit.strip() else "unknown"
 
     try:
