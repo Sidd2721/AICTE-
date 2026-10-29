@@ -75,6 +75,7 @@ jobs:
           export PGPASSWORD=testpassword
           # Create migrator and app roles
           psql -h localhost -U postgres -d app -f scripts/roles.sql
+          psql -h localhost -U postgres -d app -c "ALTER ROLE migrator WITH PASSWORD 'migratorpassword'; ALTER ROLE app WITH PASSWORD 'apppassword';"
           # Verify app role is NOSUPERUSER NOBYPASSRLS
           psql -h localhost -U postgres -d app -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('migrator', 'app');"
 
