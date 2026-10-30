@@ -62,8 +62,7 @@ def run_daily_obligations_job(
                         owner_role="institution",
                     )
                     session.add(ob)
-                    session.commit()
-                    session.refresh(ob)
+                    session.flush()
                     obligations_created += 1
 
                     # Send notice
@@ -75,7 +74,7 @@ def run_daily_obligations_job(
                         delivered=True,
                     )
                     session.add(notice)
-                    session.commit()
+                    session.flush()
                     notices_created += 1
 
             # 2. Maturity reached
@@ -101,11 +100,8 @@ def run_daily_obligations_job(
                         owner_role="regional",
                     )
                     session.add(mat_ob)
-                    session.commit()
-                    session.refresh(mat_ob)
+                    session.flush()
                     obligations_created += 1
-
-        session.commit()
 
         return {
             "lock_acquired": True,
