@@ -12,6 +12,43 @@ Automates institutional security deposit obligations, independent cryptographic 
 
 ---
 
+## ⚡ Verify in 60 Seconds (Live Evaluator Guide)
+
+**Live Deployment URL:** [https://aicte-1-59pn.onrender.com](https://aicte-1-59pn.onrender.com)  
+*(Hosted 24/7 on Render Docker Web Service + Neon PostgreSQL with Row-Level Security)*
+
+### The 5 Demo Personas (1-Click Switcher Available on Sign-In Page)
+
+| Persona | Role & Mandate | Email | Password |
+| :--- | :--- | :--- | :--- |
+| **Technical Institution** | Submits FDR deposits, views deficit/surplus coverage | `inst.north1@example.com` | `AdminSecure2026!` |
+| **Regional Officer** | Scrutiny Maker: reviews documents, initiates release | `officer.north@example.com` | `AdminSecure2026!` |
+| **Scrutiny Checker** | Checker: reviews flagged discrepancies and audits | `checker.north@example.com` | `AdminSecure2026!` |
+| **Bureau Head** | Approver: authorizes releases, turns second key | `bureau@example.com` | `AdminSecure2026!` |
+| **Regulatory Auditor** | Read-only inspection of hash-chain & system logs | `auditor@example.com` | `AdminSecure2026!` |
+
+---
+
+### 7 Read-Only Verification Steps (Zero Data Entry, Pure Proof)
+
+1. **Dashboard Overview:** Log in as any persona (or use 1-click login) -> inspect the live dashboard metrics, active deposit lifecycle distribution, and deficit/surplus coverage.
+2. **Statement Reports (4 Tabs):** Navigate to **Reports** -> inspect all 4 regulatory tabs:
+   - *Pending Verifications* (FDRs awaiting bank confirmation)
+   - *Upcoming Maturities* (FDRs expiring within 90 days)
+   - *Missing Documents* (Cases missing mandatory attachments)
+   - *Cases Needing Intervention* (Discrepancies, failed gates, or expired tenures)
+3. **Statement PDF Export:** Click **Export PDF** on the Reports page -> downloads a server-side ReportLab PDF with Indian currency formatting (`Rs.`), DEMO watermark, and timestamp.
+4. **Audit Hash-Chain Verification:** Navigate to **Audit** -> click **Verify Audit Hash-Chain** -> verifies cryptographic SHA-256 hash-chain integrity with status `clean`.
+5. **Download Demo Release Receipt PDF:** Download the signed sample release receipt directly:  
+   [`https://aicte-1-59pn.onrender.com/api/v1/demo/sample-receipt.pdf`](https://aicte-1-59pn.onrender.com/api/v1/demo/sample-receipt.pdf)  
+   Observe the DEMO watermark, QR code, verified claims box, and RS256 token block.
+6. **Public Cryptographic Verification:** Open the unauthenticated public verifier:  
+   [`https://aicte-1-59pn.onrender.com/verify-receipt`](https://aicte-1-59pn.onrender.com/verify-receipt)  
+   Click **Load Sample Token** (or paste token from PDF) -> click **Verify Signature** -> displays green **VALID** badge with decoded claims (`receipt_id`, `instrument_hash`, `path`, `issued_at`, `kid`).
+7. **Tamper Rejection Proof:** Click **Tamper 1 Character** (or flip any character in the signature) -> click **Verify Signature** -> displays red **INVALID** badge with cryptographic failure reason.
+
+---
+
 ## Quick Navigation
 
 - [1. Executive Summary & Regulatory Mandate](#1-executive-summary--regulatory-mandate)
