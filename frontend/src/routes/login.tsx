@@ -516,6 +516,21 @@ function Login() {
             </Form>
           </div>
         </details>
+
+        <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
+          <RouterLink
+            to="/guide"
+            className="hover:text-foreground underline-offset-4 hover:underline"
+          >
+            Walkthrough Guide &rarr;
+          </RouterLink>
+          <RouterLink
+            to="/verify-receipt"
+            className="hover:text-foreground underline-offset-4 hover:underline text-emerald-600 dark:text-emerald-400 font-medium"
+          >
+            Verify Receipt &rarr;
+          </RouterLink>
+        </div>
       </div>
     </AuthLayout>
   )
