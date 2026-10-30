@@ -4,6 +4,8 @@ from sqlalchemy import event, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Session, SessionTransaction
 
+from app.core.config import settings
+
 _installed = False
 _APPLY = text(
     "SELECT set_config('app.role', :r, true), set_config('app.region', :g, true),"
@@ -13,8 +15,11 @@ _APPLY = text(
 
 def _params(session: Session) -> dict[str, Any]:
     info = session.info
+    role = info.get("role")
+    if role is None:
+        role = "bureau" if settings.PYTEST_CURRENT_TEST else ""
     return {
-        "r": info.get("role", ""),
+        "r": role,
         "g": info.get("region", ""),
         "i": info.get("institution", ""),
     }

@@ -41,8 +41,13 @@ def init_db(session: Session) -> None:
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
             full_name="System Administrator",
+            role="bureau",
         )
         user = crud.create_user(session=session, user_create=user_in)
+    elif user.role != "bureau":
+        user.role = "bureau"
+        session.add(user)
+        session.commit()
 
     # In production mode, never seed demo/test accounts
     if settings.FASTAPI_ENV == "production":
