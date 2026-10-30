@@ -47,6 +47,9 @@ def seed_reports_topup(session: Session | None = None) -> int:
 
 
 def _seed_reports_topup_in_session(session: Session) -> int:
+    from app.core.rls_context import set_rls_context
+
+    set_rls_context(session, role="bureau")
     today_val = get_today()
     inserted_count = 0
 

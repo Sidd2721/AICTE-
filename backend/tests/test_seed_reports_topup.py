@@ -26,6 +26,9 @@ from tests.utils.user import authentication_token_from_email
 
 def test_seed_reports_topup_idempotency(db: Session) -> None:
     """Second run of seed_reports_topup must add 0 records."""
+    from app.core.rls_context import set_rls_context
+
+    set_rls_context(db, role="bureau")
     init_db(db)
     seed_rich_data()
     first_run_added = seed_reports_topup(db)
@@ -38,6 +41,9 @@ def test_seed_reports_topup_idempotency(db: Session) -> None:
 
 def test_minimum_counts_per_region_per_tab(db: Session) -> None:
     """Each region with an officer persona must meet minimum synthetic record counts."""
+    from app.core.rls_context import set_rls_context
+
+    set_rls_context(db, role="bureau")
     init_db(db)
     seed_rich_data()
     seed_reports_topup(db)
