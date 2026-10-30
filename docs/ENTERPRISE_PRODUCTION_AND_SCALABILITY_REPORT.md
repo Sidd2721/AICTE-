@@ -22,7 +22,7 @@ Historically, paper-based verification suffered from five fatal vulnerabilities:
 5. **Discrepancy Concealment**: Deposit shortfalls were brushed aside without an immutable audit trail.
 
 This report mathematically and architecturally proves that our portal is:
-- **100% Feasible**: Adheres to Indian IT Act 2000, RBI AA, and NeSL IU frameworks with zero proprietary lock-in.
+- **Fully Feasible**: Adheres to Indian IT Act 2000, RBI AA, and NeSL IU frameworks with zero proprietary lock-in.
 - **Linearly Scalable**: Stateless microservices, multi-tenant Row-Level Security across 8 regions, transactional outbox, and sub-50ms indexed queries.
 - **Seamlessly Integratable**: Plugs directly into AICTE's Central ERP, Core Banking Systems, and government digital gateways.
 - **Radically Different**: Moves beyond basic CRUD forms into high-assurance cryptographic governance.
@@ -62,7 +62,7 @@ flowchart TD
 - **Insolvency and Bankruptcy Code (IBC 2016) Alignment**: Interoperable with NeSL (National E-Governance Services Ltd) — India's premier Information Utility under the Ministry of Finance.
 
 ### B. Financial Feasibility
-- **Zero Proprietary Licensing**: Built 100% on high-performance open-source components (Python 3.14, FastAPI, PostgreSQL 16, React 19, Caddy 2). AICTE incurs **zero per-seat licensing fees** to Oracle, SAP, or Microsoft.
+- **Zero Proprietary Licensing**: Built entirely on high-performance open-source components (Python 3.14, FastAPI, PostgreSQL 16, React 19, Caddy 2). AICTE incurs **zero per-seat licensing fees** to Oracle, SAP, or Microsoft.
 - **Minimal Infrastructure Cost**: Operates comfortably on standard cloud instances (e.g. 4 vCPUs, 8GB RAM) or existing National Informatics Centre (NIC) MeghRaj government cloud servers.
 
 ### C. Operational Feasibility (Zero Disruption)
@@ -124,7 +124,7 @@ flowchart TD
 - **Zero Cross-Tenant Leakage**: Even if a query omits a `WHERE region = 'NR'` clause, PostgreSQL's kernel enforces table isolation, guaranteeing that Northern Region officers can never inspect or alter Western Region dossiers.
 
 ### C. Query Optimization & Partial Performance Indexes
-Child tables with millions of expected records are backed by targeted partial indexes ([`sql/performance_indexes.sql`](file:///c:/Users/avadu/26265/sql/performance_indexes.sql)):
+Child tables with millions of expected records are backed by targeted partial indexes ([`sql/performance_indexes.sql`](sql/performance_indexes.sql)):
 ```sql
 -- 1. Radar scan for upcoming 90-day maturities
 CREATE INDEX instrument_maturity_idx ON instrument (maturity_date, lifecycle);
@@ -140,15 +140,15 @@ WHERE status = 'open';
 -- 4. Audit ledger lookup by instrument
 CREATE INDEX case_note_instrument_created_idx ON case_note (instrument_id, created_at);
 ```
-*Result*: Benchmark tests ([`bench_queries.py`](file:///c:/Users/avadu/26265/scripts/bench_queries.py)) demonstrate sub-50ms execution times across datasets exceeding 1,000,000 simulated instruments.
+*Result*: Benchmark tests ([`bench_queries.py`](scripts/bench_queries.py)) demonstrate sub-50ms execution times across datasets exceeding 1,000,000 simulated instruments.
 
 ### D. Transactional Outbox Pattern (`FOR UPDATE SKIP LOCKED`)
-- High-volume bank batch processing and webhooks are decoupled from user HTTP requests via the **Transactional Outbox** pattern ([`outbox.py`](file:///c:/Users/avadu/26265/backend/app/integration/outbox.py)).
+- High-volume bank batch processing and webhooks are decoupled from user HTTP requests via the **Transactional Outbox** pattern ([`outbox.py`](backend/app/integration/outbox.py)).
 - Events are written inside the same ACID database transaction as the state mutation, preventing lost events.
 - Background worker processes pull events concurrently using `SELECT ... FOR UPDATE SKIP LOCKED`, scaling message dispatch linearly across multi-worker clusters.
 
 ### E. Detached Ed25519 Audit Checkpoints
-- Rather than forcing auditors to re-hash billions of historical records on every check, an asynchronous signer ([`checkpoints.py`](file:///c:/Users/avadu/26265/backend/app/integration/checkpoints.py)) generates hourly Ed25519 detached digital signatures stored outside PostgreSQL on immutable object storage.
+- Rather than forcing auditors to re-hash billions of historical records on every check, an asynchronous signer ([`checkpoints.py`](backend/app/integration/checkpoints.py)) generates hourly Ed25519 detached digital signatures stored outside PostgreSQL on immutable object storage.
 
 ---
 
@@ -222,14 +222,14 @@ Regulatory software often fails due to complex interfaces and cryptic error code
     Disabled buttons explicitly explain why.                     vs Claimed ₹ 35 Lakhs. Action: Submit waiver."
 ```
 
-1. **Server-Driven Finite State Machine ([`next_action.py`](file:///c:/Users/avadu/26265/backend/app/domain/next_action.py))**:
+1. **Server-Driven Finite State Machine ([`next_action.py`](backend/app/domain/next_action.py))**:
    - The user never wonders what to do next. The server evaluates user role, instrument state, and discrepancy flags, returning a single prominent primary button (`next_action_label`).
-2. **Grade-8 Readability & Plain Language ([`messages.ts`](file:///c:/Users/avadu/26265/frontend/src/lib/messages.ts))**:
+2. **Grade-8 Readability & Plain Language ([`messages.ts`](frontend/src/lib/messages.ts))**:
    - Cryptic database codes (`D1_AMOUNT_MISMATCH`, `REPLAY_REJECTED`) are sequestered inside collapsible "Technical Details" disclosures.
    - Primary text uses clear, non-technical English.
 3. **Interactive 6-Minute Guided Tour ([`/guide`](http://localhost:8000/guide))**:
-   - First-time evaluators follow an interactive tour guide derived directly from [`docs/guide.json`](file:///c:/Users/avadu/26265/docs/guide.json).
-4. **Interactive In-App Glossary ([`glossary.ts`](file:///c:/Users/avadu/26265/frontend/src/lib/glossary.ts))**:
+   - First-time evaluators follow an interactive tour guide derived directly from [`docs/guide.json`](docs/guide.json).
+4. **Interactive In-App Glossary ([`glossary.ts`](frontend/src/lib/glossary.ts))**:
    - First occurrences of regulatory terms (Lien, Table 1.4, Paise, Maker-Checker, Bank Gate) display floating contextual explanation tooltips.
 
 ---

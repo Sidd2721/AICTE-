@@ -1,35 +1,53 @@
+# Blueprint Specification for Render Web Service (using Neon PostgreSQL)
+# For Render-managed PostgreSQL alternative, see render.render-postgres.yaml.
+
 services:
   - type: web
     name: aicte-fdr-portal
     runtime: docker
-    plan: free
+    plan: starter # Starter plan or higher required if mounting persistent disk; use 'free' if disk omitted
     region: singapore
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /health
+    autoDeploy: false # Manual deploy trigger only; protects live demo environment
+    healthCheckPath: /health # Lightweight liveness check; avoids DB churn on ping
+    # Disk is OPTIONAL: with disk, redeploys experience a brief stop-before-start outage;
+    # without disk, deployments are zero-downtime rolling deploys (use Supabase for persistent cloud vault).
+    disk:
+      name: fdr-vault-disk
+      mountPath: /app/backend/vault
+      sizeGB: 1
     envVars:
       - key: FASTAPI_ENV
-        value: demo # Set to 'production' for strict production enforcement
+        value: demo # Set to 'production' for strict regulatory production mode
       - key: PROJECT_NAME
         value: AICTE Security Deposit Portal
+      - key: PORT
+        value: "10000"
       - key: WEB_CONCURRENCY
         value: "1"
+      - key: VAULT_PATH
+        value: /app/backend/vault
+      - key: TRUSTED_PROXY_HOPS
+        value: "1" # Render edge reverse proxy hop count
       - key: SECRET_KEY
-        generateValue: true # Render automatically generates a 256-bit secure key
+        sync: false # Set manually in Render Dashboard (minimum 32 characters)
       - key: VAULT_KEY
-        generateValue: true # Render automatically generates a 256-bit secure key
+        sync: false # Set manually in Render Dashboard (AES-256-GCM 32-byte key)
       - key: DATABASE_URL
-        sync: false # Supabase session pooler (Port 5432): postgresql://postgres.<ref>:<pw>@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+        sync: false # Manual secret: Neon DIRECT connection string with 'app' role (non-pooler)
+      - key: MIGRATION_DATABASE_URL
+        sync: false # Manual secret: Neon DIRECT connection string with 'neondb_owner' role
       - key: SUPABASE_URL
-        sync: false # Supabase Project URL: https://<ref>.supabase.co
+        sync: false # Set manually if Supabase cloud storage is enabled
       - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false # Supabase service_role key
+        sync: false # Set manually if Supabase cloud storage is enabled
       - key: SUPABASE_STORAGE_BUCKET
         value: fdr-vault
       - key: FIRST_SUPERUSER
         value: admin@example.com
       - key: FIRST_SUPERUSER_PASSWORD
-        value: AdminSecure2026!
+        sync: false # Set manually in Render Dashboard
       - key: AUTO_SEED
         value: "true"
       - key: FRONTEND_HOST
-        sync: false # Once deployed, set to your https://<app-name>.onrender.com
+        sync: false # Set to your deployed URL: https://<service-name>.onrender.com

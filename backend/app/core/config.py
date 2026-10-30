@@ -24,6 +24,7 @@ class Settings(BaseSettings):
         "demo-regulatory-portal-secret-key-32chars-min-change-in-prod"
     )
     VAULT_KEY: str = ""
+    VAULT_PATH: str | None = None
     # Token life: 60 minutes
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     FRONTEND_HOST: str = "http://localhost:5173"
@@ -31,14 +32,17 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "AICTE Security Deposit Portal"
     GIT_COMMIT: str | None = None
+    RENDER_GIT_COMMIT: str | None = None
+    PYTEST_CURRENT_TEST: str | None = None
     BUILT_AT: str | None = None
     SENTRY_DSN: HttpUrl | None = None
-    DATABASE_URL: PostgresDsn = (
+    DATABASE_URL: PostgresDsn = PostgresDsn(
         "postgresql+psycopg://postgres:postgres@localhost:5432/app"
     )
     MIGRATION_DATABASE_URL: PostgresDsn | None = None
     TEST_DATABASE_URL: PostgresDsn | None = None
     AUTO_SEED: bool = False
+    TRUSTED_PROXY_HOPS: int = 0
     SUPABASE_URL: str | None = None
     SUPABASE_SERVICE_ROLE_KEY: str | None = None
     SUPABASE_STORAGE_BUCKET: str = "fdr-vault"

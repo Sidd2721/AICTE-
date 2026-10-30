@@ -1,16 +1,27 @@
 import logging
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.core.db import engine, init_db
+from app.models import User
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 def init() -> None:
+    from app.core.rls_context import install_rls_context, set_rls_context
+
+    install_rls_context()
     with Session(engine) as session:
+        set_rls_context(session, role="bureau")
         init_db(session)
+        has_demo = session.exec(
+            select(User.id).where(User.email == "inst.north1@example.com")
+        ).first()
+        if has_demo:
+            logger.info("Demo data already seeded; skipping seed_rich_data")
+            return
     try:
         from app.seed_rich_synthetic_data import seed_rich_data
 

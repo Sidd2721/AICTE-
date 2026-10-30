@@ -22,8 +22,36 @@ def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{tag}-{route.name}"
 
 
+# In-memory seeding flag (V3): protects /ready until initial demo data completes
+_seed_completed: bool = True
+
+
+def is_seed_completed() -> bool:
+    return _seed_completed
+
+
+def set_seed_completed(val: bool) -> None:
+    global _seed_completed
+    _seed_completed = val
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+    import asyncio
+    import logging
+    import time
+
+    global _seed_completed
+    import os
+    is_testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+    if not is_testing and settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+        _seed_completed = False
+    else:
+        _seed_completed = True
+
+    t_start = time.perf_counter()
+    logger = logging.getLogger("uvicorn.info")
+
     # Invariant I7: outside development, refuse to start while any rule is DEMO
     names = ["deposit", "timelines", "release_paths"]
     try:
@@ -33,6 +61,24 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
         if settings.FASTAPI_ENV != "development":
             raise RuntimeError(f"Startup guard failed: {e}") from e
 
+    # FT3: Vault key security and directory writability guard
+    try:
+        from app.domain.vault import check_vault_writable, validate_vault_security
+
+        validate_vault_security(settings.FASTAPI_ENV)
+        if not check_vault_writable():
+            if settings.FASTAPI_ENV == "production":
+                raise PermissionError(
+                    "Production startup aborted: Vault directory is not writable."
+                )
+            logger.warning(
+                "[lifespan] Warning: Vault directory is not writable by current user."
+            )
+    except Exception as e:
+        if settings.FASTAPI_ENV == "production":
+            raise RuntimeError(f"Vault security check failed: {e}") from e
+        logger.warning("[lifespan] Vault initialization notice: %s", e)
+
     # Ensure Supabase storage bucket exists if configured
     try:
         from app.integration.supabase_storage import ensure_bucket_exists
@@ -41,26 +87,53 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     except Exception:
         pass
 
-    # Ensure demo database has initial seed data if unseeded in dev/demo
-    if settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
-        try:
-            from sqlmodel import Session, select
+    def _sync_seed_worker() -> None:
+        global _seed_completed
+        if settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+            try:
+                from sqlmodel import Session, select
 
-            from app.core.db import engine, init_db
-            from app.models import User
-            from app.seed_rich_synthetic_data import seed_rich_data
+                from app.core.db import engine, init_db
+                from app.models import User
+                from app.seed_rich_synthetic_data import seed_rich_data
 
-            with Session(engine) as session:
-                has_demo = session.exec(
-                    select(User).where(User.email == "inst.north1@example.com")
-                ).first()
-                if not has_demo:
-                    init_db(session)
-                    seed_rich_data()
-        except Exception:
-            pass
+                with Session(engine) as session:
+                    has_demo = session.exec(
+                        select(User.id).where(User.email == "inst.north1@example.com")
+                    ).first()
+                    if not has_demo:
+                        logger.info("[lifespan] Unseeded database detected; seeding initial demo data...")
+                        init_db(session)
+                        seed_rich_data()
+                        logger.info("[lifespan] Initial demo data seeded successfully.")
+                    else:
+                        logger.info("[lifespan] Database already seeded; skipping redundant seed.")
+            except Exception as e:
+                logger.warning("[lifespan] Background seed notice: %s", e)
+            finally:
+                _seed_completed = True
+        else:
+            _seed_completed = True
+
+    import os
+    is_testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+    seed_task = None
+    if not is_testing and settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+        seed_task = asyncio.create_task(asyncio.to_thread(_sync_seed_worker))
+
+    t_ready = time.perf_counter()
+    logger.info(
+        "[lifespan] Startup initialization complete in %.3fs; listening for traffic.",
+        t_ready - t_start,
+    )
 
     yield
+
+    if seed_task is not None:
+        try:
+            await seed_task
+        except Exception:
+            pass
 
 
 if settings.SENTRY_DSN and settings.FASTAPI_ENV != "development":
@@ -110,10 +183,14 @@ async def integration_v1_middleware(
         from sqlmodel import Session
 
         from app.core.db import engine
-        from app.core.rate_limit import check_rate_limit, ensure_rate_limit_table
+        from app.core.rate_limit import (
+            check_rate_limit,
+            ensure_rate_limit_table,
+            get_client_ip,
+        )
 
         api_key = request.headers.get("x-api-key")
-        client_ip = request.client.host if request.client else "127.0.0.1"
+        client_ip = get_client_ip(request)
         key_id = api_key[:32] if api_key else client_ip
         rate_key = f"rl:integration:{key_id}"
 
@@ -162,7 +239,7 @@ async def add_security_headers(
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob: https:; font-src 'self'; "
-        "connect-src 'self' https://*.onrender.com https://*.supabase.co; "
+        "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.onrender.com https://*.supabase.co; "
         "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
     )
     response.headers["Strict-Transport-Security"] = (
@@ -196,6 +273,57 @@ app.add_middleware(
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok", "app": settings.PROJECT_NAME}
+
+
+@app.get("/ready", include_in_schema=False)
+@app.get("/api/ready", include_in_schema=False)
+def readiness_check() -> Response:
+    """Readiness probe checking database connectivity, migration head, and vault writability.
+
+    Returns 200 {"status": "ready", "build": ...} if all systems are ready, or 503 {"status": "unready", "build": ...} otherwise.
+    Excluded from public OpenAPI schema to preserve client contract stability.
+    """
+    import os
+
+    from fastapi.responses import JSONResponse
+    from sqlalchemy import text
+    from sqlmodel import Session
+
+    from app.core.db import engine
+    from app.domain.vault import check_vault_writable
+
+    render_commit = settings.RENDER_GIT_COMMIT or os.environ.get("RENDER_GIT_COMMIT")
+    build_val = render_commit[:7] if render_commit and render_commit.strip() else "unknown"
+
+    try:
+        with Session(engine) as session:
+            db_res = session.execute(text("SELECT 1")).scalar()
+            if db_res != 1:
+                return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+
+            ver_res = session.execute(
+                text("SELECT version_num FROM alembic_version LIMIT 1")
+            ).scalar()
+            expected_head = "d812bd6c915d"
+            if ver_res != expected_head:
+                return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+    except Exception:
+        return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+
+    if not check_vault_writable():
+        return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+
+    if (
+        settings.FASTAPI_ENV in ("development", "demo")
+        and settings.AUTO_SEED
+        and not _seed_completed
+    ):
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unready", "reason": "seeding_in_progress", "build": build_val},
+        )
+
+    return JSONResponse(status_code=200, content={"status": "ready", "build": build_val})
 
 
 app.include_router(clock.router)

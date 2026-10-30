@@ -6,7 +6,7 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 const crypto = require('crypto');
 
-const FFMPEG_PATH = 'C:\\Users\\avadu\\ffmpeg\\ffmpeg-9.0.1-essentials_build\\bin\\ffmpeg.exe';
+const FFMPEG_PATH = process.env.FFMPEG_PATH || 'ffmpeg';
 const VIDEO_DIR = path.join(__dirname, '..', 'docs', 'media');
 const HTML_FILE = path.join(__dirname, '..', 'docs', 'video2_architecture_motion_graphics.html');
 

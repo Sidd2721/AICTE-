@@ -106,16 +106,16 @@ Client HTTP Request
 ```
 
 ### A. Endpoint Hierarchy
-- **`/api/v1/auth/`**: Authentication, Argon2id verification, passwordless evaluation demo tokens ([`login.py`](file:///c:/Users/avadu/26265/backend/app/api/routes/login.py)).
-- **`/api/v1/instruments/`**: Deposit intake, search, filtering, case dossier view, document downloads ([`instruments.py`](file:///c:/Users/avadu/26265/backend/app/api/routes/instruments.py)).
-- **`/api/v1/deposits/`**: Table 1.4 dynamic calculator, programme obligations, institutional coverage card ([`deposits.py`](file:///c:/Users/avadu/26265/backend/app/api/routes/deposits.py)).
-- **`/api/v1/bank/`**: Authoritative confirmation requests, 6-point gate inspection reports ([`bank.py`](file:///c:/Users/avadu/26265/backend/app/api/routes/bank.py)).
-- **`/api/v1/release/`**: Dual-custody maker verification and checker approval ([`release.py`](file:///c:/Users/avadu/26265/backend/app/api/routes/release.py)).
-- **`/api/v1/audit/`**: Append-only event stream, public ledger hash verification endpoint ([`audit.py`](file:///c:/Users/avadu/26265/backend/app/core/audit.py)).
-- **`/api/v1/integration/`**: Machine-to-machine bulk institution upsert, coverage status check ([`integration.py`](file:///c:/Users/avadu/26265/backend/app/api/routes/integration.py)).
+- **`/api/v1/auth/`**: Authentication, Argon2id verification, passwordless evaluation demo tokens ([`login.py`](backend/app/api/routes/login.py)).
+- **`/api/v1/instruments/`**: Deposit intake, search, filtering, case dossier view, document downloads ([`instruments.py`](backend/app/api/routes/instruments.py)).
+- **`/api/v1/deposits/`**: Table 1.4 dynamic calculator, programme obligations, institutional coverage card ([`deposits.py`](backend/app/api/routes/deposits.py)).
+- **`/api/v1/bank/`**: Authoritative confirmation requests, 6-point gate inspection reports ([`bank.py`](backend/app/api/routes/bank.py)).
+- **`/api/v1/release/`**: Dual-custody maker verification and checker approval ([`release.py`](backend/app/api/routes/release.py)).
+- **`/api/v1/audit/`**: Append-only event stream, public ledger hash verification endpoint ([`audit.py`](backend/app/core/audit.py)).
+- **`/api/v1/integration/`**: Machine-to-machine bulk institution upsert, coverage status check ([`integration.py`](backend/app/api/routes/integration.py)).
 - **`/sim/`**: Transparently labelled bank CBS and virtual time machine endpoints (strictly gated to `development` and `demo`).
 
-### B. Server-Driven Finite State Machine ([`next_action.py`](file:///c:/Users/avadu/26265/backend/app/domain/next_action.py))
+### B. Server-Driven Finite State Machine ([`next_action.py`](backend/app/domain/next_action.py))
 The frontend client has **zero hardcoded workflow rules**. Every response includes:
 ```json
 {
@@ -126,7 +126,7 @@ The frontend client has **zero hardcoded workflow rules**. Every response includ
 ```
 The server evaluates the user's role, the instrument's status, and discrepancy flags to return the single valid next action. If a button is disabled, the tooltip explicitly explains why (e.g. *"A different officer must approve"*).
 
-### C. Idempotency Layer ([`idempotency.py`](file:///c:/Users/avadu/26265/backend/app/integration/idempotency.py))
+### C. Idempotency Layer ([`idempotency.py`](backend/app/integration/idempotency.py))
 - State-changing machine requests accept an `Idempotency-Key` header.
 - The system stores `(idempotency_key, request_fingerprint, response_code, response_body)`.
 - If an institutional network retries a submission with the same key and payload, the completed response is replayed safely without creating duplicate database rows.
@@ -243,13 +243,13 @@ USING (
    ```
    Stored strictly as 64-bit integers (`bigint`), eliminating IEEE 754 floating-point rounding errors.
 
-### D. Partial & Composite Performance Indexes ([`sql/performance_indexes.sql`](file:///c:/Users/avadu/26265/sql/performance_indexes.sql))
+### D. Partial & Composite Performance Indexes ([`sql/performance_indexes.sql`](sql/performance_indexes.sql))
 - **`instrument_maturity_idx`**: `(maturity_date, lifecycle)` -> powers the daily T-90, T-60, T-30 expiry radar worker.
 - **`instrument_active_region_idx`**: `(region, maturity_date) WHERE lifecycle IN ('pending', 'active', 'matured', 'renewed')` -> powers regional dashboard lookups while filtering out historical archives.
 - **`obligation_open_due_idx`**: `(due_date, owner_role) WHERE status = 'open'` -> powers regulatory priority action queues.
 - **`confirmation_status_idx`**: `(instrument_id, status, confirmed_at)` -> powers fast verification status lookups.
 
-### E. Append-Only Cryptographic Database Trigger ([`audit.py`](file:///c:/Users/avadu/26265/backend/app/core/audit.py))
+### E. Append-Only Cryptographic Database Trigger ([`audit.py`](backend/app/core/audit.py))
 ```sql
 CREATE OR REPLACE FUNCTION forbid_audit_mutation() RETURNS TRIGGER AS $$
 BEGIN
@@ -351,13 +351,13 @@ sequenceDiagram
     API-->>Bureau: 200 OK (Signed Encashment Receipt)
 ```
 
-### 1. Ingestion & Document Vault Pipeline ([`vault.py`](file:///c:/Users/avadu/26265/backend/app/domain/vault.py))
+### 1. Ingestion & Document Vault Pipeline ([`vault.py`](backend/app/domain/vault.py))
 - File upload is received as a binary stream.
 - Magic bytes are inspected: stream **must** begin with `%PDF-1.4`. Executable binaries or disguised scripts are rejected immediately (`INVALID_FORMAT`).
 - A SHA-256 digest of the raw upload is calculated and stored.
 - The file is encrypted using an envelope key with **AES-256-GCM** and stored in isolated vault storage.
 
-### 2. The 6-Point Bank Confirmation Gate Pipeline ([`bank_gate.py`](file:///c:/Users/avadu/26265/backend/app/domain/bank_gate.py))
+### 2. The 6-Point Bank Confirmation Gate Pipeline ([`bank_gate.py`](backend/app/domain/bank_gate.py))
 1. **Byte-Level Prefix Check**: Validates `%PDF-1.4` stream header.
 2. **Signature Authenticity**: Verifies single valid digital signature certificate.
 3. **Entire-File Byte Coverage**: Enforces `SignatureCoverageLevel.ENTIRE_FILE`. Appended trailing pages cause immediate failure.
@@ -365,7 +365,7 @@ sequenceDiagram
 5. **Root CA Trust Anchor**: Certificate path chains to accredited Controller of Certifying Authorities (CCA) sub-CAs.
 6. **Non-Repudiation Key Usage**: Enforces `KeyUsage.nonRepudiation` under Section 3A of the IT Act 2000.
 
-### 3. Transactional Outbox Worker Pipeline ([`outbox.py`](file:///c:/Users/avadu/26265/backend/app/integration/outbox.py))
+### 3. Transactional Outbox Worker Pipeline ([`outbox.py`](backend/app/integration/outbox.py))
 - Outbound notifications are inserted into `outbox_message` within the same ACID transaction as the business event.
 - An asynchronous worker queries:
   ```sql
@@ -375,7 +375,7 @@ sequenceDiagram
   ```
 - Events are dispatched with HMAC-SHA256 signatures. Retries use exponential backoff, dead-lettering after 8 failures.
 
-### 4. Daily Expiry Radar & Obligation Pipeline ([`worker.py`](file:///c:/Users/avadu/26265/backend/app/domain/worker.py))
+### 4. Daily Expiry Radar & Obligation Pipeline ([`worker.py`](backend/app/domain/worker.py))
 - A scheduled cron worker queries `instrument_maturity_idx` daily.
 - Automatically flags instruments at **T-90, T-60, and T-30 days** before maturity.
 - Generates mandatory renewal obligations and enqueues notice dispatches.
@@ -428,16 +428,16 @@ sequenceDiagram
 
 ### C. Client-Side File-Based Routing (TanStack Router)
 - Client routes are strictly typed using TanStack Router:
-  - [`login.tsx`](file:///c:/Users/avadu/26265/frontend/src/routes/login.tsx): 1-click evaluation personas, redirecting to `/` if authenticated.
-  - [`guide.tsx`](file:///c:/Users/avadu/26265/frontend/src/routes/guide.tsx): 6-minute tour synchronized with `guide.json`.
-  - [`_layout/index.tsx`](file:///c:/Users/avadu/26265/frontend/src/routes/_layout/index.tsx): Regional dashboard with expiry radar and status counters.
-  - [`_layout/deposits.tsx`](file:///c:/Users/avadu/26265/frontend/src/routes/_layout/deposits.tsx): Dynamic Table 1.4 calculator, coverage card, and FDR submission.
-  - [`_layout/instruments.$id.tsx`](file:///c:/Users/avadu/26265/frontend/src/routes/_layout/instruments.$id.tsx): Case dossier, 6-point gate inspection, scrutiny waivers, and dual-custody release.
-  - [`_layout/audit.tsx`](file:///c:/Users/avadu/26265/frontend/src/routes/_layout/audit.tsx): Append-only audit stream with one-click hash chain verification.
-  - [`_layout/evidence.tsx`](file:///c:/Users/avadu/26265/frontend/src/routes/_layout/evidence.tsx): Complete evidence map and invariant test records.
+  - [`login.tsx`](frontend/src/routes/login.tsx): 1-click evaluation personas, redirecting to `/` if authenticated.
+  - [`guide.tsx`](frontend/src/routes/guide.tsx): 6-minute tour synchronized with `guide.json`.
+  - [`_layout/index.tsx`](frontend/src/routes/_layout/index.tsx): Regional dashboard with expiry radar and status counters.
+  - [`_layout/deposits.tsx`](frontend/src/routes/_layout/deposits.tsx): Dynamic Table 1.4 calculator, coverage card, and FDR submission.
+  - [`_layout/instruments.$id.tsx`](frontend/src/routes/_layout/instruments.$id.tsx): Case dossier, 6-point gate inspection, scrutiny waivers, and dual-custody release.
+  - [`_layout/audit.tsx`](frontend/src/routes/_layout/audit.tsx): Append-only audit stream with one-click hash chain verification.
+  - [`_layout/evidence.tsx`](frontend/src/routes/_layout/evidence.tsx): Complete evidence map and invariant test records.
 
 ---
 
 ## 7. Summary for Technical Decision Makers
 
-> *"The AICTE FDR Regulatory Portal is engineered as a high-assurance, defense-in-depth platform. Its API layer enforces server-driven governance and idempotency; its database tier leverages PostgreSQL Row-Level Security, physical constraints, and append-only triggers; its technology stack uses 100% open-source components with zero licensing costs; its data pipeline guarantees transactional outbox delivery and entire-file byte coverage verification; and its routing architecture provides a self-contained single-container deployment. It is production-tested, mathematically verified, and ready for regulatory adoption."*
+> *"The AICTE FDR Regulatory Portal is engineered as a high-assurance, defense-in-depth platform. Its API layer enforces server-driven governance and idempotency; its database tier leverages PostgreSQL Row-Level Security, physical constraints, and append-only triggers; its technology stack uses fully open-source components with zero licensing costs; its data pipeline guarantees transactional outbox delivery and entire-file byte coverage verification; and its routing architecture provides a self-contained single-container deployment. It is production-tested, mathematically verified, and ready for regulatory adoption."*

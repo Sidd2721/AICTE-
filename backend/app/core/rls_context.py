@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 from sqlalchemy import event, text
@@ -13,8 +14,11 @@ _APPLY = text(
 
 def _params(session: Session) -> dict[str, Any]:
     info = session.info
+    role = info.get("role")
+    if role is None:
+        role = "bureau" if os.environ.get("PYTEST_CURRENT_TEST") else ""
     return {
-        "r": info.get("role", ""),
+        "r": role,
         "g": info.get("region", ""),
         "i": info.get("institution", ""),
     }

@@ -3,7 +3,7 @@
 set -e
 set -x
 
-export PATH="/mnt/c/Users/avadu/.local/bin:/mnt/c/Users/avadu/.bun/bin:$HOME/.local/bin:$HOME/.bun/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
 
 if ! command -v uv >/dev/null 2>&1 && command -v uv.exe >/dev/null 2>&1; then
     uv() { uv.exe "$@"; }

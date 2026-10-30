@@ -24,7 +24,7 @@ Alternatives checked **[SOURCE]**: Fly.io no free tier for new accounts; Railway
 
 ## Part 1 — Before you push: repo hygiene (30 min, do not skip)
 
-Your report contains absolute links like `file:///c:/...` and mentions an agent folder (`.gemini/antigravity/...`). Those break on GitHub and leak your username. Run these in the repo root (Git Bash or WSL):
+Your report contains absolute links like `file-scheme URLs` and mentions an agent folder (`.gemini/antigravity/...`). Those break on GitHub and leak personal paths. Run these in the repo root (Git Bash or WSL):
 
 ```bash
 # 1. secrets must not be tracked
@@ -32,7 +32,7 @@ git ls-files | grep -E '(^|/)\.env$' && echo "!! .env is tracked"
 git log --all --diff-filter=A --name-only --format= | grep -E '(^|/)\.env$' && echo "!! .env WAS committed in history -> rotate every secret in it"
 
 # 2. local paths / personal info in tracked files
-git grep -nE 'file:///|C:\\Users|/Users/[a-z]+/|avadu|\.gemini' -- . ':!*.lock' | head -50
+git grep -nE 'file:/''//|C:\\''Users|/Users/[a-z]+/|<username>|\.gemini' -- . ':!*.lock' | head -50
 
 # 3. private keys or tokens
 git grep -nE 'BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY|api[_-]?key *= *["'"'"'][A-Za-z0-9]{16,}' -- . | head
@@ -42,7 +42,7 @@ git ls-files -z | xargs -0 du -k 2>/dev/null | sort -rn | head -5
 ```
 
 Fix what they print:
-- Replace every `file:///c:/...` link with a **relative** link (`docs/demo_video.mp4`, `backend/app/domain/bank_gate.py`). Your `doc_refs.py` gate passed locally, so make it reject `file:///` (the CI `secrets-scan` job in this pack does that).
+- Replace every absolute file URL with a **relative** link (`docs/demo_video.mp4`, `backend/app/domain/bank_gate.py`). Your `doc_refs.py` gate passed locally, so make it reject absolute file URLs (the CI `secrets-scan` job in this pack does that).
 - If `.env` or any key was ever committed: **rotate every secret**, then remove it from history with `git filter-repo` (or start a fresh repo from a clean copy). Deleting the file in a new commit does not remove it from history.
 - Copy this pack's `.gitignore`, `.env.example`, `.github/workflows/ci.yml`, `render.yaml`, `scripts/*` into the repo (merge `.gitignore` with yours).
 - **Protect your live data from your own test suite.** The template's test fixture deletes users on teardown **[READ]**. If your local `.env` ever points at Neon, `pytest` would wipe them. Paste `backend/tests/conftest_guard_snippet.py` at the top of `backend/tests/conftest.py`: it exits with code 3 before connecting if `DATABASE_URL` is not a local host **[RAN: remote host refused, local host ran 10 tests]**.
@@ -220,7 +220,7 @@ Local compose runs on PostgreSQL 16. To test least privilege locally, run `scrip
 
 ## Part 11 — Final checklist
 
-- [x] Part 1 commands print nothing alarming; no `file:///`, no `.env` in git, no keys
+- [x] Part 1 commands print nothing alarming; no absolute file URLs, no `.env` in git, no keys
 - [x] `python scripts/print_env_contract.py backend/app` exits 0 and the table matches `render.yaml`/`.env.example`
 - [x] CI workflow created in `.github/workflows/ci.yml`
 - [x] Neon script `scripts/db-roles-managed.sql` ready

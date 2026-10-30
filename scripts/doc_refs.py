@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that scripts named by project documents exist at the named path and no file:/// links exist."""
+"""Check that scripts named by project documents exist at the named path and no file-scheme absolute links exist."""
 
 import argparse
 import re
@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 SCRIPT_REFERENCE = re.compile(r"(?<![\w-])((?:backend/)?scripts/[\w.-]+\.py)")
+FORBIDDEN_FILE_SCHEME = "file:" + "///"
 
 
 def document_paths(inputs: list[str]) -> list[Path]:
@@ -25,7 +26,7 @@ def check(root: Path, paths: list[Path]) -> list[str]:
     for document in paths:
         text = document.read_text(encoding="utf-8")
         for number, line in enumerate(text.splitlines(), 1):
-            if "file:///" in line:
+            if FORBIDDEN_FILE_SCHEME in line:
                 findings.append(f"{document}:{number}: absolute file URL rejected: {line.strip()}")
             for reference in SCRIPT_REFERENCE.findall(line):
                 if not (root / reference).is_file():

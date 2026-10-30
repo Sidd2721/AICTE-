@@ -1,0 +1,55 @@
+# Degraded Free-Plan Fallback Specification for Render
+# Use this configuration ONLY for zero-cost evaluation testing.
+# LIMITATIONS:
+# 1. Spins down after 15 minutes of inactivity; cold boot wake takes ~50 seconds.
+# 2. Local container files in /app/backend/vault are ephemeral and erased on restart or spin-down.
+# 3. 512 MB memory ceiling.
+services:
+  - type: web
+    name: aicte-fdr-portal-free
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    autoDeploy: false
+    healthCheckPath: /health # Cheap liveness check; no DB or version probing
+    envVars:
+      - key: FASTAPI_ENV
+        value: demo
+      - key: PROJECT_NAME
+        value: AICTE Security Deposit Portal
+      - key: PORT
+        value: "10000"
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
+      - key: SECRET_KEY
+        sync: false
+      - key: VAULT_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: fdr-vault
+      - key: FIRST_SUPERUSER
+        value: admin@example.com
+      - key: FIRST_SUPERUSER_PASSWORD
+        sync: false
+      - key: AUTO_SEED
+        value: "true"
+      - key: FRONTEND_HOST
+        sync: false
+
+databases:
+  # Free tier Render PostgreSQL (expires after 30 days)
+  - name: aicte-fdr-db-free
+    plan: free
+    region: singapore
+    databaseName: app
+    user: app
+    postgresMajorVersion: "16"

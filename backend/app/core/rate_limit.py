@@ -14,19 +14,22 @@ from sqlmodel import Session
 
 def ensure_rate_limit_table(session: Session) -> None:
     """Ensure the rate_limit_bucket table exists."""
-    session.execute(
-        text(
-            """
-            CREATE TABLE IF NOT EXISTS rate_limit_bucket (
-                key VARCHAR(255) PRIMARY KEY,
-                count INTEGER NOT NULL DEFAULT 1,
-                reset_at TIMESTAMPTZ NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS ix_rate_limit_bucket_reset_at ON rate_limit_bucket (reset_at);
-            """
+    try:
+        session.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS rate_limit_bucket (
+                    key VARCHAR(255) PRIMARY KEY,
+                    count INTEGER NOT NULL DEFAULT 1,
+                    reset_at TIMESTAMPTZ NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS ix_rate_limit_bucket_reset_at ON rate_limit_bucket (reset_at);
+                """
+            )
         )
-    )
-    session.commit()
+        session.commit()
+    except Exception:
+        session.rollback()
 
 
 def check_rate_limit(
@@ -98,11 +101,39 @@ def check_rate_limit(
     return True, 0
 
 
-def get_client_ip(request: Request) -> str:
-    """Extract client IP, taking X-Forwarded-For into account when available."""
+def get_client_ip(request: Request, trusted_hops: int | None = None) -> str:
+    """Extract client IP securely based on trusted proxy hops.
+
+    Source: Render Documentation (https://render.com/docs/web-services#client-ip-address)
+    Render's reverse proxy appends the incoming client IP to X-Forwarded-For and also
+    injects True-Client-IP containing the client's public IP address.
+
+    When trusted_hops == 0 (default / backward compatibility):
+        Fallback to the legacy first X-Forwarded-For entry or direct socket client.
+    When trusted_hops > 0:
+        Prefer True-Client-IP if present from Render's edge, or traverse backwards
+        from the right of X-Forwarded-For by trusted_hops.
+    """
+    from app.core.config import settings
+
+    if trusted_hops is None:
+        trusted_hops = getattr(settings, "TRUSTED_PROXY_HOPS", 0)
+
+    if trusted_hops > 0:
+        true_client = request.headers.get("True-Client-IP")
+        if true_client and true_client.strip():
+            return true_client.strip()
+
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            ips = [ip.strip() for ip in forwarded.split(",") if ip.strip()]
+            if ips:
+                idx = max(0, len(ips) - trusted_hops)
+                return ips[idx]
+        return request.client.host if request.client else "127.0.0.1"
+
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
-        # First IP in the list is the client
         return forwarded.split(",")[0].strip()
     return request.client.host if request.client else "127.0.0.1"
 

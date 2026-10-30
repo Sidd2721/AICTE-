@@ -46,9 +46,10 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
 
     from app.core.rls_context import set_rls_context
 
+    role = "bureau" if user.is_superuser else (user.role or "bureau")
     set_rls_context(
         session,
-        role=user.role,
+        role=role,
         region=user.region or "",
         institution=str(user.institution_id or ""),
     )
