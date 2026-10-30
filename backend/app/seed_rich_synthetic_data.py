@@ -24,7 +24,11 @@ from app.models import (
 
 
 def seed_rich_data() -> None:
+    from app.core.rls_context import install_rls_context, set_rls_context
+
+    install_rls_context()
     with Session(engine) as session:
+        set_rls_context(session, role="bureau")
         # 1. Fetch Key Users
         officer = session.exec(
             select(User).where(User.email == "officer.north@example.com")

@@ -6,12 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   secrets-scan:
     name: Secrets & Path Hygiene Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Check for tracked .env files
         run: |
@@ -54,10 +59,12 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: "0.9.26"
           enable-cache: true
@@ -66,7 +73,7 @@ jobs:
         run: uv python install 3.14
 
       - name: Install Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: latest
 
@@ -78,6 +85,9 @@ jobs:
           psql -h localhost -U postgres -d app -c "ALTER ROLE migrator WITH PASSWORD 'migratorpassword'; ALTER ROLE app WITH PASSWORD 'apppassword';"
           # In PostgreSQL 16+, public schema permissions are restricted; grant migrator rights to migrate
           psql -h localhost -U postgres -d app -c "GRANT ALL ON SCHEMA public TO migrator; GRANT ALL ON DATABASE app TO migrator; ALTER SCHEMA public OWNER TO migrator;"
+          # Create app_test database for isolated pytest runs
+          psql -h localhost -U postgres -d postgres -c "CREATE DATABASE app_test OWNER migrator; GRANT CONNECT ON DATABASE app_test TO app;"
+          psql -h localhost -U postgres -d app_test -c "GRANT ALL ON SCHEMA public TO migrator; GRANT ALL ON DATABASE app_test TO migrator; ALTER SCHEMA public OWNER TO migrator;"
           # Verify app role is NOSUPERUSER NOBYPASSRLS
           psql -h localhost -U postgres -d app -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('migrator', 'app');"
 
@@ -103,6 +113,7 @@ jobs:
         run: |
           cd backend
           uv run alembic upgrade head
+          MIGRATION_DATABASE_URL=postgresql+psycopg://migrator:migratorpassword@localhost:5432/app_test uv run alembic upgrade head
           uv run python app/initial_data.py
 
       - name: Verify Environment Contract

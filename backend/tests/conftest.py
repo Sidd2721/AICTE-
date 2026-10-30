@@ -66,7 +66,11 @@ from tests.utils.utils import get_superuser_token_headers
 
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session]:
+    from app.core.rls_context import install_rls_context, set_rls_context
+
+    install_rls_context()
     with Session(engine) as session:
+        set_rls_context(session, role="bureau")
         # Pre-cleanup of known test users that may survive between test runs
         try:
             session.execute(text("DELETE FROM \"user\" WHERE email NOT IN (SELECT \"user\".email FROM \"user\" JOIN lateral(select 1) ON true WHERE is_superuser = true) OR email = 'pollo@listo.com'"))

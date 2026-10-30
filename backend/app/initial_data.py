@@ -10,7 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 def init() -> None:
+    from app.core.rls_context import install_rls_context, set_rls_context
+
+    install_rls_context()
     with Session(engine) as session:
+        set_rls_context(session, role="bureau")
         init_db(session)
         has_demo = session.exec(
             select(User.id).where(User.email == "inst.north1@example.com")
