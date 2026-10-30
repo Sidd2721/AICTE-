@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import uuid
 from datetime import date, timedelta
 from typing import Any
@@ -15,6 +16,8 @@ from app.domain.vault import (
     store_in_vault,
 )
 from app.models import Document, DocumentPublic, Institution, Instrument
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -188,9 +191,26 @@ def download_document(
     try:
         content = read_from_vault(doc.storage_key)
     except FileNotFoundError as e:
+        logger.warning(
+            "Vault file missing for document %s (key %s): %s",
+            doc.id,
+            doc.storage_key,
+            e,
+        )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vault file not found on disk",
+        ) from e
+    except Exception as e:
+        logger.warning(
+            "Vault file unreadable or corrupt for document %s (key %s): %s",
+            doc.id,
+            doc.storage_key,
+            e,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Vault file unreadable or corrupt",
         ) from e
 
     return Response(
