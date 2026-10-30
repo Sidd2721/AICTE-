@@ -5,6 +5,7 @@ import {
   Calendar,
   Download,
   FileSpreadsheet,
+  FileText,
   FileWarning,
   Hourglass,
 } from "lucide-react"
@@ -92,6 +93,31 @@ function ReportsView() {
     },
   })
 
+  const downloadPdf = async () => {
+    try {
+      const token = localStorage.getItem("access_token")
+      const response = await fetch(
+        `/api/v1/reports/pdf?report_type=${encodeURIComponent(activeTab)}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      )
+      if (!response.ok) throw new Error("Export failed")
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `statement_report_${activeTab}_${new Date().toISOString().slice(0, 10)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success("Statement PDF report downloaded")
+    } catch {
+      toast.error("Failed to download PDF report")
+    }
+  }
+
   const downloadCsv = async () => {
     try {
       const token = localStorage.getItem("access_token")
@@ -130,9 +156,14 @@ function ReportsView() {
             Rule I13).
           </p>
         </div>
-        <Button onClick={downloadCsv} className="gap-2">
-          <Download className="h-4 w-4" /> Export Formula-Safe CSV
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" onClick={downloadPdf} className="gap-2">
+            <FileText className="h-4 w-4" /> Export PDF
+          </Button>
+          <Button onClick={downloadCsv} className="gap-2">
+            <Download className="h-4 w-4" /> Export Formula-Safe CSV
+          </Button>
+        </div>
       </div>
 
       {/* About this screen guide (G3) */}
