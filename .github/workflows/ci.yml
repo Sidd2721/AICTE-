@@ -86,7 +86,8 @@ jobs:
           # In PostgreSQL 16+, public schema permissions are restricted; grant migrator rights to migrate
           psql -h localhost -U postgres -d app -c "GRANT ALL ON SCHEMA public TO migrator; GRANT ALL ON DATABASE app TO migrator; ALTER SCHEMA public OWNER TO migrator;"
           # Create app_test database for isolated pytest runs
-          psql -h localhost -U postgres -d postgres -c "CREATE DATABASE app_test OWNER migrator; GRANT CONNECT ON DATABASE app_test TO app;"
+          psql -h localhost -U postgres -d postgres -c "CREATE DATABASE app_test OWNER migrator;"
+          psql -h localhost -U postgres -d postgres -c "GRANT CONNECT ON DATABASE app_test TO app;"
           psql -h localhost -U postgres -d app_test -c "GRANT ALL ON SCHEMA public TO migrator; GRANT ALL ON DATABASE app_test TO migrator; ALTER SCHEMA public OWNER TO migrator;"
           # Verify app role is NOSUPERUSER NOBYPASSRLS
           psql -h localhost -U postgres -d app -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('migrator', 'app');"
