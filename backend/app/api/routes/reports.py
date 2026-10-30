@@ -1,13 +1,14 @@
 import csv
 import io
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, HTTPException, Response
 from sqlmodel import col, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.audit import audit_append
+from app.domain.clock import today as clock_today
 from app.domain.csv_safe import csv_safe
 from app.domain.reports_pdf import generate_reports_pdf
 from app.domain.trust import Confirmation as TrustConfirmation
@@ -15,6 +16,15 @@ from app.domain.trust import badge
 from app.models import Confirmation, Document, Institution, Instrument, Obligation
 
 router = APIRouter(prefix="/reports", tags=["reports"])
+
+VALID_REPORT_TYPES = {
+    "pending-verifications",
+    "upcoming-maturities",
+    "missing-documents",
+    "cases-needing-intervention",
+    "all",
+    "full",
+}
 
 
 @router.get("/pdf")
@@ -24,6 +34,13 @@ def export_reports_pdf(
     report_type: str | None = None,
 ) -> Response:
     """Server-side PDF statement report export with DEMO watermark and prototype disclaimers."""
+    if report_type:
+        normalized = report_type.strip().lower().replace("_", "-")
+        if normalized not in VALID_REPORT_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid report_type '{report_type}'. Must be one of: pending-verifications, upcoming-maturities, missing-documents, cases-needing-intervention",
+            )
     pdf_bytes, filename, total_rows = generate_reports_pdf(
         session=session,
         current_user=current_user,
@@ -155,7 +172,8 @@ def report_upcoming_maturities(
     current_user: CurrentUser,
 ) -> Response:
     """CSV report of FDRs maturing within 90 days."""
-    cutoff = date.today() + timedelta(days=90)
+    today_val = clock_today()
+    cutoff = today_val + timedelta(days=90)
     query = (
         select(Instrument)
         .where(Instrument.lifecycle == "active")
@@ -177,7 +195,6 @@ def report_upcoming_maturities(
         "Maturity Date",
         "Days to Maturity",
     ]
-    today_val = date.today()
     rows: list[list[Any]] = []
     for inst in instruments:
         days_to_mat = (inst.maturity_date - today_val).days
@@ -268,7 +285,7 @@ def report_cases_needing_intervention(
     current_user: CurrentUser,
 ) -> Response:
     """CSV report of cases with open overdue obligations or maturity past due."""
-    today_val = date.today()
+    today_val = clock_today()
     query = select(Instrument).where(
         col(Instrument.lifecycle).in_(["pending", "active", "matured"])
     )
@@ -338,21 +355,25 @@ def preview_pending_verifications(
     elif current_user.role == "regional" and current_user.region:
         query = query.where(Instrument.region == current_user.region)
     instruments = session.exec(query.limit(limit)).all()
-    rows = [
-        {
-            "id": str(i.id),
-            "institution_id": str(i.institution_id),
-            "region": i.region,
-            "kind": i.kind,
-            "ref_no": i.ref_no,
-            "bank_code": i.bank_code,
-            "amount_paise": i.amount_paise,
-            "issue_date": str(i.issue_date),
-            "maturity_date": str(i.maturity_date),
-            "badge": _hydrate_badge(i, session),
-        }
-        for i in instruments
-    ]
+    rows = []
+    for i in instruments:
+        inst_obj = session.get(Institution, i.institution_id)
+        rows.append(
+            {
+                "id": str(i.id),
+                "institution_id": str(i.institution_id),
+                "institution_name": inst_obj.name if inst_obj else "",
+                "region": i.region,
+                "kind": i.kind,
+                "ref_no": i.ref_no,
+                "bank_code": i.bank_code,
+                "amount_paise": i.amount_paise,
+                "issue_date": str(i.issue_date),
+                "maturity_date": str(i.maturity_date),
+                "lifecycle": i.lifecycle,
+                "badge": _hydrate_badge(i, session),
+            }
+        )
     return {"rows": rows, "count": len(rows)}
 
 
@@ -363,7 +384,8 @@ def preview_upcoming_maturities(
     limit: int = 50,
 ) -> dict[str, Any]:
     """JSON preview for the upcoming-maturities report."""
-    cutoff = date.today() + timedelta(days=90)
+    today_val = clock_today()
+    cutoff = today_val + timedelta(days=90)
     query = (
         select(Instrument)
         .where(Instrument.lifecycle == "active")
@@ -373,21 +395,24 @@ def preview_upcoming_maturities(
         query = query.where(Instrument.institution_id == current_user.institution_id)
     elif current_user.role == "regional" and current_user.region:
         query = query.where(Instrument.region == current_user.region)
-    today_val = date.today()
     instruments = session.exec(query.limit(limit)).all()
-    rows = [
-        {
-            "id": str(i.id),
-            "institution_id": str(i.institution_id),
-            "region": i.region,
-            "ref_no": i.ref_no,
-            "bank_code": i.bank_code,
-            "amount_paise": i.amount_paise,
-            "maturity_date": str(i.maturity_date),
-            "days_to_maturity": (i.maturity_date - today_val).days,
-        }
-        for i in instruments
-    ]
+    rows = []
+    for i in instruments:
+        inst_obj = session.get(Institution, i.institution_id)
+        rows.append(
+            {
+                "id": str(i.id),
+                "institution_id": str(i.institution_id),
+                "institution_name": inst_obj.name if inst_obj else "",
+                "region": i.region,
+                "ref_no": i.ref_no,
+                "bank_code": i.bank_code,
+                "amount_paise": i.amount_paise,
+                "maturity_date": str(i.maturity_date),
+                "lifecycle": i.lifecycle,
+                "days_to_maturity": (i.maturity_date - today_val).days,
+            }
+        )
     return {"rows": rows, "count": len(rows)}
 
 
@@ -418,9 +443,14 @@ def preview_missing_documents(
             rows.append(
                 {
                     "id": str(i.id),
+                    "institution_id": str(i.institution_id),
                     "institution_name": inst_obj.name if inst_obj else "",
                     "region": i.region,
                     "ref_no": i.ref_no,
+                    "bank_code": i.bank_code,
+                    "amount_paise": i.amount_paise,
+                    "maturity_date": str(i.maturity_date),
+                    "lifecycle": i.lifecycle,
                     "missing": missing,
                 }
             )
@@ -434,7 +464,7 @@ def preview_cases_needing_intervention(
     limit: int = 50,
 ) -> dict[str, Any]:
     """JSON preview for the cases-needing-intervention report."""
-    today_val = date.today()
+    today_val = clock_today()
     query = select(Instrument).where(
         col(Instrument.lifecycle).in_(["pending", "active", "matured"])
     )
@@ -457,11 +487,17 @@ def preview_cases_needing_intervention(
         for o in obs:
             reasons.append(f"Overdue {o.kind} (due {o.due_date})")
         if reasons:
+            inst_obj = session.get(Institution, i.institution_id)
             rows.append(
                 {
                     "id": str(i.id),
+                    "institution_id": str(i.institution_id),
+                    "institution_name": inst_obj.name if inst_obj else "",
                     "ref_no": i.ref_no,
                     "region": i.region,
+                    "bank_code": i.bank_code,
+                    "amount_paise": i.amount_paise,
+                    "maturity_date": str(i.maturity_date),
                     "lifecycle": i.lifecycle,
                     "reasons": reasons,
                 }

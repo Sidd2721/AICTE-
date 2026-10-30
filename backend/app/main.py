@@ -103,6 +103,9 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
                 from app.seed_rich_synthetic_data import seed_rich_data
 
                 with Session(engine) as session:
+                    from app.core.rls_context import set_rls_context
+
+                    set_rls_context(session, role="bureau")
                     has_demo = session.exec(
                         select(User.id).where(User.email == "inst.north1@example.com")
                     ).first()

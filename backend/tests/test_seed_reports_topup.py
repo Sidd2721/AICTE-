@@ -174,3 +174,13 @@ def test_production_mode_does_not_run_topup(
     monkeypatch.setattr(settings, "FASTAPI_ENV", "production")
     added = seed_reports_topup(db)
     assert added == 0
+
+
+def test_standalone_seed_rich_data_runs_under_rls_and_executes_worker(db: Session) -> None:
+    """Standalone seed_rich_data() sets bureau RLS context and runs maturity worker without error."""
+    init_db(db)
+    seed_rich_data()
+    # Confirm maturity obligations exist
+    matured_ob = db.exec(select(Obligation).where(Obligation.kind == "renewal_due")).first()
+    assert matured_ob is not None, "Maturity worker must create renewal_due obligations for upcoming maturities"
+

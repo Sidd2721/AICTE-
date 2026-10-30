@@ -166,3 +166,55 @@ def test_reports_pdf_audit_trail_logging(
     assert last_audit.entity_id == "pdf-upcoming-maturities"
     assert last_audit.payload.get("format") == "pdf"
     assert last_audit.payload.get("report_type") == "upcoming-maturities"
+
+
+def test_reports_pdf_invalid_report_type_returns_400(
+    client: TestClient, db: Session
+) -> None:
+    """PDF export rejects unrecognized report_type with 400 Bad Request."""
+    init_db(db)
+    seed_rich_data()
+
+    nr_headers = authentication_token_from_email(
+        client=client, email="officer.north@example.com", db=db
+    )
+
+    r = client.get(
+        f"{settings.API_V1_STR}/reports/pdf?report_type=unsupported-tab",
+        headers=nr_headers,
+    )
+    assert r.status_code == 400
+    assert "Invalid report_type" in r.json()["detail"]
+
+
+def test_reports_preview_rich_data_fields(
+    client: TestClient, db: Session
+) -> None:
+    """Preview endpoints for all 4 tabs must supply realistic institution names, bank codes, and amounts."""
+    init_db(db)
+    seed_rich_data()
+    seed_reports_topup(db)
+
+    nr_headers = authentication_token_from_email(
+        client=client, email="officer.north@example.com", db=db
+    )
+
+    tabs = [
+        "pending-verifications",
+        "upcoming-maturities",
+        "missing-documents",
+        "cases-needing-intervention",
+    ]
+
+    for tab in tabs:
+        res = client.get(f"{settings.API_V1_STR}/reports/{tab}/preview", headers=nr_headers)
+        assert res.status_code == 200
+        rows = res.json().get("rows", [])
+        assert len(rows) > 0, f"Expected rows for tab {tab}"
+        for row in rows:
+            assert row.get("ref_no"), f"Missing ref_no in {tab}"
+            assert row.get("institution_name"), f"Missing institution_name in {tab}"
+            assert row.get("bank_code"), f"Missing bank_code in {tab}"
+            assert row.get("amount_paise") is not None, f"Missing amount_paise in {tab}"
+            assert row.get("maturity_date"), f"Missing maturity_date in {tab}"
+

@@ -77,6 +77,7 @@ def db() -> Generator[Session]:
         # Pre-cleanup of known test users that may survive between test runs
         try:
             session.execute(text("DELETE FROM \"user\" WHERE email NOT IN (SELECT \"user\".email FROM \"user\" JOIN lateral(select 1) ON true WHERE is_superuser = true) OR email = 'pollo@listo.com'"))
+            session.execute(text("DELETE FROM rate_limit_bucket"))
             session.commit()
         except Exception:
             session.rollback()
@@ -84,7 +85,7 @@ def db() -> Generator[Session]:
         yield session
         # Teardown: clean up test database rows without touching or re-seeding live DB
         try:
-            session.execute(text("DELETE FROM flag_waiver; DELETE FROM notice; DELETE FROM obligation; DELETE FROM case_note; DELETE FROM confirmation; DELETE FROM document; DELETE FROM release_request; DELETE FROM instrument;"))
+            session.execute(text("DELETE FROM flag_waiver; DELETE FROM notice; DELETE FROM obligation; DELETE FROM case_note; DELETE FROM confirmation; DELETE FROM document; DELETE FROM release_request; DELETE FROM instrument; DELETE FROM rate_limit_bucket;"))
         except Exception:
             session.rollback()
         statement = delete(User)
