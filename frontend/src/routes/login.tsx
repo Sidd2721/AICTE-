@@ -142,14 +142,24 @@ export const Route = createFileRoute("/login")({
   }),
 })
 
+function getSafeRedirect(redirectParam: string | undefined): string {
+  if (!redirectParam) return "/"
+  if (
+    redirectParam.startsWith("/") &&
+    !redirectParam.startsWith("//") &&
+    !redirectParam.startsWith("/\\")
+  ) {
+    const cleanPath = redirectParam.split("?")[0].split("#")[0]
+    if (cleanPath !== "/login" && cleanPath !== "") {
+      return redirectParam
+    }
+  }
+  return "/"
+}
+
 function Login() {
   const search = Route.useSearch()
-  const redirectTarget =
-    search.redirect?.startsWith("/") &&
-    !search.redirect.startsWith("//") &&
-    !search.redirect.startsWith("/\\")
-      ? search.redirect
-      : "/"
+  const redirectTarget = getSafeRedirect(search.redirect)
 
   const { loginMutation } = useAuth()
   const [activePersonaEmail, setActivePersonaEmail] = useState<string | null>(
@@ -160,6 +170,14 @@ function Login() {
   const [failedPersona, setFailedPersona] = useState<DemoPersona | null>(null)
 
   const wakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (wakeTimerRef.current) clearTimeout(wakeTimerRef.current)
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+    }
+  }, [])
 
   const {
     data: demoPersonas = DEFAULT_PERSONAS,
@@ -196,7 +214,7 @@ function Login() {
   })
 
   const onSubmit = (data: FormData) => {
-    if (loginMutation.isPending) return
+    if (loginMutation.isPending || activePersonaEmail) return
     loginMutation.mutate(data)
   }
 
@@ -236,7 +254,8 @@ function Login() {
       // If response not ok and not retry, attempt auto-retry once
       if (!isRetry) {
         setWakingNotice("Waking the demo server, this can take up to a minute")
-        setTimeout(() => {
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = setTimeout(() => {
           instantLogin(persona, true)
         }, 1500)
         return
@@ -254,7 +273,8 @@ function Login() {
 
       if (!isRetry) {
         setWakingNotice("Waking the demo server, this can take up to a minute")
-        setTimeout(() => {
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = setTimeout(() => {
           instantLogin(persona, true)
         }, 1500)
         return
@@ -487,6 +507,7 @@ function Login() {
                 <LoadingButton
                   type="submit"
                   loading={loginMutation.isPending}
+                  disabled={loginMutation.isPending || !!activePersonaEmail}
                   className="w-full mt-2 min-h-[44px]"
                 >
                   Log In

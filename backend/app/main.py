@@ -43,8 +43,13 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
 
     global _seed_completed
     import os
+
     is_testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
-    if not is_testing and settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+    if (
+        not is_testing
+        and settings.FASTAPI_ENV in ("development", "demo")
+        and settings.AUTO_SEED
+    ):
         _seed_completed = False
     else:
         _seed_completed = True
@@ -102,12 +107,16 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
                         select(User.id).where(User.email == "inst.north1@example.com")
                     ).first()
                     if not has_demo:
-                        logger.info("[lifespan] Unseeded database detected; seeding initial demo data...")
+                        logger.info(
+                            "[lifespan] Unseeded database detected; seeding initial demo data..."
+                        )
                         init_db(session)
                         seed_rich_data()
                         logger.info("[lifespan] Initial demo data seeded successfully.")
                     else:
-                        logger.info("[lifespan] Database already seeded; skipping redundant seed.")
+                        logger.info(
+                            "[lifespan] Database already seeded; skipping redundant seed."
+                        )
             except Exception as e:
                 logger.warning("[lifespan] Background seed notice: %s", e)
             finally:
@@ -116,9 +125,14 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
             _seed_completed = True
 
     import os
+
     is_testing = bool(os.environ.get("PYTEST_CURRENT_TEST"))
     seed_task = None
-    if not is_testing and settings.FASTAPI_ENV in ("development", "demo") and settings.AUTO_SEED:
+    if (
+        not is_testing
+        and settings.FASTAPI_ENV in ("development", "demo")
+        and settings.AUTO_SEED
+    ):
         seed_task = asyncio.create_task(asyncio.to_thread(_sync_seed_worker))
 
     t_ready = time.perf_counter()
@@ -293,25 +307,35 @@ def readiness_check() -> Response:
     from app.domain.vault import check_vault_writable
 
     render_commit = settings.RENDER_GIT_COMMIT or os.environ.get("RENDER_GIT_COMMIT")
-    build_val = render_commit[:7] if render_commit and render_commit.strip() else "unknown"
+    build_val = (
+        render_commit[:7] if render_commit and render_commit.strip() else "unknown"
+    )
 
     try:
         with Session(engine) as session:
             db_res = session.execute(text("SELECT 1")).scalar()
             if db_res != 1:
-                return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+                return JSONResponse(
+                    status_code=503, content={"status": "unready", "build": build_val}
+                )
 
             ver_res = session.execute(
                 text("SELECT version_num FROM alembic_version LIMIT 1")
             ).scalar()
             expected_head = "d812bd6c915d"
             if ver_res != expected_head:
-                return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+                return JSONResponse(
+                    status_code=503, content={"status": "unready", "build": build_val}
+                )
     except Exception:
-        return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+        return JSONResponse(
+            status_code=503, content={"status": "unready", "build": build_val}
+        )
 
     if not check_vault_writable():
-        return JSONResponse(status_code=503, content={"status": "unready", "build": build_val})
+        return JSONResponse(
+            status_code=503, content={"status": "unready", "build": build_val}
+        )
 
     if (
         settings.FASTAPI_ENV in ("development", "demo")
@@ -320,10 +344,16 @@ def readiness_check() -> Response:
     ):
         return JSONResponse(
             status_code=503,
-            content={"status": "unready", "reason": "seeding_in_progress", "build": build_val},
+            content={
+                "status": "unready",
+                "reason": "seeding_in_progress",
+                "build": build_val,
+            },
         )
 
-    return JSONResponse(status_code=200, content={"status": "ready", "build": build_val})
+    return JSONResponse(
+        status_code=200, content={"status": "ready", "build": build_val}
+    )
 
 
 app.include_router(clock.router)

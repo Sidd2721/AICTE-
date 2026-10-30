@@ -33,10 +33,17 @@ def _check_idle_reset() -> None:
     global _offset_seconds, _last_changed_at
     idle_minutes = settings.DEMO_CLOCK_IDLE_MINUTES
     if idle_minutes > 0 and _offset_seconds != 0:
+        now_dt = _time_source_fn()
         if _last_changed_at is None:
-            _last_changed_at = _time_source_fn()
+            _last_changed_at = now_dt
         else:
-            elapsed = (_time_source_fn() - _last_changed_at).total_seconds()
+            t1 = (
+                _last_changed_at
+                if _last_changed_at.tzinfo is not None
+                else _last_changed_at.replace(tzinfo=UTC)
+            )
+            t2 = now_dt if now_dt.tzinfo is not None else now_dt.replace(tzinfo=UTC)
+            elapsed = (t2 - t1).total_seconds()
             if elapsed >= idle_minutes * 60:
                 _offset_seconds = 0
                 _last_changed_at = None

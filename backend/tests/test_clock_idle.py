@@ -176,3 +176,28 @@ def test_clock_idle_recovers_if_last_changed_is_none() -> None:
         set_clock_offset(0)
         reset_time_source()
         settings.DEMO_CLOCK_IDLE_MINUTES = original_setting
+
+
+def test_clock_idle_handles_naive_and_aware_datetimes() -> None:
+    """Idle countdown safely handles custom time sources returning naive datetimes."""
+    reset_time_source()
+    original_setting = settings.DEMO_CLOCK_IDLE_MINUTES
+    settings.DEMO_CLOCK_IDLE_MINUTES = 10
+
+    # Naive datetime without tzinfo
+    t0_naive = datetime(2026, 10, 30, 12, 0, 0)
+    sim_time = t0_naive
+    set_time_source(lambda: sim_time)
+
+    try:
+        set_clock_offset(3600)
+        assert get_clock_offset() == 3600
+
+        # Advance naive time past 10 minutes
+        sim_time = t0_naive + timedelta(minutes=11)
+        assert get_clock_offset() == 0
+    finally:
+        set_clock_offset(0)
+        reset_time_source()
+        settings.DEMO_CLOCK_IDLE_MINUTES = original_setting
+
