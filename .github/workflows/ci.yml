@@ -89,6 +89,7 @@ jobs:
           psql -h localhost -U postgres -d postgres -c "CREATE DATABASE app_test OWNER migrator;"
           psql -h localhost -U postgres -d postgres -c "GRANT CONNECT ON DATABASE app_test TO app;"
           psql -h localhost -U postgres -d app_test -c "GRANT ALL ON SCHEMA public TO migrator; GRANT ALL ON DATABASE app_test TO migrator; ALTER SCHEMA public OWNER TO migrator;"
+          psql -h localhost -U postgres -d app_test -c "GRANT ALL ON SCHEMA public TO app; GRANT ALL ON DATABASE app_test TO app; GRANT DELETE ON ALL TABLES IN SCHEMA public TO app; ALTER DEFAULT PRIVILEGES FOR ROLE migrator IN SCHEMA public GRANT DELETE ON TABLES TO app;"
           # Verify app role is NOSUPERUSER NOBYPASSRLS
           psql -h localhost -U postgres -d app -c "SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname IN ('migrator', 'app');"
 
@@ -125,6 +126,10 @@ jobs:
         env:
           DATABASE_URL: postgresql+psycopg://app:apppassword@localhost:5432/app
           MIGRATION_DATABASE_URL: postgresql+psycopg://migrator:migratorpassword@localhost:5432/app
+          MIGRATION_PG_URL: host=localhost port=5432 dbname=app_test user=migrator password=migratorpassword
+          APP_PG_URL: host=localhost port=5432 dbname=app_test user=app password=apppassword
+          SUPERUSER_PG_URL: host=localhost port=5432 dbname=app_test user=postgres password=testpassword
+          POSTGRES_PASSWORD: testpassword
           SECRET_KEY: testsecretkeyformodernsecurityinvariants32bytes
           PROJECT_NAME: AICTE Security Deposit Portal
           FIRST_SUPERUSER: admin@example.com

@@ -14,19 +14,22 @@ from sqlmodel import Session
 
 def ensure_rate_limit_table(session: Session) -> None:
     """Ensure the rate_limit_bucket table exists."""
-    session.execute(
-        text(
-            """
-            CREATE TABLE IF NOT EXISTS rate_limit_bucket (
-                key VARCHAR(255) PRIMARY KEY,
-                count INTEGER NOT NULL DEFAULT 1,
-                reset_at TIMESTAMPTZ NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS ix_rate_limit_bucket_reset_at ON rate_limit_bucket (reset_at);
-            """
+    try:
+        session.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS rate_limit_bucket (
+                    key VARCHAR(255) PRIMARY KEY,
+                    count INTEGER NOT NULL DEFAULT 1,
+                    reset_at TIMESTAMPTZ NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS ix_rate_limit_bucket_reset_at ON rate_limit_bucket (reset_at);
+                """
+            )
         )
-    )
-    session.commit()
+        session.commit()
+    except Exception:
+        session.rollback()
 
 
 def check_rate_limit(
