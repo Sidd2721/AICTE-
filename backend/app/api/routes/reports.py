@@ -9,11 +9,45 @@ from sqlmodel import col, select
 from app.api.deps import CurrentUser, SessionDep
 from app.core.audit import audit_append
 from app.domain.csv_safe import csv_safe
+from app.domain.reports_pdf import generate_reports_pdf
 from app.domain.trust import Confirmation as TrustConfirmation
 from app.domain.trust import badge
 from app.models import Confirmation, Document, Institution, Instrument, Obligation
 
 router = APIRouter(prefix="/reports", tags=["reports"])
+
+
+@router.get("/pdf")
+def export_reports_pdf(
+    session: SessionDep,
+    current_user: CurrentUser,
+    report_type: str | None = None,
+) -> Response:
+    """Server-side PDF statement report export with DEMO watermark and prototype disclaimers."""
+    pdf_bytes, filename, total_rows = generate_reports_pdf(
+        session=session,
+        current_user=current_user,
+        report_type=report_type,
+    )
+
+    audit_append(
+        session,
+        actor_id=current_user.id,
+        action="report.exported",
+        entity="report",
+        entity_id=f"pdf-{report_type or 'all'}",
+        payload={
+            "format": "pdf",
+            "report_type": report_type or "all",
+            "row_count": total_rows,
+        },
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 def _hydrate_badge(inst: Instrument, session: SessionDep) -> str:

@@ -117,6 +117,17 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
                         logger.info(
                             "[lifespan] Database already seeded; skipping redundant seed."
                         )
+                    from app.seed_reports_topup import seed_reports_topup
+
+                    n_topup = seed_reports_topup(session)
+                    if n_topup > 0:
+                        logger.info(
+                            "[lifespan] Seeded %d statement reports top-up instruments.",
+                            n_topup,
+                        )
+                    from app.domain.worker import run_daily_obligations_job
+
+                    run_daily_obligations_job(session)
             except Exception as e:
                 logger.warning("[lifespan] Background seed notice: %s", e)
             finally:

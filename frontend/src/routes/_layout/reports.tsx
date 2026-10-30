@@ -5,6 +5,7 @@ import {
   Calendar,
   Download,
   FileSpreadsheet,
+  FileText,
   FileWarning,
   Hourglass,
 } from "lucide-react"
@@ -65,11 +66,13 @@ const REPORT_TABS = [
 
 function formatPaise(p: number | null | undefined): string {
   if (p == null) return "—"
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(p / 100)
+  const sign = p < 0 ? "-" : ""
+  const abs = Math.abs(Math.trunc(p))
+  const rupees = Math.floor(abs / 100)
+  const paise = abs % 100
+  const paiseStr = paise.toString().padStart(2, "0")
+  const rupeesFormatted = rupees.toLocaleString("en-IN")
+  return `${sign}₹${rupeesFormatted}.${paiseStr}`
 }
 
 function ReportsView() {
@@ -81,9 +84,39 @@ function ReportsView() {
       const res = await client.get({
         url: `/api/v1/reports/${activeTab}/preview`,
       })
-      return res.data as { report: string; count: number; items: any[] }
+      return res.data as {
+        report?: string
+        count: number
+        rows?: any[]
+        items?: any[]
+      }
     },
   })
+
+  const downloadPdf = async () => {
+    try {
+      const token = localStorage.getItem("access_token")
+      const response = await fetch(
+        `/api/v1/reports/pdf?report_type=${encodeURIComponent(activeTab)}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      )
+      if (!response.ok) throw new Error("Export failed")
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `statement_report_${activeTab}_${new Date().toISOString().slice(0, 10)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success("Statement PDF report downloaded")
+    } catch {
+      toast.error("Failed to download PDF report")
+    }
+  }
 
   const downloadCsv = async () => {
     try {
@@ -107,7 +140,7 @@ function ReportsView() {
     }
   }
 
-  const items = data?.items || []
+  const items = data?.rows || data?.items || []
   const currentTabMeta =
     REPORT_TABS.find((t) => t.id === activeTab) || REPORT_TABS[0]
 
@@ -123,9 +156,14 @@ function ReportsView() {
             Rule I13).
           </p>
         </div>
-        <Button onClick={downloadCsv} className="gap-2">
-          <Download className="h-4 w-4" /> Export Formula-Safe CSV
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" onClick={downloadPdf} className="gap-2">
+            <FileText className="h-4 w-4" /> Export PDF
+          </Button>
+          <Button onClick={downloadCsv} className="gap-2">
+            <Download className="h-4 w-4" /> Export Formula-Safe CSV
+          </Button>
+        </div>
       </div>
 
       {/* About this screen guide (G3) */}
@@ -202,7 +240,11 @@ function ReportsView() {
                       <TableCell className="text-xs text-muted-foreground">
                         {row.days_to_maturity != null
                           ? `${row.days_to_maturity} days remaining`
-                          : row.reason || row.missing || "—"}
+                          : Array.isArray(row.reasons)
+                            ? row.reasons.join("; ")
+                            : Array.isArray(row.missing)
+                              ? `Missing: ${row.missing.join(", ")}`
+                              : row.reason || row.missing || "—"}
                       </TableCell>
                     </TableRow>
                   ))}

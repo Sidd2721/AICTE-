@@ -21,6 +21,9 @@ else:
     test_db_name = current_name if current_name.endswith("_test") else f"{current_name}_test"
     test_db_url_str = re.sub(r"/([^/?]+)(\?|$)", f"/{test_db_name}\\2", raw_url)
 
+# Prefer IPv4 loopback on Windows to avoid ::1 resolution delay
+test_db_url_str = test_db_url_str.replace("@localhost:", "@127.0.0.1:")
+
 # 2. Guard: Refuse to run test suite against remote database hosts
 _db_hosts = [h.get("host") for h in settings.DATABASE_URL.hosts() if h.get("host")]
 _allowed_local = {"localhost", "127.0.0.1", "::1", "db", "postgres"}

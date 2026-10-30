@@ -571,6 +571,11 @@ def seed_rich_data() -> None:
                     },
                 )
 
+        # 6. Seed Statement Reports Top-Up
+        from app.seed_reports_topup import seed_reports_topup
+
+        seed_reports_topup(session)
+
 
 if __name__ == "__main__":
     seed_rich_data()
