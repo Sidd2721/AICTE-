@@ -28,11 +28,6 @@ def seed_rich_data() -> None:
 
     install_rls_context()
     with Session(engine) as session:
-<<<<<<< HEAD
-=======
-        from app.core.rls_context import set_rls_context
-
->>>>>>> a788529 (fix(reports): enforce bureau rls, run maturity worker after seed, and enrich report previews)
         set_rls_context(session, role="bureau")
         # 1. Fetch Key Users
         officer = session.exec(
