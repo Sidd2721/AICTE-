@@ -214,6 +214,7 @@ def test_update_user_me(
     assert updated_user["email"] == email
     assert updated_user["full_name"] == full_name
 
+    db.commit()
     user_query = select(User).where(User.email == email)
     user_db = db.exec(user_query).first()
     assert user_db
@@ -314,8 +315,6 @@ def test_update_password_me_same_password_error(
     assert (
         updated_user["detail"] == "New password cannot be the same as the current one"
     )
-
-
 
 
 def test_update_user(

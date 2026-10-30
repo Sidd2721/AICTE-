@@ -6,21 +6,32 @@ from app.models import User
 
 
 def test_create_user(client: TestClient, db: Session) -> None:
-    r = client.post(
-        f"{settings.API_V1_STR}/private/users/",
-        json={
-            "email": "pollo@listo.com",
-            "password": "password123",
-            "full_name": "Pollo Listo",
-        },
-    )
+    existing = db.exec(select(User).where(User.email == "pollo@listo.com")).all()
+    for u in existing:
+        db.delete(u)
+    db.commit()
 
-    assert r.status_code == 200
+    try:
+        r = client.post(
+            f"{settings.API_V1_STR}/private/users/",
+            json={
+                "email": "pollo@listo.com",
+                "password": "password123",
+                "full_name": "Pollo Listo",
+            },
+        )
 
-    data = r.json()
+        assert r.status_code == 200
 
-    user = db.exec(select(User).where(User.id == data["id"])).first()
+        data = r.json()
 
-    assert user
-    assert user.email == "pollo@listo.com"
-    assert user.full_name == "Pollo Listo"
+        user = db.exec(select(User).where(User.id == data["id"])).first()
+
+        assert user
+        assert user.email == "pollo@listo.com"
+        assert user.full_name == "Pollo Listo"
+    finally:
+        existing = db.exec(select(User).where(User.email == "pollo@listo.com")).all()
+        for u in existing:
+            db.delete(u)
+        db.commit()
