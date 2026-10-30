@@ -135,5 +135,6 @@ jobs:
           FIRST_SUPERUSER: admin@example.com
           FIRST_SUPERUSER_PASSWORD: changethis
           FASTAPI_ENV: development
+          EMAILS_FROM_EMAIL: info@example.com
         run: |
           bash scripts/verify.sh
