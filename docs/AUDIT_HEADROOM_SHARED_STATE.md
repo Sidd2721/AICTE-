@@ -77,7 +77,7 @@ Current enforcement points:
   - When `DEMO_CLOCK_IDLE_MINUTES > 0` and the clock has a non-zero offset, any read (`now()`, `get_clock_offset()`, `today()`) checks the time elapsed since the last manual shift.
   - If no user has adjusted the clock for ≥ `DEMO_CLOCK_IDLE_MINUTES`, `_offset_seconds` automatically resets to 0.
   - Zero-offset states never trigger expiry overhead.
-- **Verification:** 100% verified by comprehensive unit tests in `backend/tests/test_clock_idle.py`.
+- **Verification:** Verified by unit tests in `backend/tests/test_clock_idle.py`.
 
 ---
 
@@ -110,7 +110,7 @@ Current enforcement points:
 #### Mitigation Implemented (S3: Vault Resilience)
 1. **Clean Error Handling:** Updated `backend/app/api/routes/documents.py:download_document` to catch `FileNotFoundError`, `ValueError`, and decryption `InvalidTag` exceptions and return a clean HTTP 404 (`Vault file not found on disk` or `Vault file unreadable or corrupt`) with structured warnings in server logs.
 2. **Cloud Storage Fallback:** If `SUPABASE_STORAGE_BUCKET` is configured, `read_from_vault()` automatically falls back to fetching the encrypted document from Supabase Cloud Storage and caches it locally.
-3. **Verification:** 100% verified by test suite in `backend/tests/test_vault_resilience.py`.
+3. **Verification:** Verified by test suite in `backend/tests/test_vault_resilience.py`.
 
 ---
 
