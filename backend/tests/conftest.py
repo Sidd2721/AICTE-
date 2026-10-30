@@ -1,4 +1,3 @@
-import os
 import re
 import sys
 from collections.abc import Generator
@@ -18,8 +17,13 @@ else:
     raw_url = str(settings.DATABASE_URL)
     m = re.search(r"/([^/?]+)(\?|$)", raw_url)
     current_name = m.group(1) if m else "app"
-    test_db_name = current_name if current_name.endswith("_test") else f"{current_name}_test"
+    test_db_name = (
+        current_name if current_name.endswith("_test") else f"{current_name}_test"
+    )
     test_db_url_str = re.sub(r"/([^/?]+)(\?|$)", f"/{test_db_name}\\2", raw_url)
+
+# Prefer IPv4 loopback on Windows to avoid ::1 resolution delay
+test_db_url_str = test_db_url_str.replace("@localhost:", "@127.0.0.1:")
 
 # 2. Guard: Refuse to run test suite against remote database hosts
 _db_hosts = [h.get("host") for h in settings.DATABASE_URL.hosts() if h.get("host")]
@@ -42,11 +46,15 @@ if not _test_db_name.endswith("_test"):
     sys.exit(3)
 
 # 4. Ensure test database exists on the database server
-_maint_url = re.sub(r"/([^/?]+)(\?|$)", r"/postgres\2", test_db_url_str).replace("postgresql+psycopg://", "postgresql://")
+_maint_url = re.sub(r"/([^/?]+)(\?|$)", r"/postgres\2", test_db_url_str).replace(
+    "postgresql+psycopg://", "postgresql://"
+)
 try:
     with psycopg.connect(_maint_url, autocommit=True) as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (_test_db_name,))
+            cur.execute(
+                "SELECT 1 FROM pg_database WHERE datname = %s", (_test_db_name,)
+            )
             if not cur.fetchone():
                 cur.execute(f'CREATE DATABASE "{_test_db_name}"')
 except Exception:
@@ -54,6 +62,7 @@ except Exception:
 
 # 5. Point application engine to the isolated test database
 import app.core.db as app_db
+
 app_db.engine = create_engine(test_db_url_str, pool_pre_ping=True)
 engine = app_db.engine
 
@@ -73,7 +82,14 @@ def db() -> Generator[Session]:
         set_rls_context(session, role="bureau")
         # Pre-cleanup of known test users that may survive between test runs
         try:
-            session.execute(text("DELETE FROM \"user\" WHERE email NOT IN (SELECT \"user\".email FROM \"user\" JOIN lateral(select 1) ON true WHERE is_superuser = true) OR email = 'pollo@listo.com'"))
+            session.execute(
+                text(
+                    "DELETE FROM \"user\" WHERE email IN ('a@x', 'b@x', 'r@x') OR email NOT IN (SELECT \"user\".email FROM \"user\" JOIN lateral(select 1) ON true WHERE is_superuser = true) OR email = 'pollo@listo.com'"
+                )
+            )
+            session.execute(
+                text("DELETE FROM rate_limit_bucket; SELECT pg_advisory_unlock_all();")
+            )
             session.commit()
         except Exception:
             session.rollback()
@@ -81,7 +97,11 @@ def db() -> Generator[Session]:
         yield session
         # Teardown: clean up test database rows without touching or re-seeding live DB
         try:
-            session.execute(text("DELETE FROM flag_waiver; DELETE FROM notice; DELETE FROM obligation; DELETE FROM case_note; DELETE FROM confirmation; DELETE FROM document; DELETE FROM release_request; DELETE FROM instrument;"))
+            session.execute(
+                text(
+                    "DELETE FROM flag_waiver; DELETE FROM notice; DELETE FROM obligation; DELETE FROM case_note; DELETE FROM confirmation; DELETE FROM document; DELETE FROM release_request; DELETE FROM instrument; DELETE FROM rate_limit_bucket; SELECT pg_advisory_unlock_all();"
+                )
+            )
         except Exception:
             session.rollback()
         statement = delete(User)
@@ -95,8 +115,59 @@ def client() -> Generator[TestClient]:
         yield c
 
 
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    with Session(engine) as session:
+        try:
+            session.execute(
+                text("DELETE FROM rate_limit_bucket; SELECT pg_advisory_unlock_all();")
+            )
+            session.commit()
+        except Exception:
+            session.rollback()
+    yield
+    with Session(engine) as session:
+        try:
+            session.execute(
+                text("DELETE FROM rate_limit_bucket; SELECT pg_advisory_unlock_all();")
+            )
+            session.commit()
+        except Exception:
+            session.rollback()
+
+
 @pytest.fixture(scope="module")
 def superuser_token_headers(client: TestClient) -> dict[str, str]:
+    from sqlmodel import select
+
+    from app.core.rls_context import set_rls_context
+    from app.core.security import get_password_hash, verify_password
+
+    with Session(engine) as session:
+        set_rls_context(session, role="bureau")
+        user = session.exec(
+            select(User).where(User.email == settings.FIRST_SUPERUSER)
+        ).first()
+        if not user:
+            init_db(session)
+        else:
+            v, _ = verify_password(
+                settings.FIRST_SUPERUSER_PASSWORD, user.hashed_password
+            )
+            if (
+                not v
+                or user.role != "bureau"
+                or not user.is_superuser
+                or not user.is_active
+            ):
+                user.hashed_password = get_password_hash(
+                    settings.FIRST_SUPERUSER_PASSWORD
+                )
+                user.role = "bureau"
+                user.is_superuser = True
+                user.is_active = True
+                session.add(user)
+                session.commit()
     return get_superuser_token_headers(client)
 
 

@@ -3,7 +3,7 @@ from sqlmodel import Session, create_engine, select
 from app import crud
 from app.core.config import settings
 from app.core.rls_context import install_rls_context, set_rls_context
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, verify_password
 from app.models import User, UserCreate
 
 engine = create_engine(
@@ -44,10 +44,20 @@ def init_db(session: Session) -> None:
             role="bureau",
         )
         user = crud.create_user(session=session, user_create=user_in)
-    elif user.role != "bureau":
-        user.role = "bureau"
-        session.add(user)
-        session.commit()
+    else:
+        v, _ = verify_password(settings.FIRST_SUPERUSER_PASSWORD, user.hashed_password)
+        if (
+            not v
+            or user.role != "bureau"
+            or not user.is_superuser
+            or not user.is_active
+        ):
+            user.hashed_password = get_password_hash(settings.FIRST_SUPERUSER_PASSWORD)
+            user.role = "bureau"
+            user.is_superuser = True
+            user.is_active = True
+            session.add(user)
+            session.commit()
 
     # In production mode, never seed demo/test accounts
     if settings.FASTAPI_ENV == "production":

@@ -971,6 +971,46 @@ export type WebhookCreateRequest = {
     secret?: string | null;
 };
 
+export type apiHealthCheckData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/health';
+};
+
+export type apiHealthCheckResponses = {
+    /**
+     * Response Api-Health Check
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type apiHealthCheckResponse = apiHealthCheckResponses[keyof apiHealthCheckResponses];
+
+export type apiHealthCheck2Data = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/health';
+};
+
+export type apiHealthCheck2Responses = {
+    /**
+     * Response Api-Health Check
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type apiHealthCheck2Response = apiHealthCheck2Responses[keyof apiHealthCheck2Responses];
+
 export type clockGetClockV1Data = {
     body?: never;
     path?: never;
@@ -3058,6 +3098,34 @@ export type dashboardGetImpactMetricsResponses = {
 };
 
 export type dashboardGetImpactMetricsResponse = dashboardGetImpactMetricsResponses[keyof dashboardGetImpactMetricsResponses];
+
+export type reportsExportReportsPdfData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Report Type
+         */
+        report_type?: string | null;
+    };
+    url: '/api/v1/reports/pdf';
+};
+
+export type reportsExportReportsPdfErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsExportReportsPdfError = reportsExportReportsPdfErrors[keyof reportsExportReportsPdfErrors];
+
+export type reportsExportReportsPdfResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type reportsReportPendingVerificationsData = {
     body?: never;
