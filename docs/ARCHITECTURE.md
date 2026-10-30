@@ -13,7 +13,7 @@ System design document detailing architectural layers, trust boundaries, cryptog
 
 ## 1. Target Architecture Topology
 
-The following is the high-assurance deployment topology. The prototype uses local FastAPI, PostgreSQL 16, and labelled bank integration simulators:
+The following is the defense-in-depth deployment topology. The prototype uses local FastAPI, PostgreSQL 16, and labelled bank integration simulators:
 
 ```mermaid
 flowchart TD

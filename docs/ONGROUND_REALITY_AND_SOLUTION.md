@@ -7,16 +7,16 @@
 
 ---
 
-## 1. Statutory Context & Regulatory Background
+## 1. regulatory Context & Regulatory Background
 
-Under the **All India Council for Technical Education Act, 1987 (Act 52 of 1987)** and the statutory **AICTE (Grant of Approvals for Technical Institutions) Regulations**, the Council is legally mandated to ensure that every technical education institution in India maintains financial viability, operational continuity, and student safeguards.
+Under the **All India Council for Technical Education Act, 1987 (Act 52 of 1987)** and the regulatory **AICTE (Grant of Approvals for Technical Institutions) Regulations**, the Council is legally mandated to ensure that every technical education institution in India maintains financial viability, operational continuity, and student safeguards.
 
 ### The Security Deposit Mandate
 Whenever a Trust, Society, or Section 8 Company applies to establish a new technical institution, add new programmes, or expand sanctioned student intake, AICTE mandates the creation of a **Fixed Deposit Receipt (FDR) / Security Deposit** pledged in **Joint Lien**:
 - **Joint Custody**: Fixed Deposit Receipt issued jointly in the name of the **"Regional Officer, AICTE"** and the **"Chairman/President of the Trust/Society/Institute"**.
-- **Mandatory Tenure**: Locked for a continuous duration of **8 to 10 years** (or until closure/release by statutory order).
+- **Mandatory Tenure**: Locked for a continuous duration of **10-year term** (or until closure/release by regulatory order).
 - **APH Table 1.4 Scale**: Slabs range from **₹ 15 Lakhs to ₹ 1.00+ Crore** per division/programme (Engineering, Management, Architecture, Applied Arts, Hotel Management, MCA, Polytechnic, and other programmes), with specific regulatory concessions for Women's institutions, Persons with Disabilities (PwD), and North-Eastern / Himalayan states.
-- **National Volume**: Over **10,000+ technical institutions** across 8 AICTE Regional Offices (Northern, Western, Southern, Eastern, South-Western, Central, North-Western, and Camp Offices) holding an estimated **₹ 5,000+ Crores** in statutory safety-net deposits.
+- **National Volume**: Over **10,000+ technical institutions** across 8 AICTE Regional Offices (Northern, Western, Southern, Eastern, South-Western, Central, North-Western, and Camp Offices) holding an estimated **regulatory security deposit portfolios** in regulatory safety-net deposits.
 
 ---
 
@@ -27,7 +27,7 @@ Extensive field analysis of AICTE regional offices and institutional interaction
 ```mermaid
 flowchart TD
     subgraph Reality ["ON-GROUND REALITY: 8 FIELD VULNERABILITIES"]
-        P1["1. Physical Cupboard Decay & Lost Paper Files (8-10 Years)"]
+        P1["1. Physical Cupboard Decay & Lost Paper Files (10-year term)"]
         P2["2. Photoshop Bank Letterhead & Fake Stamp Forgery"]
         P3["3. Fraudulent Premature Liquidation & Collateral Overdrafts"]
         P4["4. Discrepancy Deadlocks & Manual Scrutiny Gridlocks"]
@@ -63,7 +63,7 @@ flowchart TD
 ### Detailed Analysis of Field Pain Points
 
 #### Pain Point 1: Physical Paper Rot & Lost Files in Regional Record Rooms
-- **The On-Ground Truth**: Security deposits are locked for 8 to 10 years. In regional offices (Bhopal, Chandigarh, Chennai, Kanpur, Kolkata, Mumbai, Vadodara), thousands of original physical Fixed Deposit Receipts and bank confirmation letters are stored in physical godowns and tin trunks.
+- **The On-Ground Truth**: Security deposits are locked for 10-year term. In regional offices (Bhopal, Chandigarh, Chennai, Kanpur, Kolkata, Mumbai, Vadodara), thousands of original physical Fixed Deposit Receipts and bank confirmation letters are stored in physical godowns and tin trunks.
 - **The Failure Mode**: Over a decade, paper rots, ink fades, or folders are misplaced during office relocations. When an institution applies for release after 10 years of unblemished service, neither AICTE nor the bank branch can locate the physical original FDR. Scheduled commercial banks refuse to liquidate or transfer funds without the original physical certificate, leaving institutes in endless administrative limbo.
 
 #### Pain Point 2: Photoshop Forgery & Bogus Bank Confirmation Letters
@@ -78,13 +78,13 @@ flowchart TD
 - **The On-Ground Truth**: Discrepancies between approved intake, required amounts, and submitted certificates are common:
   - Deposited amount falls short by a few thousand rupees due to bank charges.
   - Deposit tenure is marked for 3 or 5 years instead of mandatory 8 or 10 years.
-  - Joint name omits the exact statutory phrase *"Regional Officer, AICTE"*.
+  - Joint name omits the exact regulatory phrase *"Regional Officer, AICTE"*.
   - Typo in institution name versus the legal society registration name.
 - **The Failure Mode**: Discrepancies cause files to be shuttled back and forth via speed post for months, with no centralized tracking or auditable justification mechanism.
 
 #### Pain Point 5: The "10-Year Cupboard Blindspot" & Missing Maturities
-- **The On-Ground Truth**: AICTE oversees ₹ 5,000+ Crores across 10,000+ colleges, but historically possessed **no automated calendar alerting officers when an FDR matures**.
-- **The Failure Mode**: FDRs mature silently. Some banks auto-rollover deposits into negligible savings interest accounts; others allow accrued interest to be diverted into trust operational accounts without AICTE's knowledge. Millions in statutory returns are lost to inflation or misdirection.
+- **The On-Ground Truth**: AICTE oversees regulatory security deposit portfolios across 10,000+ colleges, but historically possessed **no automated calendar alerting officers when an FDR matures**.
+- **The Failure Mode**: FDRs mature silently. Some banks auto-rollover deposits into negligible savings interest accounts; others allow accrued interest to be diverted into trust operational accounts without AICTE's knowledge. Millions in regulatory returns are lost to inflation or misdirection.
 
 #### Pain Point 6: Bureaucratic Extortion & 18-36 Month Release Delays
 - **The On-Ground Truth**: When an honest college operates successfully for 10 years without student complaints, it is legally entitled to the release and refund of its security deposit.
@@ -100,11 +100,11 @@ flowchart TD
 
 ---
 
-## 3. How Our High-Assurance Architecture Solves Every Challenge
+## 3. How Our defense-in-depth Architecture Solves Every Challenge
 
 Our portal systematically replaces human vulnerability, paper decay, and administrative delays with **mathematical, cryptographic, and architectural guarantees**:
 
-| # | Real-World Problem | Root Cause in Paper System | Our High-Assurance Architectural Solution | Technical Implementation & Code Reference |
+| # | Real-World Problem | Root Cause in Paper System | Our defense-in-depth Architectural Solution | Technical Implementation & Code Reference |
 | :- | :--- | :--- | :--- | :--- |
 | **1** | **Physical Document Decay & Loss** | Original paper receipts stored in regional cupboards for 10 years. | **Encrypted Object Vault**: AES-256-GCM envelope encryption with `%PDF-1.4` magic byte sniffing and SHA-256 scan digests. Documents are permanently preserved and instantly accessible. | [`backend/app/domain/vault.py`](backend/app/domain/vault.py) |
 | **2** | **Photoshop Bank Letterhead Forgery** | Scrutiny officers inspect visual printouts without bank verification. | **6-Point Cryptographic Bank Gate**: Direct validation of bank digital signatures chaining to Controller of Certifying Authorities (CCA) accredited Root CAs, enforcing Section 3A of IT Act 2000. | [`backend/app/domain/bank_gate.py`](backend/app/domain/bank_gate.py) |
@@ -174,7 +174,7 @@ AICTE & MINISTRY OF EDUCATION     TECHNICAL INSTITUTIONS          SCHEDULED COMM
 ```
 
 ### 1. For AICTE & Ministry of Education
-- **Zero Cupboard Blindspots**: Complete real-time portfolio visibility across all 8 regions and 10,000+ institutions.
+- **Zero Cupboard Blindspots**: Complete real-time portfolio visibility across all 8 regions and institutions nationwide.
 - **Total Fraud Immunity**: Eliminates forged bank letterheads, fake bank stamps, and premature encashment.
 - **Audit Defensibility**: When the Comptroller and Auditor General (CAG) or Parliamentary Committees inspect AICTE records, the immutable SHA-256 ledger proves the complete chronological history of every single rupee.
 
@@ -209,4 +209,4 @@ AICTE & MINISTRY OF EDUCATION     TECHNICAL INSTITUTIONS          SCHEDULED COMM
 
 ## 7. Conclusion
 
-> *"The AICTE FDR & Security Deposit Regulatory Portal is not an incremental cosmetic facelift—it is a fundamental paradigm shift from passive, paper-based vulnerability to active, cryptographic certainty. By addressing the true on-ground realities of Indian technical education governance, this system protects ₹ 5,000+ Crores of national student safety nets with unbreakable mathematical integrity."*
+> *"The AICTE FDR & Security Deposit Regulatory Portal is not an incremental cosmetic facelift—it is a fundamental paradigm shift from passive, paper-based vulnerability to active, cryptographic certainty. By addressing the true on-ground realities of Indian technical education governance, this system protects regulatory security deposit portfolios of national student safety nets with unbreakable mathematical integrity."*

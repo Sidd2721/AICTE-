@@ -152,10 +152,10 @@ The demo server runs at **http://localhost:8000**.
 
 | Persona Role | Email | Region | Permission Scope | Password |
 | :--- | :--- | :--- | :--- | :--- |
-| **Institution** | `inst.north1@example.com` | NR | Submits FDR, requests release | `changethis` |
-| **Regional Officer** | `officer.north@example.com` | NR | Requests bank confirmation, verifies release | `changethis` |
-| **Regional Checker** | `checker.north@example.com` | NR | Regional inspection & notes | `changethis` |
-| **Bureau Head** | `bureau@example.com` | ALL | Approves release (checker), all reports | `changethis` |
-| **Auditor** | `auditor@example.com` | ALL | Read-only audit log & instruments | `changethis` |
+| **Institution** | `inst.north1@example.com` | NR | Submits FDR, requests release | `AdminSecure2026!` |
+| **Regional Officer** | `officer.north@example.com` | NR | Requests bank confirmation, verifies release | `AdminSecure2026!` |
+| **Regional Checker** | `checker.north@example.com` | NR | Regional inspection & notes | `AdminSecure2026!` |
+| **Bureau Head** | `bureau@example.com` | ALL | Approves release (checker), all reports | `AdminSecure2026!` |
+| **Auditor** | `auditor@example.com` | ALL | Read-only audit log & instruments | `AdminSecure2026!` |
 
 *(All demo personas are accessible via 1-click login buttons on `/login` and `/guide`)*

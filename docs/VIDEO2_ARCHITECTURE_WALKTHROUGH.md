@@ -51,7 +51,7 @@
 - **Visuals:** PostgreSQL entity web: `institutions`, `fdr_records`, `verification_events`, and `audit_event`. Live demonstration of integer paise representation (`₹35,00,000.00` = `350,000,000 PAISE`). Row-Level Security (RLS) role switcher showing data isolation:
   - College Role: restricted to own institution ID
   - Regional Officer: filtered by regional jurisdiction
-  - Statutory Rule: Database-level `CHECK (checker_id != maker_id)` constraint
+  - regulatory Rule: Database-level `CHECK (checker_id != maker_id)` constraint
   - Append-only audit trail with SHA-256 cryptographic hash chain
 - **Narrator Audio:** *"Next, let's look at the database architecture built on PostgreSQL. Institutions connect to FDR records, and FDR records connect to verification logs and approval workflows. We enforce strict Row-Level Security: colleges only access their own records, regional officers see their jurisdiction, and head office views consolidated national reports. All financial amounts are stored as integer paise to prevent floating-point rounding errors. Role segregation is enforced at the database level: the user who prepares a submission can never approve or release it. Every action is recorded in a cryptographically linked append-only audit trail with SHA-256 hashes for total tamper detection."*
 
@@ -61,7 +61,7 @@
   2. Backend: FastAPI, Python 3.14, SQLAlchemy 2.0, Alembic, Pydantic v2, uv
   3. Persistence: PostgreSQL 17, RLS, Redis 7 In-Memory, Celery queues, NOSUPERUSER role
   4. Security: SHA-256 cryptographic ledger, AES-256 at rest, JWT RS256, DSC signature gate, TLS 1.3
-  External integrations status cards: CBS Banking Gateway (Simulated), AICTE Institution Master, DigiLocker / NAD, and Statutory Notification Engine.
+  External integrations status cards: CBS Banking Gateway (Simulated), AICTE Institution Master, DigiLocker / NAD, and regulatory Notification Engine.
 - **Narrator Audio:** *"Now let's examine our technology choices and external connections. The frontend is built with React, Vite, and Tailwind CSS. The backend uses FastAPI, Python, SQLAlchemy, and Alembic. PostgreSQL handles data storage while Redis and Celery manage background tasks such as bank verification polling and reminders. For external systems, we integrate with Core Banking Solutions, the AICTE Institution Master Database, and notification services for email and SMS. Security layers protect every connection: JWT tokens, role-based access control, TLS encryption in transit, AES-256 at rest, and digital signature verification."*
 
 ### Scene 5 — End-to-End Deposit Lifecycle (02:35 – 03:40 | 65s)
@@ -71,7 +71,7 @@
   3. Bank Verification Request
   4. Tripartite Agreement & Lien Marking
   5. Active Monitoring & Accrual Engine
-  6. Statutory Maturity Alerts (T-90, T-60, T-30 countdown badges)
+  6. regulatory Maturity Alerts (T-90, T-60, T-30 countdown badges)
   7. Release Application & Compliance Certificates
   8. Multi-Tier Maker-Checker DSC Discharge
 - **Narrator Audio:** *"Let's follow a deposit through its entire lifecycle across eight automated stages. Stage 1: The college submits deposit details. Stage 2: The system validates bank IFSC, amount against AICTE regulation tables, and required formats. Stage 3: An automated verification request is sent to the bank. Stage 4: The bank confirms lien marked in favor of AICTE, sealing the tripartite agreement. Stage 5: The FDR enters active monitoring with interest tracking. Stage 6: Automated maturity alerts trigger at T-90, T-60, and T-30 days. Stage 7: The college applies for release and uploads necessary compliance certificates. Stage 8: Regional officers review, Finance Bureau validates, and an automated release order is issued with digital signature verification. Every state transition is locked, audited, and mathematically verified without manual paper chasing."*

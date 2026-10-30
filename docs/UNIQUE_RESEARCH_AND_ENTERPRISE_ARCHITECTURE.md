@@ -27,23 +27,23 @@ Through deep domain research across all regulatory specifications (Approval Proc
 
 ## 2. Deep Domain Research & Regulatory Modeling
 
-Our solution is grounded in extensive research of the official **AICTE Approval Process Handbook (APH)**, statutory affidavits, legal frameworks, and Indian inter-bank messaging standards:
+Our solution is grounded in extensive research of the official **AICTE Approval Process Handbook (APH)**, regulatory affidavits, legal frameworks, and Indian inter-bank messaging standards:
 
 ### 1. Dynamic Table 1.4 Regulatory Calculations
-Under APH regulations, security deposit obligations depend dynamically on multiple statutory parameters:
+Under APH regulations, security deposit obligations depend dynamically on multiple regulatory parameters:
 - **Programme Categories & Levels:**
   * Engineering & Technology: Under Graduate (UG) ₹ 35 Lakh, Post Graduate (PG) ₹ 15 Lakh, Diploma ₹ 15 Lakh.
   * Applied Arts & Crafts, Planning, Design, Hotel Management: ₹ 15 Lakh across all levels.
   * Computer Applications (MCA): UG ₹ 5 Lakh, PG ₹ 15 Lakh (no diploma level).
   * Management (MBA/PGDM): UG ₹ 5 Lakh, PG ₹ 15 Lakh (no diploma level).
 - **Land & Infrastructure Ownership Multiplier:**
-  * Private institutions operating on leased land/buildings must provide **double (2x)** the statutory deposit.
+  * Private institutions operating on leased land/buildings must provide **double (2x)** the regulatory deposit.
 - **Accredited Government Institution Exemption:**
   * Central/State Government institutions and regulatory university departments are **fully exempt**, with explicit exemption rationale tracked in the audit trail.
 - **Dynamic Formula:**
   $$\text{Required Deposit} = \sum (\text{Base Rate for Programme Level}) \times (\text{Lease Multiplier}) \times (\text{Exemption Factor})$$
 
-### 2. Statutory Affidavits & Release Pathways
+### 2. regulatory Affidavits & Release Pathways
 The portal models the complete formal lifecycle across all 4 recognized AICTE release pathways:
 1. **Term Completion (10-Year Lock-In Matured):** Requires formal release request letter, copy of original FDR, and bank deposit ledger statement.
 2. **Institution Closure:** Mandatory Affidavit 4, NOC from State Government, affiliating university/board certificate confirming zero enrolled students remain.
@@ -52,11 +52,11 @@ The portal models the complete formal lifecycle across all 4 recognized AICTE re
 
 ### 3. Legal Evidentiary Weight under Indian Law
 - **Information Technology Act, 2000 (Section 3A & Section 65B):** Electronic records verified via asymmetric public-key cryptography and digital signature certificates (DSC) carry formal legal admissibility in Indian judicial proceedings.
-- **NeSL Electronic Lien Registration:** Electronic lien recording on fixed deposit instruments provides legally enforceable joint charges in favor of statutory regulators under the Insolvency and Bankruptcy Code (IBC).
+- **NeSL Electronic Lien Registration:** Electronic lien recording on fixed deposit instruments provides legally enforceable joint charges in favor of regulatory regulators under the Insolvency and Bankruptcy Code (IBC).
 
 ---
 
-## 3. High-Assurance Architecture: The 15 Non-Negotiable Safety Invariants
+## 3. defense-in-depth Architecture: The 15 Non-Negotiable Safety Invariants
 
 The platform enforces 15 defense-in-depth invariants verified by automated mutation testing:
 
@@ -96,7 +96,7 @@ High security does not require complicated user interfaces. The portal is design
 
 1. **4-Step Intuitive Institution Flow:**
    - Step 1: Sign in and view automated Table 1.4 Coverage Card.
-   - Step 2: Open deposit intake wizard with pre-calculated statutory requirements.
+   - Step 2: Open deposit intake wizard with pre-calculated regulatory requirements.
    - Step 3: Drag-and-drop FDR scan with instant magic-byte validation and hash calculation.
    - Step 4: Submit claim and track real-time bank confirmation progress.
 2. **2-Click Priority Action Queue for Officers:**
@@ -234,8 +234,8 @@ Based on structured benchmarks documented in [docs/TIMING.md](docs/TIMING.md):
 
 ### Real-World Strategic Impact
 1. **Elimination of Financial Fraud:** Eliminates fraudulent encashments by requiring independent cryptographic bank verification and electronic lien registration before any deposit is recognized.
-2. **Protection of Statutory Safety Nets:** Ensures that every technical institution maintains the exact statutory financial deposit required to protect student and faculty interests in the event of institutional closure.
-3. **Elimination of Insider Collusion:** Enforcing dual-custody maker-checker segregation at the database kernel level ensures that no single officer can authorize the release of institutional funds.
+2. **Protection of regulatory Safety Nets:** Ensures that every technical institution maintains the exact regulatory financial deposit required to protect student and faculty interests in the event of institutional closure.
+3. **Elimination of Insider Collusion:** Enforcing dual-custody maker-checker segregation at the database database-enforced ensures that no single officer can authorize the release of institutional funds.
 4. **Complete Accountability:** The tamper-evident SHA-256 append-only ledger provides an irrefutable legal audit trail admissible under Section 65B of the Indian Evidence Act.
 
 ---

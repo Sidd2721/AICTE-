@@ -97,14 +97,14 @@ export const SYSTEM_MESSAGES: Record<
   OBLIGATION_ACTIVE: {
     label: "Active Obligation Lock",
     sentence:
-      "The institution has active statutory security deposit obligations that require this FDR coverage.",
+      "The institution has active regulatory security deposit obligations that require this FDR coverage.",
     action:
       "Ensure adequate replacement FDR coverage is submitted before requesting final release.",
   },
   TENURE_NOT_MET: {
     label: "Lock-in Period Active",
     sentence:
-      "The statutory lock-in duration has not concluded under applicable Approval Process Handbook rules.",
+      "The regulatory lock-in duration has not concluded under applicable Approval Process Handbook rules.",
     action:
       "Review the original deposit terms or obtain Council special dispensation.",
   },

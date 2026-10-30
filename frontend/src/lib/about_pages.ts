@@ -18,14 +18,14 @@ export const ABOUT_PAGES: Record<string, AboutPageContent> = {
     whatToDoHere:
       "Review the Coverage Card for deposit shortfalls, inspect the prioritized Needs Action queue, or use the Time Machine to simulate future dates.",
     whatToNotice:
-      "The Coverage Card computes statutory requirements dynamically from dated rule JSON; counters re-order automatically as deadlines approach.",
+      "The Coverage Card computes regulatory requirements dynamically from dated rule JSON; counters re-order automatically as deadlines approach.",
   },
   calculator: {
     title: "Table 1.4 Deposit Calculator (DEMO values)",
     whatThisIs:
       "A transparent calculation engine deriving mandatory security deposits from AICTE Approval Process Handbook (APH) guidelines.",
     whatToDoHere:
-      "Select proposed academic programmes and property ownership types to compute statutory deposit requirements before submission.",
+      "Select proposed academic programmes and property ownership types to compute regulatory deposit requirements before submission.",
     whatToNotice:
       "All calculations are performed server-side using integer paise without hardcoded numeric constants; government institutions receive verified exemptions.",
   },

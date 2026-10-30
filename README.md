@@ -6,7 +6,7 @@
 [![React 19](https://img.shields.io/badge/frontend-React%2019-61dafb.svg)](https://react.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-High-assurance regulatory portal prototype engineered for **AICTE Problem Statement PS 26265** (*Monitoring and Verification of Fixed Deposit Receipts / Security Deposits*).
+defense-in-depth regulatory portal prototype engineered for **AICTE Problem Statement PS 26265** (*Monitoring and Verification of Fixed Deposit Receipts / Security Deposits*).
 
 Automates institutional security deposit obligations, independent cryptographic bank confirmations, 10-year maturity and renewal monitoring, and strict dual-custody release authorization.
 
@@ -34,7 +34,7 @@ Automates institutional security deposit obligations, independent cryptographic 
 
 ## 1. Executive Summary & Regulatory Mandate
 
-Technical institutions seeking AICTE approval to establish campuses or add technical programmes must submit a mandatory security deposit as a Fixed Deposit Receipt (FDR) pledged jointly to AICTE for a statutory 10-year duration.
+Technical institutions seeking AICTE approval to establish campuses or add technical programmes must submit a mandatory security deposit as a Fixed Deposit Receipt (FDR) pledged jointly to AICTE for a regulatory 10-year duration.
 
 ### The Regulatory Challenge
 Under the legacy physical procedure:
@@ -44,7 +44,7 @@ Under the legacy physical procedure:
 4. **Opaque Rule Computation:** Approval Process Handbook (APH) Table 1.4 formulas vary across programme levels, minority statuses, and land ownership types.
 
 ### The Solution: AICTE FDR Portal
-A high-assurance system engineered under the foundational principle:
+A defense-in-depth system engineered under the foundational principle:
 > **"Every fact is claimed or independently confirmed, with method, date, and expiry; the system proves it cryptographically; maker is never checker; and no regulatory numbers are hardcoded."**
 
 ---
@@ -259,11 +259,11 @@ Incoming digital bank confirmation letters pass through 6 checks:
 ### 4. Pure Discrepancy Engine (D1–D7) (`app/domain/discrepancy.py`)
 Pure functional evaluation checking bank assertions against institutional claims:
 - **D1 (Amount Shortfall):** Bank confirmed amount is less than claimed deposit. (Severity: BLOCK).
-- **D2 (Maturity Discrepancy):** Bank maturity date is shorter than statutory term. (Severity: BLOCK).
+- **D2 (Maturity Discrepancy):** Bank maturity date is shorter than regulatory term. (Severity: BLOCK).
 - **D3 (Cross-Institution Duplicate):** Same bank code and FDR reference registered to another entity. (Severity: BLOCK).
 - **D4 (Bank IFSC Mismatch):** Bank code fails RBI IFSC prefix pattern. (Severity: BLOCK).
 - **D5 (Lien Discrepancy):** FDR is not marked with an exclusive joint lien to AICTE. (Severity: BLOCK).
-- **D6 (Missing Statutory Documents):** Required Affidavits (Affidavit 3, 4, 6, 9) missing. (Severity: BLOCK).
+- **D6 (Missing regulatory Documents):** Required Affidavits (Affidavit 3, 4, 6, 9) missing. (Severity: BLOCK).
 - **D7 (Renewal Coverage Gap):** Replacement FDR issue date is later than predecessor maturity date. (Severity: WARN).
 - **Mandatory Scrutiny Justification:** Manual discrepancy waivers require an officer justification note ($\ge 10$ characters) immutably recorded in the audit trail.
 
@@ -398,7 +398,7 @@ Why this matters: Dual-custody stops rogue insider releases. Proof is verifiable
 ========================================================================================
 [SLIDE 1] TITLE & REGULATORY MANDATE
 Title: AICTE Security Deposit & Fixed Deposit Receipt (FDR) Portal
-Subtitle: High-Assurance Automated Verification, Maturity Tracking & Dual-Custody Release
+Subtitle: defense-in-depth Automated Verification, Maturity Tracking & Dual-Custody Release
 Mandate: AICTE Problem Statement PS 26265
 Visual Suggestion: AICTE Emblem + Modern Regulatory Shield Diagram
 Talking Points:
@@ -430,7 +430,7 @@ Bullet Points:
 Visual Suggestion: Multi-layer Architecture Stack (Browser -> Gateway -> API -> Kernel).
 Talking Points:
 "Notice our database role separation: the app runs as a restricted role without superuser 
-or RLS bypass privileges. Tenant isolation is enforced at the database kernel level."
+or RLS bypass privileges. Tenant isolation is enforced at the database database-enforced."
 ----------------------------------------------------------------------------------------
 [SLIDE 4] DATED APPROVAL PROCESS HANDBOOK RULES ENGINE
 Title: Table 1.4 Calculation: Zero Hardcoded Constants
@@ -659,7 +659,7 @@ bash scripts/verify.sh
 **Defense:** *"The portal features an automated daily background worker protected by PostgreSQL advisory lock `847291`. It scans upcoming obligations and executes an automated escalation ladder: dispatching reminders at T-90, T-60, and T-30 days to maturity. At T-0, it transitions the instrument state to `matured`. If unrenewed, it flags an overdue alert to the Regional Officer and Bureau Approver, simultaneously notifying the central AICTE approval portal to place a hold on the institution's annual Extension of Approval (EoA)."*
 
 #### Q6: "Why use integer paise instead of standard floating-point numbers or decimals?"
-**Defense:** *"IEEE 754 floating-point representations introduce fractional precision errors when performing cumulative summations across thousands of records. In a statutory regulatory ledger, rounding discrepancies are unacceptable. Invariant I6 mandates that all money is represented as integer paise (`bigint`), where 1 Lakh is strictly `10,000,000` paise. Calculations are exact down to the single paisa."*
+**Defense:** *"IEEE 754 floating-point representations introduce fractional precision errors when performing cumulative summations across thousands of records. In a regulatory regulatory ledger, rounding discrepancies are unacceptable. Invariant I6 mandates that all money is represented as integer paise (`bigint`), where 1 Lakh is strictly `10,000,000` paise. Calculations are exact down to the single paisa."*
 
 ---
 

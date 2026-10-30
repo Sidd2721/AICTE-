@@ -149,7 +149,7 @@ flowchart TD
 
     subgraph Engine ["DATED RULES & DISCREPANCY EVALUATOR"]
         PROG & INST_META --> LOAD_RULES["Load Rules: rules/aph-{academic_year}.json"]
-        LOAD_RULES --> CALC["Calculate Statutory Requirement (Integer Paise)<br/>total_required = Sum(programme_slabs * concessions)"]
+        LOAD_RULES --> CALC["Calculate regulatory Requirement (Integer Paise)<br/>total_required = Sum(programme_slabs * concessions)"]
         
         CALC & FDR_META --> D1{"D1: Amount Check<br/>amount_paise >= total_required?"}
         D1 -->|No| FLAG_D1["Flag: D1_AMOUNT_MISMATCH"]
@@ -248,7 +248,7 @@ flowchart LR
 
 ## 7. Feature 6: Multi-Tenant Row-Level Security (RLS) Isolation Pipeline
 
-Enforces multi-tenancy inside the PostgreSQL kernel, ensuring that regional officers can only inspect and mutate records within their statutory jurisdiction.
+Enforces multi-tenancy inside the PostgreSQL kernel, ensuring that regional officers can only inspect and mutate records within their regulatory jurisdiction.
 
 ```mermaid
 flowchart TD

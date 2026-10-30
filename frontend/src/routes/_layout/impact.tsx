@@ -154,7 +154,7 @@ function ImpactDashboard() {
             </CardTitle>
           </div>
           <CardDescription>
-            High-assurance architecture safeguards preventing regulatory
+            defense-in-depth architecture safeguards preventing regulatory
             non-compliance and financial leakage.
           </CardDescription>
         </CardHeader>
@@ -184,7 +184,7 @@ function ImpactDashboard() {
                 Zero Discretionary Actions
               </h4>
               <p className="text-xs leading-relaxed">
-                Buttons in user interface are 100% computed from backend Finite
+                Buttons in user interface are fully computed from backend Finite
                 State Machine (<code className="text-xs">next_action()</code>).
                 No client override.
               </p>

@@ -2,7 +2,7 @@
   "capabilities": [
     {
       "id": "CAP-01",
-      "name": "Deposit Calculation & Statutory Rules",
+      "name": "Deposit Calculation & regulatory Rules",
       "description": "Sum across programmes from Table 1.4 APH, 2x leased-land multiplier, government exemption, effective dating.",
       "tests": [
         "tests/test_rules_files.py::test_deposit_sum_and_double_with_values",

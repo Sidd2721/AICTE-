@@ -9,7 +9,7 @@
 
 ## 1. Overall System Topology & Architectural Invariants
 
-The portal transitions statutory security deposit management from manual paper tracking to an automated, cryptographically secured registry. The architecture is structured across five discrete tiers:
+The portal transitions regulatory security deposit management from manual paper tracking to an automated, cryptographically secured registry. The architecture is structured across five discrete tiers:
 
 ```mermaid
 flowchart TD
@@ -440,4 +440,4 @@ sequenceDiagram
 
 ## 7. Summary for Technical Decision Makers
 
-> *"The AICTE FDR Regulatory Portal is engineered as a high-assurance, defense-in-depth platform. Its API layer enforces server-driven governance and idempotency; its database tier leverages PostgreSQL Row-Level Security, physical constraints, and append-only triggers; its technology stack uses fully open-source components with zero licensing costs; its data pipeline guarantees transactional outbox delivery and entire-file byte coverage verification; and its routing architecture provides a self-contained single-container deployment. It is production-tested, mathematically verified, and ready for regulatory adoption."*
+> *"The AICTE FDR Regulatory Portal is engineered as a defense-in-depth, defense-in-depth platform. Its API layer enforces server-driven governance and idempotency; its database tier leverages PostgreSQL Row-Level Security, physical constraints, and append-only triggers; its technology stack uses fully open-source components with zero licensing costs; its data pipeline guarantees transactional outbox delivery and entire-file byte coverage verification; and its routing architecture provides a self-contained single-container deployment. It is production-tested, mathematically verified, and ready for regulatory adoption."*
