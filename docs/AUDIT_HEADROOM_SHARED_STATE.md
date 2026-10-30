@@ -72,7 +72,7 @@ Current enforcement points:
 - **Initial Risk:** If Evaluator A advances the clock +30 days to test overdue workflows and leaves the browser tab open, Evaluator B visiting the portal 10 minutes later would encounter a system running 30 days in the future with expired instruments and unexpected alerts.
 
 #### Mitigation Implemented (S2: Clock Guard)
-- Added `DEMO_CLOCK_IDLE_MINUTES: int = 15` configuration in `backend/app/core/config.py`.
+- Added `DEMO_CLOCK_IDLE_MINUTES: int = 0` configuration in `backend/app/core/config.py` (configurable via environment variable, with 15 minutes recommended for shared demo deployments).
 - Implemented lazy auto-reversion in `backend/app/domain/clock.py`:
   - When `DEMO_CLOCK_IDLE_MINUTES > 0` and the clock has a non-zero offset, any read (`now()`, `get_clock_offset()`, `today()`) checks the time elapsed since the last manual shift.
   - If no user has adjusted the clock for ≥ `DEMO_CLOCK_IDLE_MINUTES`, `_offset_seconds` automatically resets to 0.

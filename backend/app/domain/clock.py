@@ -32,11 +32,14 @@ def _check_idle_reset() -> None:
     """Lazily revert shifted clock offset if untouched beyond idle threshold."""
     global _offset_seconds, _last_changed_at
     idle_minutes = settings.DEMO_CLOCK_IDLE_MINUTES
-    if idle_minutes > 0 and _offset_seconds != 0 and _last_changed_at is not None:
-        elapsed = (_time_source_fn() - _last_changed_at).total_seconds()
-        if elapsed >= idle_minutes * 60:
-            _offset_seconds = 0
-            _last_changed_at = None
+    if idle_minutes > 0 and _offset_seconds != 0:
+        if _last_changed_at is None:
+            _last_changed_at = _time_source_fn()
+        else:
+            elapsed = (_time_source_fn() - _last_changed_at).total_seconds()
+            if elapsed >= idle_minutes * 60:
+                _offset_seconds = 0
+                _last_changed_at = None
 
 
 def get_clock_offset() -> int:

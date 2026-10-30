@@ -145,3 +145,34 @@ def test_sim_clock_api_endpoint_idle_revert(client: TestClient) -> None:
         set_clock_offset(0)
         reset_time_source()
         settings.DEMO_CLOCK_IDLE_MINUTES = original_setting
+
+
+def test_clock_idle_recovers_if_last_changed_is_none() -> None:
+    """If offset is non-zero but _last_changed_at was None, idle check initializes timer and expires."""
+    import app.domain.clock as clock_mod
+
+    reset_time_source()
+    original_setting = settings.DEMO_CLOCK_IDLE_MINUTES
+    settings.DEMO_CLOCK_IDLE_MINUTES = 5
+
+    t0 = datetime(2026, 10, 30, 12, 0, 0, tzinfo=UTC)
+    sim_time = t0
+    set_time_source(lambda: sim_time)
+
+    try:
+        # Force non-zero offset with None timestamp
+        clock_mod._offset_seconds = 1800
+        clock_mod._last_changed_at = None
+
+        # First check initializes _last_changed_at
+        assert get_clock_offset() == 1800
+        assert clock_mod._last_changed_at == t0
+
+        # Advance past 5 minutes
+        sim_time = t0 + timedelta(minutes=6)
+        assert get_clock_offset() == 0
+        assert clock_mod._last_changed_at is None
+    finally:
+        set_clock_offset(0)
+        reset_time_source()
+        settings.DEMO_CLOCK_IDLE_MINUTES = original_setting

@@ -145,7 +145,9 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const search = Route.useSearch()
   const redirectTarget =
-    search.redirect?.startsWith("/") && !search.redirect.startsWith("//")
+    search.redirect?.startsWith("/") &&
+    !search.redirect.startsWith("//") &&
+    !search.redirect.startsWith("/\\")
       ? search.redirect
       : "/"
 
