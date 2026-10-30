@@ -3,22 +3,30 @@
 Endpoints are public, unauthenticated, outside the OpenAPI schema, and write zero audit rows.
 """
 
+from __future__ import annotations
+
 import time
 from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Any
 
 import jwt
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, Field
+from sqlmodel import Session, col, select
 
+from app.api.deps import SessionDep
+from app.core.config import settings
+from app.core.rls_context import set_rls_context
 from app.domain.receipt import (
     get_public_key_info,
     get_public_key_pem,
     verify_release_receipt,
 )
+from app.domain.receipt_pdf import build_release_receipt_pdf
+from app.models import Institution, Instrument, ReleaseRequest
 
-router = APIRouter(prefix="/receipts", tags=["receipts"])
+router = APIRouter(tags=["receipts"])
 
 # In-memory sliding window rate limiter: zero database writes, zero audit rows
 # 120 requests/minute per client IP (satisfies requirement of at least 60/min)
@@ -45,7 +53,7 @@ def reset_rate_limit_buckets() -> None:
     _RATE_LIMIT_BUCKETS.clear()
 
 
-@router.get("/public-key", include_in_schema=False)
+@router.get("/receipts/public-key", include_in_schema=False)
 def get_receipt_public_key(request: Request) -> Any:
     """Public endpoint to fetch the portal's active receipt verification public key.
 
@@ -66,11 +74,12 @@ class VerifyReceiptResponse(BaseModel):
     reason: str | None = None
     claims: dict[str, Any] | None = None
     kid: str | None = None
+    algorithm: str = "RS256"
     issued_at: str | None = None
 
 
 @router.post(
-    "/verify",
+    "/receipts/verify",
     response_model=VerifyReceiptResponse,
     include_in_schema=False,
 )
@@ -132,6 +141,7 @@ async def verify_receipt_endpoint(request: Request) -> VerifyReceiptResponse:
             reason=None,
             claims=claims,
             kid=kid,
+            algorithm="RS256",
             issued_at=issued_at_str,
         )
     except ValueError as val_err:
@@ -146,5 +156,79 @@ async def verify_receipt_endpoint(request: Request) -> VerifyReceiptResponse:
             reason=str(val_err),
             claims=None,
             kid=kid_hint,
+            algorithm="RS256",
             issued_at=None,
         )
+
+
+def _get_seeded_sample_release_request(
+    session: Session,
+) -> tuple[ReleaseRequest, Instrument, Institution | None]:
+    """Retrieve the seeded released request for demo showcase."""
+    set_rls_context(session, role="bureau")
+    req = session.exec(
+        select(ReleaseRequest)
+        .where(ReleaseRequest.status == "released")
+        .order_by(col(ReleaseRequest.created_at).desc())
+    ).first()
+    if not req or not req.receipt_token:
+        raise HTTPException(
+            status_code=404,
+            detail="No released sample receipt found in database",
+        )
+    inst = session.get(Instrument, req.instrument_id)
+    if not inst:
+        raise HTTPException(status_code=404, detail="Instrument not found")
+    institution = session.get(Institution, inst.institution_id)
+    return req, inst, institution
+
+
+@router.get("/demo/sample-receipt.pdf", include_in_schema=False)
+def get_sample_receipt_pdf(session: SessionDep) -> Response:
+    """Download demo sample release receipt PDF (demo mode only)."""
+    if settings.FASTAPI_ENV == "production":
+        raise HTTPException(
+            status_code=404,
+            detail="Sample receipt endpoint is disabled in production",
+        )
+    req, inst, institution = _get_seeded_sample_release_request(session)
+    assert req.receipt_token is not None
+    inst_name = institution.name if institution else "AICTE Regulated Institution"
+    pdf_bytes = build_release_receipt_pdf(
+        token=req.receipt_token,
+        instrument_ref_no=inst.ref_no,
+        institution_name=inst_name,
+        bank_code=inst.bank_code,
+        amount_paise=inst.amount_paise,
+    )
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="sample_release_receipt.pdf"'
+        },
+    )
+
+
+@router.get("/demo/sample-receipt", include_in_schema=False)
+def get_sample_receipt(
+    session: SessionDep,
+    format: str | None = Query(None),
+) -> Any:
+    """Get demo sample release receipt token or PDF (demo mode only)."""
+    if settings.FASTAPI_ENV == "production":
+        raise HTTPException(
+            status_code=404,
+            detail="Sample receipt endpoint is disabled in production",
+        )
+    if format == "pdf":
+        return get_sample_receipt_pdf(session)
+
+    req, inst, _ = _get_seeded_sample_release_request(session)
+    return {
+        "status": "released",
+        "release_id": str(req.id),
+        "instrument_id": str(inst.id),
+        "instrument_ref_no": inst.ref_no,
+        "token": req.receipt_token,
+    }

@@ -254,6 +254,20 @@ def seed_rich_data() -> None:
                 "conf_status": "confirmed",
                 "conf_amount": 350000000,
             },
+            # --- Fully Released Deposit Showcase Case ---
+            {
+                "ref_no": "FDR-HDFC-2014-RELEASED",
+                "inst": nr_inst1,
+                "bank": "HDFC",
+                "ifsc": "HDFC0001234",
+                "amount": 500000000,
+                "issue": today - timedelta(days=3665),
+                "maturity": today - timedelta(days=15),
+                "lifecycle": "released",
+                "lien": False,
+                "conf_status": "confirmed",
+                "conf_amount": 500000000,
+            },
             # --- Discrepancy Case: Amount Mismatch (Needs Scrutiny) ---
             {
                 "ref_no": "FDR-DISC-AMOUNT-01",
@@ -569,6 +583,97 @@ def seed_rich_data() -> None:
                         "instrument_ref": rel_inst2.ref_no,
                         "verified_by": "officer.north@example.com",
                     },
+                )
+
+        # Release Case 3: Status = "released" (Full Domain Release Path Completed)
+        rel_inst3 = created_instruments.get("FDR-HDFC-2014-RELEASED")
+        bureau_user = session.exec(
+            select(User).where(User.email == "bureau@example.com")
+        ).first()
+        bureau_user_id = bureau_user.id if bureau_user else fallback_id
+
+        if rel_inst3:
+            existing_req3 = session.exec(
+                select(ReleaseRequest).where(
+                    ReleaseRequest.instrument_id == rel_inst3.id
+                )
+            ).first()
+            if not existing_req3:
+                from app.domain.receipt import sign_release_receipt
+
+                temp_release_id = uuid.uuid4()
+                receipt_token = sign_release_receipt(
+                    instrument_id=str(rel_inst3.id),
+                    instrument_ref_no=rel_inst3.ref_no,
+                    path="term_completion",
+                    release_id=str(temp_release_id),
+                )
+
+                req3 = ReleaseRequest(
+                    id=temp_release_id,
+                    instrument_id=rel_inst3.id,
+                    path="term_completion",
+                    status="released",
+                    requested_by=inst_user_id,
+                    verified_by=officer_id,
+                    approved_by=bureau_user_id,
+                    receipt_token=receipt_token,
+                    checklist=[
+                        {"item": "Tenure Completed (10 Years)", "satisfied": True},
+                        {"item": "No Pending AICTE Inquiries", "satisfied": True},
+                        {"item": "Resolution from Governing Body", "satisfied": True},
+                        {"item": "Scrutiny Officer Inspection", "satisfied": True},
+                        {
+                            "item": "Competent Authority Release Sanction",
+                            "satisfied": True,
+                        },
+                    ],
+                )
+                session.add(req3)
+                session.commit()
+
+                # Invariant I3: Audit chain intact
+                audit(
+                    session,
+                    actor_id=inst_user_id,
+                    action="RELEASE_REQUESTED",
+                    entity="release_request",
+                    entity_id=str(req3.id),
+                    payload={
+                        "instrument_ref": rel_inst3.ref_no,
+                        "path": "term_completion",
+                    },
+                )
+                audit(
+                    session,
+                    actor_id=officer_id,
+                    action="RELEASE_VERIFIED",
+                    entity="release_request",
+                    entity_id=str(req3.id),
+                    payload={
+                        "instrument_ref": rel_inst3.ref_no,
+                        "verified_by": "officer.north@example.com",
+                    },
+                )
+                audit(
+                    session,
+                    actor_id=bureau_user_id,
+                    action="RELEASE_APPROVED",
+                    entity="release_request",
+                    entity_id=str(req3.id),
+                    payload={
+                        "instrument_ref": rel_inst3.ref_no,
+                        "approved_by": "bureau@example.com",
+                        "receipt_id": receipt_token[:20],
+                    },
+                )
+                audit(
+                    session,
+                    actor_id=bureau_user_id,
+                    action="INSTRUMENT_RELEASED",
+                    entity="instrument",
+                    entity_id=str(rel_inst3.id),
+                    payload={"release_id": str(req3.id)},
                 )
 
         # 6. Seed Statement Reports Top-Up
