@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     TEST_DATABASE_URL: PostgresDsn | None = None
     AUTO_SEED: bool = False
     TRUSTED_PROXY_HOPS: int = 0
+    DEMO_CLOCK_IDLE_MINUTES: int = 0
     SUPABASE_URL: str | None = None
     SUPABASE_SERVICE_ROLE_KEY: str | None = None
     SUPABASE_STORAGE_BUCKET: str = "fdr-vault"
