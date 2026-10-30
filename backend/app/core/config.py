@@ -20,9 +20,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = (
-        "demo-regulatory-portal-secret-key-32chars-min-change-in-prod"
-    )
+    SECRET_KEY: str = "demo-regulatory-portal-secret-key-32chars-min-change-in-prod"
     VAULT_KEY: str = ""
     VAULT_PATH: str | None = None
     # Token life: 60 minutes
@@ -43,6 +41,7 @@ class Settings(BaseSettings):
     TEST_DATABASE_URL: PostgresDsn | None = None
     AUTO_SEED: bool = False
     TRUSTED_PROXY_HOPS: int = 0
+    DEMO_CLOCK_IDLE_MINUTES: int = 0
     SUPABASE_URL: str | None = None
     SUPABASE_SERVICE_ROLE_KEY: str | None = None
     SUPABASE_STORAGE_BUCKET: str = "fdr-vault"

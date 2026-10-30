@@ -8,6 +8,7 @@ SECURITY AND IMMUTABILITY RULES (FT3):
 - Key Immutability: Never rotate or re-encrypt existing documents automatically. Changing VAULT_KEY
   will render all previously stored documents permanently unreadable!
 """
+
 import base64
 import hashlib
 import logging
@@ -55,9 +56,13 @@ def validate_vault_security(env: str | None = None) -> None:
         )
         if current_env == "production":
             raise RuntimeError(f"Production startup aborted: {msg}")
-        logger.warning("****************************************************************")
+        logger.warning(
+            "****************************************************************"
+        )
         logger.warning(msg)
-        logger.warning("****************************************************************")
+        logger.warning(
+            "****************************************************************"
+        )
         return
 
     if vault_raw == secret_raw:
