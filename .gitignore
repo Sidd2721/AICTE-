@@ -45,3 +45,4 @@ backend/app/keys/*.pem
 
 docs/media/*.webm
 docs/media/*.mp4
+verify-results.md
