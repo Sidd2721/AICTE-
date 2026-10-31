@@ -401,3 +401,15 @@ def get_release_receipt_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'inline; filename="{filename}"'},
     )
+
+
+@router.get("/release/verify-receipt")
+def verify_receipt_endpoint(token: str = Query(...)) -> Any:
+    """Public endpoint to verify a release receipt token."""
+    from app.domain.receipt import verify_release_receipt
+
+    try:
+        claims = verify_release_receipt(token)
+        return {"status": "valid", **claims}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid or tampered receipt: {e}")

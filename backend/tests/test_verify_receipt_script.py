@@ -3,15 +3,15 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
-from app.domain.receipt import sign_release_receipt
+from app.domain.receipt import get_public_key_pem, sign_release_receipt
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
-def test_verify_receipt_cli_valid_and_tampered():
+def test_verify_receipt_cli_valid_and_tampered(tmp_path: Path):
     inst_id = str(uuid.uuid4())
     ref_no = "FDR-TEST-12345"
-    path = "fdrs/inst-1/fdr-1.pdf"
+    path = "term_completion"
     token = sign_release_receipt(
         instrument_id=inst_id,
         instrument_ref_no=ref_no,
@@ -19,15 +19,16 @@ def test_verify_receipt_cli_valid_and_tampered():
     )
 
     script = REPO_ROOT / "scripts" / "verify_receipt.py"
-    pub_key_path = REPO_ROOT / "backend" / "app" / "keys" / "receipt_public.pem"
+    key_file = tmp_path / "pub.pem"
+    key_file.write_text(get_public_key_pem().decode("utf-8"), encoding="utf-8")
 
     # Test valid token
     res = subprocess.run(
-        [sys.executable, str(script), token, "--key", str(pub_key_path)],
+        [sys.executable, str(script), token, "--key", str(key_file)],
         capture_output=True,
         text=True,
     )
-    assert res.returncode == 0
+    assert res.returncode == 0, f"STDOUT: {res.stdout}\nSTDERR: {res.stderr}"
     assert "STATUS: VALID" in res.stdout
     data = json.loads(res.stdout.split("STATUS: VALID\n")[1])
     assert "receipt_id" in data
@@ -40,7 +41,7 @@ def test_verify_receipt_cli_valid_and_tampered():
     tampered_token = f"{parts[0]}.{parts[1]}.{tampered_sig}"
 
     res_bad = subprocess.run(
-        [sys.executable, str(script), tampered_token, "--key", str(pub_key_path)],
+        [sys.executable, str(script), tampered_token, "--key", str(key_file)],
         capture_output=True,
         text=True,
     )
