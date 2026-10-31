@@ -349,9 +349,8 @@ class LiveVerifier:
         sample_token = ""
         if tok_stat == 200:
             try:
-                sample_token = json.loads(tok_body.decode("utf-8")).get(
-                    "receipt_token", ""
-                )
+                tok_data = json.loads(tok_body.decode("utf-8"))
+                sample_token = tok_data.get("receipt_token") or tok_data.get("token", "")
             except Exception:
                 pass
 
@@ -417,7 +416,12 @@ class LiveVerifier:
         )
 
         # 10. Public SPA Verification Route
-        spa_stat, _, spa_body, spa_elapsed = self.request("/verify-receipt")
+        spa_stat, _, spa_body, spa_elapsed = self.request(
+            "/verify-receipt",
+            headers={
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+        )
         spa_html = spa_body.decode("utf-8", errors="replace")
         has_html = "<!DOCTYPE html>" in spa_html or "<html" in spa_html
         spa_ok = spa_stat == 200 and has_html

@@ -289,6 +289,20 @@ def get_instrument(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Instrument not found",
         )
+    if not current_user.is_superuser and current_user.role not in ("bureau", "auditor"):
+        if (
+            current_user.institution_id
+            and instrument.institution_id != current_user.institution_id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Instrument not found",
+            )
+        if current_user.region and instrument.region != current_user.region:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Instrument not found",
+            )
 
     role = current_user.role or (
         "institution" if current_user.institution_id else "regional"
@@ -323,6 +337,20 @@ def get_instrument_case(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Instrument not found"
         )
+    if not current_user.is_superuser and current_user.role not in ("bureau", "auditor"):
+        if (
+            current_user.institution_id
+            and instrument.institution_id != current_user.institution_id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Instrument not found",
+            )
+        if current_user.region and instrument.region != current_user.region:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Instrument not found",
+            )
 
     role = current_user.role or (
         "institution" if current_user.institution_id else "regional"

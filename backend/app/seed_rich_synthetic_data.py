@@ -586,19 +586,43 @@ def seed_rich_data() -> None:
                 )
 
         # Release Case 3: Status = "released" (Full Domain Release Path Completed)
-        rel_inst3 = created_instruments.get("FDR-HDFC-2014-RELEASED")
+        rel_inst3 = (
+            created_instruments.get("FDR-HDFC-2014-RELEASED")
+            or session.exec(
+                select(Instrument).where(Instrument.ref_no == "FDR-HDFC-2014-RELEASED")
+            ).first()
+        )
         bureau_user = session.exec(
             select(User).where(User.email == "bureau@example.com")
         ).first()
         bureau_user_id = bureau_user.id if bureau_user else fallback_id
 
         if rel_inst3:
+            if rel_inst3.lifecycle != "released":
+                rel_inst3.lifecycle = "released"
+                session.add(rel_inst3)
+                session.commit()
+                session.refresh(rel_inst3)
+
             existing_req3 = session.exec(
                 select(ReleaseRequest).where(
                     ReleaseRequest.instrument_id == rel_inst3.id
                 )
             ).first()
-            if not existing_req3:
+            if existing_req3 and not existing_req3.receipt_token:
+                from app.domain.receipt import sign_release_receipt
+
+                receipt_token = sign_release_receipt(
+                    instrument_id=str(rel_inst3.id),
+                    instrument_ref_no=rel_inst3.ref_no,
+                    path="term_completion",
+                    release_id=str(existing_req3.id),
+                )
+                existing_req3.receipt_token = receipt_token
+                existing_req3.status = "released"
+                session.add(existing_req3)
+                session.commit()
+            elif not existing_req3:
                 from app.domain.receipt import sign_release_receipt
 
                 temp_release_id = uuid.uuid4()
