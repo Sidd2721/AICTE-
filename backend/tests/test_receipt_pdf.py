@@ -108,7 +108,7 @@ def test_receipt_pdf_route_lifecycle_and_tenant_guards(
     ).first()
     assert sub_inst is not None
 
-    # Align users with their tenant institution ids in db
+    # Align users with their tenant institution ids and bureau role in db
     u_north = db.exec(
         select(User).where(User.email == "inst.north1@example.com")
     ).first()
@@ -126,6 +126,13 @@ def test_receipt_pdf_route_lifecycle_and_tenant_guards(
     assert west_inst is not None
     u_west.institution_id = west_inst.id
     db.add(u_west)
+
+    u_bureau = db.exec(
+        select(User).where(User.email == "bureau.approver@example.com")
+    ).first()
+    assert u_bureau is not None
+    u_bureau.role = "bureau"
+    db.add(u_bureau)
     db.commit()
 
     sub_req = db.exec(
