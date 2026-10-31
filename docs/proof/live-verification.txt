@@ -1,0 +1,20 @@
+﻿================================================================================
+AICTE FDR Portal � Live Verification Suite
+Target: https://aicte-1-59pn.onrender.com
+================================================================================
+[1;32m[PASS][0m 1. Readiness Probe (/ready) � HTTP 200, build=17b35ab (0.18s)
+[1;32m[PASS][0m 2. Unauthenticated Access Defense (/api/v1/instruments/) � HTTP 401 (Expected 401/403)
+[1;32m[PASS][0m 3. Five Persona Logins � Acquired JWT tokens for all 5 personas
+[1;32m[PASS][0m 4. Tenant and Regional Isolation (RLS Scope Defense) � NR=25, WR=11, overlap=0, cross-fetch=404 (expected 404)
+[1;32m[PASS][0m 5. Statement Reports (4 Tabs Preview) � pending-verifications: 10 (>= 3); upcoming-maturities: 10 (>= 3); missing-documents: 18 (>= 2); cases-needing-intervention: 5 (>= 2)
+[1;32m[PASS][0m 6. Statement PDF Export (/api/v1/reports/pdf) � HTTP 200, is_pdf=True, size=38569 bytes (0.99s)
+[1;32m[PASS][0m 7. Demo Sample Receipt PDF (/api/v1/demo/sample-receipt.pdf) � HTTP 200, is_pdf=True, size=172406 bytes (< 300KB: True)
+[1;32m[PASS][0m 8. Sample Receipt Token Verification (/api/v1/receipts/verify) � HTTP 200, valid=True, claims=['receipt_id', 'iat', 'instrument_hash', 'path', 'kid', 'release_id'], reason=None
+[1;32m[PASS][0m 9. Tampered Receipt Token Rejection (/api/v1/receipts/verify) � HTTP 200, valid=False, reason='bad signature: cryptographic verification failed'
+[1;32m[PASS][0m 10. Public Verify SPA Route (/verify-receipt) � HTTP 200, has_html=True (0.12s)
+[1;32m[PASS][0m 11. API Documentation Status (/docs) � HTTP 404 (Locked 404)
+[1;32m[PASS][0m 12. Security Headers (CSP, nosniff, DENY) � nosniff=True, xframe=True, csp=True
+================================================================================
+VERIFICATION SUMMARY: 12/12 CHECKS PASSED
+================================================================================
+Report written to: verify-results.md
