@@ -370,9 +370,11 @@ class LiveVerifier:
             )
             if v_stat == 200:
                 try:
-                    v_data = json.loads(v_body.decode("utf-8"))
-                    token_verify_ok = v_data.get("valid") is True
-                    token_verify_detail = f"HTTP 200, valid={v_data.get('valid')}, claims={list(v_data.get('claims', {}).keys())}"
+                    claims_dict = v_data.get("claims") or {}
+                    token_verify_detail = (
+                        f"HTTP 200, valid={v_data.get('valid')}, "
+                        f"claims={list(claims_dict.keys())}, reason={v_data.get('reason')}"
+                    )
                 except Exception as e:
                     token_verify_detail = f"Parse error: {e}"
             else:
