@@ -203,7 +203,7 @@ function Dashboard() {
 
   return (
     <div className="flex flex-col gap-8 pb-12">
-      {/* Statutory / Synthetic Prototype Disclaimer Banner (Invariant I15) */}
+      {/* regulatory / Synthetic Prototype Disclaimer Banner (Invariant I15) */}
       <div className="relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-4 md:p-5 shadow-sm">
         <div className="flex items-start gap-4">
           <div className="rounded-lg bg-amber-500/20 p-2 text-amber-600 dark:text-amber-400 shrink-0">
@@ -644,7 +644,7 @@ function Dashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Scale className="h-4 w-4 text-primary" />
-                Statutory Table 1.4 Rules
+                regulatory Table 1.4 Rules
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-muted-foreground">

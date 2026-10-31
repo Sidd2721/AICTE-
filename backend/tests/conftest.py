@@ -97,16 +97,16 @@ def db() -> Generator[Session]:
         yield session
         # Teardown: clean up test database rows without touching or re-seeding live DB
         try:
+            session.rollback()
             session.execute(
                 text(
                     "DELETE FROM flag_waiver; DELETE FROM notice; DELETE FROM obligation; DELETE FROM case_note; DELETE FROM confirmation; DELETE FROM document; DELETE FROM release_request; DELETE FROM instrument; DELETE FROM rate_limit_bucket; SELECT pg_advisory_unlock_all();"
                 )
             )
+            session.execute(delete(User))
+            session.commit()
         except Exception:
             session.rollback()
-        statement = delete(User)
-        session.execute(statement)
-        session.commit()
 
 
 @pytest.fixture(scope="module")
@@ -117,6 +117,10 @@ def client() -> Generator[TestClient]:
 
 @pytest.fixture(autouse=True)
 def _reset_rate_limits():
+    from app.domain.clock import reset_time_source, set_clock_offset
+
+    reset_time_source()
+    set_clock_offset(0)
     with Session(engine) as session:
         try:
             session.execute(
@@ -126,6 +130,8 @@ def _reset_rate_limits():
         except Exception:
             session.rollback()
     yield
+    reset_time_source()
+    set_clock_offset(0)
     with Session(engine) as session:
         try:
             session.execute(

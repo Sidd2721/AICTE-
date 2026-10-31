@@ -1,4 +1,4 @@
-# High-Assurance Architecture, Feasibility & Scalability Proof
+# defense-in-depth Architecture, Feasibility & Scalability Proof
 ## AICTE Fixed Deposit Receipt (FDR) & Security Deposit Regulatory Portal (PS 26265)
 
 > **Document Type**: Enterprise Production Architecture, Platform Integration & Feasibility Proof  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & The High-Level Mandate
 
-The All India Council for Technical Education (AICTE) oversees statutory security deposits across **10,000+ technical institutions** in India, safeguarding an estimated **₹ 5,000+ Crores** in student safety net funds. 
+The All India Council for Technical Education (AICTE) oversees regulatory security deposits across **10,000+ technical institutions** in India, safeguarding an estimated **regulatory security deposit portfolios** in student safety net funds. 
 
 Under the AICTE Approval Process Handbook (APH), these deposits must remain locked in joint lien with the Member Secretary, AICTE for **8 to 10 continuous years**.
 
@@ -25,7 +25,7 @@ This report mathematically and architecturally proves that our portal is:
 - **Fully Feasible**: Adheres to Indian IT Act 2000, RBI AA, and NeSL IU frameworks with zero proprietary lock-in.
 - **Linearly Scalable**: Stateless microservices, multi-tenant Row-Level Security across 8 regions, transactional outbox, and sub-50ms indexed queries.
 - **Seamlessly Integratable**: Plugs directly into AICTE's Central ERP, Core Banking Systems, and government digital gateways.
-- **Radically Different**: Moves beyond basic CRUD forms into high-assurance cryptographic governance.
+- **Radically Different**: Moves beyond basic CRUD forms into defense-in-depth cryptographic governance.
 
 ---
 
@@ -58,7 +58,7 @@ flowchart TD
 
 ### A. Legal & Regulatory Feasibility
 - **IT Act 2000 Section 3A Compliance**: All bank confirmation certificates and release advices are validated for non-repudiation key usage (`KeyUsage.nonRepudiation`) issued by Controller of Certifying Authorities (CCA) accredited Root CAs.
-- **RBI Core Banking Circular Adherence**: System mirrors the standard banking mandate where liens are marked in favor of statutory bodies without transferring underlying ownership.
+- **RBI Core Banking Circular Adherence**: System mirrors the standard banking mandate where liens are marked in favor of regulatory bodies without transferring underlying ownership.
 - **Insolvency and Bankruptcy Code (IBC 2016) Alignment**: Interoperable with NeSL (National E-Governance Services Ltd) — India's premier Information Utility under the Ministry of Finance.
 
 ### B. Financial Feasibility
@@ -77,7 +77,7 @@ To serve 10,000+ technical colleges, 8 regional offices, and 50+ commercial bank
 ```mermaid
 flowchart TD
     subgraph Ingress ["1. Ingress Tier (Stateless)"]
-        CLIENTS["10,000+ Institutions<br/>8 Regional Offices<br/>AICTE Bureau Approvers"]
+        CLIENTS["institutions nationwide<br/>8 Regional Offices<br/>AICTE Bureau Approvers"]
         CADDY["Caddy Reverse Proxy<br/>Auto TLS / HTTP/2 & HTTP/3<br/>Load Balancer"]
     end
 
@@ -236,7 +236,7 @@ Regulatory software often fails due to complex interfaces and cryptic error code
 
 ## 6. Technical Depth: What Makes Us Fundamentally Different
 
-| Feature Dimension | Typical Software Solutions | Our High-Assurance Architecture |
+| Feature Dimension | Typical Software Solutions | Our defense-in-depth Architecture |
 | :--- | :--- | :--- |
 | **Regulatory Numbers** | Hardcoded in source code (`if amt == 3500000`) | **Zero numbers in code**: Loaded from dated JSON rules files. |
 | **PDF Signature Check** | Surface-level PDF signature validation | **Entire-File Byte Coverage Gate**: Enforces `SignatureCoverageLevel.ENTIRE_FILE` to block appended pages. |
@@ -279,7 +279,7 @@ Use this authoritative pitch when addressing high-level regulatory committees:
 
 > *"Esteemed Members of the Regulatory Council,*  
 >  
-> *Every year, technical colleges across India hold over ₹ 5,000 Crores in statutory fixed deposits. But for thirty years, that massive financial guarantee rested on paper letters, unverified letterheads, and dust-covered cupboards.*  
+> *Every year, technical colleges across India hold over regulatory security deposit portfolios in regulatory fixed deposits. But for thirty years, that massive financial guarantee rested on paper letters, unverified letterheads, and dust-covered cupboards.*  
 >  
 > *We have engineered an enterprise regulatory portal that replaces human trust with mathematical proof.*  
 >  

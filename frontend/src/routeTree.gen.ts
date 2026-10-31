@@ -14,6 +14,7 @@ import { Route as GuideRouteImport } from './routes/guide'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as VerifyReceiptRouteImport } from './routes/verify-receipt'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutAuditRouteImport } from './routes/_layout/audit'
@@ -47,6 +48,11 @@ const RecoverPasswordRoute = RecoverPasswordRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyReceiptRoute = VerifyReceiptRouteImport.update({
+  id: '/verify-receipt',
+  path: '/verify-receipt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/verify-receipt': typeof VerifyReceiptRoute
   '/admin': typeof LayoutAdminRoute
   '/audit': typeof LayoutAuditRoute
   '/deposits': typeof LayoutDepositsRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/verify-receipt': typeof VerifyReceiptRoute
   '/admin': typeof LayoutAdminRoute
   '/audit': typeof LayoutAuditRoute
   '/deposits': typeof LayoutDepositsRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/recover-password': typeof RecoverPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/verify-receipt': typeof VerifyReceiptRoute
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/audit': typeof LayoutAuditRoute
   '/_layout/deposits': typeof LayoutDepositsRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover-password'
     | '/reset-password'
+    | '/verify-receipt'
     | '/admin'
     | '/audit'
     | '/deposits'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover-password'
     | '/reset-password'
+    | '/verify-receipt'
     | '/admin'
     | '/audit'
     | '/deposits'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover-password'
     | '/reset-password'
+    | '/verify-receipt'
     | '/_layout/admin'
     | '/_layout/audit'
     | '/_layout/deposits'
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RecoverPasswordRoute: typeof RecoverPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  VerifyReceiptRoute: typeof VerifyReceiptRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-receipt': {
+      id: '/verify-receipt'
+      path: '/verify-receipt'
+      fullPath: '/verify-receipt'
+      preLoaderRoute: typeof VerifyReceiptRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/': {
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RecoverPasswordRoute: RecoverPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  VerifyReceiptRoute: VerifyReceiptRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -271,6 +271,15 @@ function GuidePage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Link to="/verify-receipt">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+              >
+                Verify Receipt
+              </Button>
+            </Link>
             <Link to="/login">
               <Button
                 variant="outline"

@@ -387,7 +387,7 @@ function Deposits() {
         },
       })
       setCalcResult(res.data)
-      toast.success("Statutory Deposit Calculated", {
+      toast.success("regulatory Deposit Calculated", {
         description: `Required: ${formatPaiseToRupees(res.data.required_deposit_paise)} under ${res.data.rule_edition}`,
       })
     } catch (e: any) {
@@ -468,7 +468,7 @@ function Deposits() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-              Statutory Vault
+              regulatory Vault
             </span>
             <span className="text-xs text-muted-foreground">•</span>
             <span className="text-xs text-muted-foreground font-mono">
@@ -574,7 +574,7 @@ function Deposits() {
               </div>
               <div className="p-2.5 bg-background/80 rounded border">
                 <div className="text-destructive text-[11px]">
-                  Statutory Shortfall
+                  regulatory Shortfall
                 </div>
                 <div className="text-base font-bold font-mono text-destructive mt-0.5">
                   {formatPaiseToRupees(coverageData.shortfall_paise)}
@@ -1145,7 +1145,7 @@ function Deposits() {
             <div className="flex items-center gap-2">
               <Calculator className="h-4 w-4 text-primary" />
               <DialogTitle className="text-base font-bold">
-                Table 1.4 Statutory Deposit Calculator
+                Table 1.4 regulatory Deposit Calculator
               </DialogTitle>
             </div>
             <DialogDescription className="text-xs">

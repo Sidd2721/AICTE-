@@ -68,6 +68,17 @@ Configure these variables in your Render Service Dashboard (**Environment** tab)
 | `SUPABASE_URL` | Optional | `https://<ref>.supabase.co` | Optional secondary cloud vault sync. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Optional | JWT service token | Optional secondary cloud vault sync. |
 | `SUPABASE_STORAGE_BUCKET` | Optional | `fdr-vault` | S3-compatible bucket name. |
+| `RECEIPT_PRIVATE_KEY_PEM` | Yes (prod) / Rec (demo) | Multi-line RSA 2048-bit PEM | Release receipt signing key. Generated via `python scripts/gen_receipt_key.py`. In demo mode, ephemeral keys auto-generate if unset. |
+| `PUBLIC_BASE_URL` | Yes | `https://aicte-1-59pn.onrender.com` | Base public URL for receipt verification links and QR code targets. |
+| `DEMO_CLOCK_IDLE_MINUTES` | No | `20` | Inactivity interval in minutes before demo time-travel clock auto-resets. |
+
+### 3.1 Release Receipt Signing Key Setup
+To ensure release receipt verification survives container restarts and redeployments:
+1. Run `python scripts/gen_receipt_key.py` locally.
+2. Copy the full RSA private key PEM block.
+3. In Render Dashboard, open **Environment** > **Add Environment Variable**.
+4. Set Key: `RECEIPT_PRIVATE_KEY_PEM` and Value: the copied PEM block.
+5. In production mode (`FASTAPI_ENV=production`), application startup fails immediately if this variable is missing.
 
 ---
 

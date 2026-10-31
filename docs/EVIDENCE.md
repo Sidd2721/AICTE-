@@ -136,7 +136,7 @@
 
 ### Claims this MVP DOES NOT MAKE:
 - Not connected to live production banking networks (SIMULATED bank and email adapters).
-- Not certified as statutory regulatory authority software (contains DEMO values and synthetic datasets).
+- Not certified as regulatory regulatory authority software (contains DEMO values and synthetic datasets).
 - Does not initiate financial disbursements or wire money.
 - Digital signature certificates (DSC) prove document signers, not external bank confirmation.
 

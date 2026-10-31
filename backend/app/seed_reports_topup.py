@@ -267,6 +267,16 @@ def _seed_reports_topup_in_session(session: Session) -> int:
                 select(Instrument).where(Instrument.ref_no == s["ref_no"])
             ).first()
             if existing:
+                if (
+                    existing.lifecycle != s["lifecycle"]
+                    or existing.maturity_date != s["maturity"]
+                    or existing.issue_date != s["issue"]
+                ):
+                    existing.lifecycle = s["lifecycle"]
+                    existing.maturity_date = s["maturity"]
+                    existing.issue_date = s["issue"]
+                    session.add(existing)
+                    session.commit()
                 continue
 
             inst_obj = Instrument(

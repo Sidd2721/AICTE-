@@ -29,7 +29,7 @@ Demo Credentials (all passwords: `changethis`):
 - **Persona:** `inst.north1@example.com` (Institution)
 - **UI State:**
   - Navigate to `/deposits`.
-  - View the **Coverage Card**: Table 1.4 statutory calculation vs active deposits vs claimed deposits vs remaining shortfall.
+  - View the **Coverage Card**: Table 1.4 regulatory calculation vs active deposits vs claimed deposits vs remaining shortfall.
   - Interactive Table 1.4 calculator shows required deposit per approved programme.
   - Click **Add Deposit** to submit new FDR (`DEMO-FDR-XXXX`) with State Bank of India, principal ₹ 35,00,000, 10-year term.
   - Badge displays **Claimed** (`claimed` amber badge with explainer popover: "Self-reported by institution; pending independent bank confirmation").
@@ -105,7 +105,7 @@ Demo Credentials (all passwords: `changethis`):
 - **Persona:** Institution -> Regional Officer -> Regional Officer (Blocked) -> Bureau Approver
 - **UI State:**
   - Institution requests release under `term_completion`.
-  - Regional Officer (`officer.north@example.com`) reviews statutory release checklist and clicks **Verify** (`verified_by` recorded).
+  - Regional Officer (`officer.north@example.com`) reviews regulatory release checklist and clicks **Verify** (`verified_by` recorded).
   - Same Regional Officer attempts to click **Approve** -> **BLOCKED: HTTP 403 Maker cannot be checker**.
   - Bureau Approver (`bureau@example.com`) inspects verified request and clicks **Authorize Release**.
   - System generates signed cryptographic release receipt JWT.

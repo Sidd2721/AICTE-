@@ -82,7 +82,15 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     except Exception as e:
         if settings.FASTAPI_ENV == "production":
             raise RuntimeError(f"Vault security check failed: {e}") from e
-        logger.warning("[lifespan] Vault initialization notice: %s", e)
+    # S1.1: Receipt key stability and security guard
+    try:
+        from app.domain.receipt import validate_receipt_key_security
+
+        validate_receipt_key_security(settings.FASTAPI_ENV)
+    except Exception as e:
+        if settings.FASTAPI_ENV == "production":
+            raise RuntimeError(f"Receipt key security check failed: {e}") from e
+        logger.warning("[lifespan] Receipt key notice: %s", e)
 
     # Ensure Supabase storage bucket exists if configured
     try:

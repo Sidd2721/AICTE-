@@ -8,7 +8,7 @@ Role-based operational guides for the AICTE Security Deposit / FDR Portal protot
 
 ### Objective: Submit FDRs, track deposit maturity, request replacements and releases.
 1. **Sign In:** Use the institutional credentials provided during onboarding.
-2. **Deposit Calculator:** Navigate to *Calculator* to compute statutory deposit requirements based on programme, level, leased/owned land, and minority/women exemptions.
+2. **Deposit Calculator:** Navigate to *Calculator* to compute regulatory deposit requirements based on programme, level, leased/owned land, and minority/women exemptions.
 3. **Submit New FDR (4 Steps):**
    - Step 1: Enter deposit details (Bank IFSC, Reference Number, Principal in Rupees, Issue Date, Maturity Date).
    - Step 2: Upload joint FDR scan and bank confirmation letter (PDF/PNG magic bytes verified, AES-GCM encrypted in vault).

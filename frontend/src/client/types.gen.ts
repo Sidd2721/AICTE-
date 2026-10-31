@@ -2926,31 +2926,29 @@ export type releaseRejectReleaseResponses = {
 
 export type releaseRejectReleaseResponse = releaseRejectReleaseResponses[keyof releaseRejectReleaseResponses];
 
-export type releaseVerifyReceiptEndpointData = {
+export type releaseGetReleaseReceiptPdfData = {
     body?: never;
-    path?: never;
-    query: {
+    path: {
         /**
-         * Token
+         * Id
          */
-        token: string;
+        id: string;
     };
-    url: '/api/v1/release/verify-receipt';
+    query?: never;
+    url: '/api/v1/release/{id}/receipt.pdf';
 };
 
-export type releaseVerifyReceiptEndpointErrors = {
+export type releaseGetReleaseReceiptPdfErrors = {
     /**
      * Validation Error
      */
     422: HTTPValidationError;
 };
 
-export type releaseVerifyReceiptEndpointError = releaseVerifyReceiptEndpointErrors[keyof releaseVerifyReceiptEndpointErrors];
+export type releaseGetReleaseReceiptPdfError = releaseGetReleaseReceiptPdfErrors[keyof releaseGetReleaseReceiptPdfErrors];
 
-export type releaseVerifyReceiptEndpointResponses = {
+export type releaseGetReleaseReceiptPdfResponses = {
     /**
-     * Response Release-Verify Receipt Endpoint
-     *
      * Successful Response
      */
     200: unknown;

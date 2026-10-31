@@ -21,11 +21,11 @@
 - **Visual Cue**: Navigation to `/guide`. Smooth scrolling over 7 capability cards with reading time estimates, prerequisite badges, and live links.
 - **On-Screen Subtitle**: `SCENE 2: INTERACTIVE 6-MINUTE TOUR — Single Source of Truth (docs/guide.json)`
 - **Voice-Over Narration**:  
-  *"For first-time evaluators, the built-in 6-minute tour walks through every statutory capability. All tour steps derive from a single JSON configuration, written at an eighth-grade reading level, completely free of unexplained database codes or technical jargon."*
+  *"For first-time evaluators, the built-in 6-minute tour walks through every regulatory capability. All tour steps derive from a single JSON configuration, written at an eighth-grade reading level, completely free of unexplained database codes or technical jargon."*
 
 #### Scene 3: Dynamic Table 1.4 Handbook Calculator (0:50 - 1:20)
 - **Visual Cue**: Switched to Institution persona (`inst.north1@example.com`). At `/deposits`, click "Table 1.4 Calculator". Modal pops up showing programme multi-select, land ownership toggle (owned vs leased), and minority status.
-- **On-Screen Subtitle**: `SCENE 3: STATUTORY CALCULATOR — Dynamic Handbook Engine (Integer Paise)`
+- **On-Screen Subtitle**: `SCENE 3: regulatory CALCULATOR — Dynamic Handbook Engine (Integer Paise)`
 - **Voice-Over Narration**:  
   *"Institutions submit deposit guarantees based on AICTE Approval Process Handbook regulations. Rather than hardcoding figures in application code, our engine dynamically evaluates dated JSON rule sets. For example, a new Engineering campus on leased private land applies a 2x multiplier, stored accurately in integer paise to eliminate rounding discrepancies."*
 

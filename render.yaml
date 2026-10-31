@@ -51,3 +51,10 @@ services:
         value: "true"
       - key: FRONTEND_HOST
         sync: false # Set to your deployed URL: https://<service-name>.onrender.com
+      - key: RECEIPT_PRIVATE_KEY_PEM
+        sync: false # Set manually in Render Dashboard: RSA 2048-bit PEM from python scripts/gen_receipt_key.py
+      - key: PUBLIC_BASE_URL
+        value: https://aicte-1-59pn.onrender.com
+      - key: DEMO_CLOCK_IDLE_MINUTES
+        value: "20"
+

@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     # Token life: 60 minutes
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     FRONTEND_HOST: str = "http://localhost:5173"
+    PUBLIC_BASE_URL: str = "http://localhost:5173"
+    RECEIPT_PRIVATE_KEY_PEM: str | None = None
     FASTAPI_ENV: Literal["development", "demo", "production"] | None = "demo"
 
     PROJECT_NAME: str = "AICTE Security Deposit Portal"

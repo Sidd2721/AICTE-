@@ -109,7 +109,7 @@ brute-force dictionaries.     blocks mass parallel cracking. brute-force hardwar
 
 ## 4. Tier 3: Multi-Tenant Row-Level Security (RLS) Isolation
 
-The portal implements multi-tenancy not through error-prone application-level `WHERE` clauses, but through **PostgreSQL kernel-level Row-Level Security**:
+The portal implements multi-tenancy not through error-prone application-level `WHERE` clauses, but through **PostgreSQL database-enforced Row-Level Security**:
 
 ```mermaid
 flowchart TD

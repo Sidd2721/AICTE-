@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary & Problem Context
 
-Technical colleges in India are mandated by the All India Council for Technical Education (AICTE) to maintain fixed deposit receipts (FDRs) or cash security deposits pledged jointly to AICTE for a statutory duration (typically 8 to 10 years). Historically, regulatory oversight faced three severe structural vulnerabilities:
+Technical colleges in India are mandated by the All India Council for Technical Education (AICTE) to maintain fixed deposit receipts (FDRs) or cash security deposits pledged jointly to AICTE for a regulatory duration (typically 10-year term). Historically, regulatory oversight faced three severe structural vulnerabilities:
 1. **Paper Letter Forgery**: Dishonest institutions submitted fake bank letterheads or doctored bank confirmation receipts claiming a deposit existed.
 2. **Premature Encashment & Lien Circumvention**: Deposits were prematurely encashed without AICTE knowledge because banks received no automated lien revocation blocks.
 3. **Internal Collusion & Unilateral Releases**: Regulatory officers had the ability to unilaterally approve the return of deposits without secondary dual-control authorization.
@@ -79,7 +79,7 @@ flowchart TD
 
 ### A. Regulatory Dashboard & Dynamic Calculation
 1. **Dynamic Table 1.4 Calculator**:
-   - Computes statutory security deposit obligations according to the AICTE Approval Process Handbook (APH) without hardcoded numbers.
+   - Computes regulatory security deposit obligations according to the AICTE Approval Process Handbook (APH) without hardcoded numbers.
    - Evaluates technical programmes (Engineering, Management, Planning, Architecture, MCA), ownership categories (Private, Government, Leased Land), and institutional status.
    - Computes integer paise amounts (e.g., ₹ 35,00,000 = `350000000` paise).
 2. **Institutional Coverage Card**:
@@ -105,7 +105,7 @@ To confirm a deposit, the system queries the bank Core Banking System (CBS) simu
 ### D. Discrepancy Defense & Mandatory Audit Waivers
 - Detects discrepancies:
   - `D1_AMOUNT_MISMATCH`: Bank reports less than claimed (e.g. ₹ 25 Lakhs vs claimed ₹ 35 Lakhs).
-  - `D2_TENURE_MISMATCH`: Deposit duration less than statutory 10-year term.
+  - `D2_TENURE_MISMATCH`: Deposit duration less than regulatory 10-year term.
   - `D3_LIEN_NOT_MARKED`: Deposit lacks explicit joint lien in favour of Member Secretary, AICTE.
   - `D4_NAME_MISMATCH`: Institution title does not match regulatory charter.
   - `D5_INVALID_STATUS`: Bank reports deposit encashed, revoked, or frozen.

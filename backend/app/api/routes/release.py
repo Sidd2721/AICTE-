@@ -2,19 +2,21 @@ import uuid
 from datetime import UTC, date, datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 from sqlmodel import col, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.audit import audit_append
 from app.domain.discrepancy import evaluate_discrepancies
-from app.domain.receipt import sign_release_receipt, verify_release_receipt
+from app.domain.receipt import sign_release_receipt
+from app.domain.receipt_pdf import build_release_receipt_pdf
 from app.domain.rules import load_rule
 from app.domain.trust import Confirmation as TrustConfirmation
 from app.domain.trust import badge
 from app.models import (
     Confirmation,
     FlagWaiver,
+    Institution,
     Instrument,
     ReleaseRequest,
     ReleaseRequestCreate,
@@ -343,9 +345,69 @@ def reject_release(
     return release_req
 
 
+@router.get("/release/{id}/receipt.pdf")
+def get_release_receipt_pdf(
+    id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Response:
+    """Download signed PDF release receipt for a released instrument."""
+    release_req = session.get(ReleaseRequest, id)
+    if not release_req:
+        raise HTTPException(status_code=404, detail="Release request not found")
+
+    instrument = session.get(Instrument, release_req.instrument_id)
+    if not instrument:
+        raise HTTPException(status_code=404, detail="Instrument not found")
+
+    # Tenant check:
+    # 1. Institution users can only view their own institution's receipts
+    if (
+        current_user.role == "institution"
+        and current_user.institution_id
+        and instrument.institution_id != current_user.institution_id
+    ):
+        raise HTTPException(status_code=404, detail="Release request not found")
+
+    # 2. Regional officers can only view instruments within their assigned region
+    if (
+        current_user.role == "regional"
+        and current_user.region
+        and instrument.region != current_user.region
+    ):
+        raise HTTPException(status_code=404, detail="Release request not found")
+
+    # Status check: must be fully released with receipt token
+    if release_req.status != "released" or not release_req.receipt_token:
+        raise HTTPException(
+            status_code=409,
+            detail="Release request is not in released status; receipt is only available after release approval",
+        )
+
+    institution = session.get(Institution, instrument.institution_id)
+    inst_name = institution.name if institution else "AICTE Regulated Institution"
+
+    pdf_bytes = build_release_receipt_pdf(
+        token=release_req.receipt_token,
+        instrument_ref_no=instrument.ref_no,
+        institution_name=inst_name,
+        bank_code=instrument.bank_code,
+        amount_paise=instrument.amount_paise,
+    )
+
+    filename = f"release_receipt_{instrument.ref_no}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
+
+
 @router.get("/release/verify-receipt")
 def verify_receipt_endpoint(token: str = Query(...)) -> Any:
-    """Public offline/online endpoint to verify a release receipt token."""
+    """Public endpoint to verify a release receipt token."""
+    from app.domain.receipt import verify_release_receipt
+
     try:
         claims = verify_release_receipt(token)
         return {"status": "valid", **claims}

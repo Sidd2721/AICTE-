@@ -9,14 +9,14 @@
 
 ## Executive Summary
 
-The All India Council for Technical Education (AICTE), under the Ministry of Education, mandates that technical institutions (Engineering, Management, Architecture, Design, Applied Arts) maintain Fixed Deposit Receipts (FDRs) or Security Deposits in joint accounts with AICTE for lock-in periods of up to 10 years. Across India’s **10,000+ technical institutions**, this represents an estimated cumulative sovereign regulatory corpus exceeding **₹15,000+ Crore ($1.8+ Billion USD)**.
+The All India Council for Technical Education (AICTE), under the Ministry of Education, mandates that technical institutions (Engineering, Management, Architecture, Design, Applied Arts) maintain Fixed Deposit Receipts (FDRs) or Security Deposits in joint accounts with AICTE for lock-in periods of up to 10 years. Across India’s **10,000+ technical institutions**, this represents an estimated cumulative sovereign regulatory corpus exceeding **₹1regulatory security deposit portfolios ($1.8+ Billion USD)**.
 
-Historically, this multi-crore deposit ecosystem has operated via physical paper letters, scanned PDFs sent over unauthenticated emails, manual branch visits, and physical courier correspondence. This asymmetric information gap between the statutory regulator, financial institutions (Scheduled Commercial Banks), and educational societies has resulted in recurring vulnerabilities: forged bank confirmation letters, unauthorized premature liquidations, double-pledged instruments, and phantom trust diversions.
+Historically, this multi-crore deposit ecosystem has operated via physical paper letters, scanned PDFs sent over unauthenticated emails, manual branch visits, and physical courier correspondence. This asymmetric information gap between the regulatory regulator, financial institutions (Scheduled Commercial Banks), and educational societies has resulted in recurring vulnerabilities: forged bank confirmation letters, unauthorized premature liquidations, double-pledged instruments, and phantom trust diversions.
 
 This research paper provides an exhaustive, multi-perspective examination of:
 1. **Multi-Dimensional Impacts**: Quantifying the regulatory, financial, student welfare, banking, and governance dividends delivered by transitioning to a unified cryptographic portal.
 2. **Structural & Architectural Improvements**: Detailed engineering evolution from the current monolithic MVP into an enterprise-grade, event-driven, horizontally scalable microservice architecture.
-3. **Advanced Security Hardening**: Next-generation zero-trust controls, Hardware Security Modules (HSM), Mutual TLS (mTLS), Confidential Computing Enclaves, and Post-Quantum Cryptography (PQC) readiness.
+3. **Advanced Security Hardening**: Next-generation defense-in-depth controls, Hardware Security Modules (HSM), Mutual TLS (mTLS), Confidential Computing Enclaves, and Post-Quantum Cryptography (PQC) readiness.
 4. **Comprehensive Fraud Prevention Blueprint**: Deep taxonomic deconstruction of 8 real-world fraud vectors with exact cryptographic, database-level, and inter-bank countermeasures.
 
 ---
@@ -61,13 +61,13 @@ flowchart TD
 2. **Instantaneous Parliamentary & CAG Audit Readiness**:
    - Compliance audits by the Comptroller and Auditor General (CAG) historically require months of compiling physical bank certificates across 8 regional offices. With the portal's SHA-256 linear hash-chained audit ledger (`audit_event`) and `audit_verify()` integrity check, regulatory verification executes in automated batch runs.
 3. **Eradication of File Tampering & Discretionary Delays**:
-   - The server-driven Finite State Machine (`next_action()`) and strict Role-Based Access Control eliminate administrative discretion. Files cannot be held indefinitely; statutory SLAs trigger automated visual escalations (Warning at 30 days, Critical at 7 days).
+   - The server-driven Finite State Machine (`next_action()`) and strict Role-Based Access Control eliminate administrative discretion. Files cannot be held indefinitely; regulatory SLAs trigger automated visual escalations (Warning at 30 days, Critical at 7 days).
 
 ### 1.2 Financial & Economic Impact
 1. **Protection of Sovereign & Public Trust Corpus**:
-   - Technical institutions frequently deposit between ₹15 Lakh and ₹70 Lakh (dynamically calculated based on programme and land ownership). Preventing unauthorized encashment ensures that an estimated **₹15,000+ Crore** in educational security deposits remains actively preserved.
+   - Technical institutions frequently deposit between ₹15 Lakh and ₹70 Lakh (dynamically calculated based on programme and land ownership). Preventing unauthorized encashment ensures that an estimated **₹1regulatory security deposit portfolios** in educational security deposits remains actively preserved.
 2. **Elimination of IEEE 754 Floating-Point Discrepancies**:
-   - Across 10,000 institutions over 10-year lock-in terms, standard floating-point calculations introduce compounding binary rounding errors. The portal's strict integer paise accounting (`bigint` storing exact paise: ₹1 Lakh = 10,000,000 paise) guarantees penny-perfect mathematical reconciliation across multi-decade lifecycles.
+   - Across institutions nationwide over 10-year lock-in terms, standard floating-point calculations introduce compounding binary rounding errors. The portal's strict integer paise accounting (`bigint` storing exact paise: ₹1 Lakh = 10,000,000 paise) guarantees penny-perfect mathematical reconciliation across multi-decade lifecycles.
 3. **Reduction of Operational Compliance Costs**:
    - Physical paper issuance, postal registration, notary attestations, and manual courier verifications cost institutions an estimated ₹15,000 to ₹35,000 per FDR cycle. For 10,000 colleges, the digital portal saves an aggregate **₹25 to ₹35 Crore annually** in deadweight administrative overhead.
 
@@ -100,7 +100,7 @@ graph TB
     end
 
     subgraph Target_Enterprise ["Target Enterprise Structure (Distributed Event-Driven)"]
-        Ingress["Cloudflare Zero Trust / Caddy Ingress (mTLS)"]
+        Ingress["Cloudflare defense-in-depth / Caddy Ingress (mTLS)"]
         
         subgraph Services ["Decoupled Microservice Mesh"]
             Auth_Svc["Auth & Identity Service (OIDC / OAuth2)"]
@@ -112,7 +112,7 @@ graph TB
         
         Kafka_Bus["Apache Kafka Event Spine (Idempotent Topics)"]
         
-        subgraph Storage_Layer ["Distributed High-Assurance Data Layer"]
+        subgraph Storage_Layer ["Distributed defense-in-depth Data Layer"]
             PG_Primary["PostgreSQL Primary (Write-Heavy, RLS Enforced)"]
             PG_Replica1["PostgreSQL Read Replica 1 (North/West Regions)"]
             PG_Replica2["PostgreSQL Read Replica 2 (South/East Regions)"]
@@ -189,7 +189,7 @@ The existing portal enforces 7 defense tiers. To achieve national critical infra
 
 ```mermaid
 flowchart LR
-    subgraph ZeroTrust ["Zero-Trust Cryptographic Perimeter"]
+    subgraph ZeroTrust ["defense-in-depth Cryptographic Perimeter"]
         direction TB
         mTLS["Hardware-Backed mTLS 1.3<br/>(RFC 7469 Strict Pinning)"]
         HSM["FIPS 140-2 Level 3 HSM<br/>(PKCS#11 Secure Key Storage)"]
@@ -218,7 +218,7 @@ flowchart LR
   - All cryptographic signing and verification executes inside the tamper-resistant hardware cryptographic boundary via standard PKCS#11 interfaces.
 
 ### 3.2 Post-Quantum Cryptography (PQC) Readiness
-- **The "Harvest Now, Decrypt Later" Threat**: AICTE FDRs have a statutory **10-year lock-in period**. Encrypted instruments and digital signatures archived in 2026 will mature in 2036. Adversaries storing captured network traffic today could break standard RSA-2048 or ECC P-256 signatures in the 2030s using Shor's algorithm on quantum computers.
+- **The "Harvest Now, Decrypt Later" Threat**: AICTE FDRs have a regulatory **10-year lock-in period**. Encrypted instruments and digital signatures archived in 2026 will mature in 2036. Adversaries storing captured network traffic today could break standard RSA-2048 or ECC P-256 signatures in the 2030s using Shor's algorithm on quantum computers.
 - **Countermeasure**: Hybrid cryptographic signing incorporating NIST-standardized Post-Quantum algorithms:
   - **Key Encapsulation**: ML-KEM (formerly CRYSTALS-Kyber) combined with X25519 for document vault encryption.
   - **Digital Signatures**: Dual-signing using ECDSA (FIPS 186-4) concatenated with **ML-DSA (CRYSTALS-Dilithium)**. Even if classical cryptography falls to quantum computers, the post-quantum signature guarantees mathematical non-repudiation across the full 10-year horizon.
@@ -559,4 +559,4 @@ timeline
 
 ---
 
-> **Conclusion**: The AICTE FDR Portal transforms an antiquated, paper-based, fraud-vulnerable regulatory chore into an automated, mathematically verifiable, high-assurance sovereign trust ecosystem. By treating security deposits not as simple database rows, but as **cryptographic assets governed by strict dual-custody invariants**, this system safeguards student futures, protects national regulatory integrity, and establishes a gold standard for digital governance in India.
+> **Conclusion**: The AICTE FDR Portal transforms an antiquated, paper-based, fraud-vulnerable regulatory chore into an automated, mathematically verifiable, defense-in-depth sovereign trust ecosystem. By treating security deposits not as simple database rows, but as **cryptographic assets governed by strict dual-custody invariants**, this system safeguards student futures, protects national regulatory integrity, and establishes a gold standard for digital governance in India.

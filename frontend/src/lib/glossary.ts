@@ -17,7 +17,7 @@ export const GLOSSARY_TERMS: Record<string, GlossaryTerm> = {
     plainSummary:
       "A fixed-term bank deposit held under joint lien for AICTE regulatory approval.",
     detail:
-      "A Fixed Deposit Receipt issued by a Scheduled Commercial Bank, pledged jointly with AICTE for a statutory 10-year term as security against institutional obligations.",
+      "A Fixed Deposit Receipt issued by a Scheduled Commercial Bank, pledged jointly with AICTE for a regulatory 10-year term as security against institutional obligations.",
   },
   lien: {
     id: "lien",
