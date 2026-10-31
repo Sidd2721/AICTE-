@@ -179,6 +179,23 @@ def _get_seeded_sample_release_request(
     inst = session.get(Instrument, req.instrument_id)
     if not inst:
         raise HTTPException(status_code=404, detail="Instrument not found")
+
+    if settings.FASTAPI_ENV != "production":
+        try:
+            verify_release_receipt(req.receipt_token)
+        except ValueError:
+            from app.domain.receipt import sign_release_receipt
+
+            req.receipt_token = sign_release_receipt(
+                instrument_id=str(inst.id),
+                instrument_ref_no=inst.ref_no,
+                path=req.path or "term_completion",
+                release_id=str(req.id),
+            )
+            session.add(req)
+            session.commit()
+            session.refresh(req)
+
     institution = session.get(Institution, inst.institution_id)
     return req, inst, institution
 

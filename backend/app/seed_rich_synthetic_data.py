@@ -609,7 +609,19 @@ def seed_rich_data() -> None:
                     ReleaseRequest.instrument_id == rel_inst3.id
                 )
             ).first()
-            if existing_req3 and not existing_req3.receipt_token:
+            needs_token = False
+            if existing_req3:
+                if not existing_req3.receipt_token:
+                    needs_token = True
+                else:
+                    from app.domain.receipt import verify_release_receipt
+
+                    try:
+                        verify_release_receipt(existing_req3.receipt_token)
+                    except ValueError:
+                        needs_token = True
+
+            if existing_req3 and needs_token:
                 from app.domain.receipt import sign_release_receipt
 
                 receipt_token = sign_release_receipt(
