@@ -122,12 +122,8 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
                             "[lifespan] Unseeded database detected; seeding initial demo data..."
                         )
                         init_db(session)
-                        seed_rich_data()
-                        logger.info("[lifespan] Initial demo data seeded successfully.")
-                    else:
-                        logger.info(
-                            "[lifespan] Database already seeded; skipping redundant seed."
-                        )
+                    seed_rich_data()
+                    logger.info("[lifespan] Initial demo data seeded successfully.")
                     from app.seed_reports_topup import seed_reports_topup
 
                     n_topup = seed_reports_topup(session)
@@ -386,4 +382,13 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 if FRONTEND_DIR.is_dir():
+    from fastapi.responses import FileResponse, JSONResponse
+
+    @app.get("/verify-receipt", include_in_schema=False)
+    def verify_receipt_spa_entry() -> Response:
+        index_file = FRONTEND_DIR / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file, media_type="text/html")
+        return JSONResponse(status_code=404, content={"detail": "Frontend not found"})
+
     app.frontend("/", directory=FRONTEND_DIR, fallback="index.html")

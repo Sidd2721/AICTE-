@@ -231,4 +231,5 @@ def get_sample_receipt(
         "instrument_id": str(inst.id),
         "instrument_ref_no": inst.ref_no,
         "token": req.receipt_token,
+        "receipt_token": req.receipt_token,
     }
