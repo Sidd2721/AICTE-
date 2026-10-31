@@ -370,6 +370,8 @@ class LiveVerifier:
             )
             if v_stat == 200:
                 try:
+                    v_data = json.loads(v_body.decode("utf-8"))
+                    token_verify_ok = v_data.get("valid") is True
                     claims_dict = v_data.get("claims") or {}
                     token_verify_detail = (
                         f"HTTP 200, valid={v_data.get('valid')}, "
