@@ -86,3 +86,14 @@ Preshow Summary: 7/7 checks passed
 2. **Row-Level Security (RLS)**: PostgreSQL enforces tenant isolation directly in SQL engine; cross-institution/region access returns 404 with 0 rows leaked.
 3. **Dual-Custody Enforcement**: Regional officers can only verify/recommend release; Central Bureau must separately approve. The system strictly prevents maker from acting as checker.
 4. **Tamper-Evident SHA-256 Audit Chain**: Every critical event is chained to previous events. Modifying any past event invalidates the hash chain integrity.
+
+---
+
+## 5. Scope Limits & Honest Disclosures
+
+- **Local write journey**: NOT RUN
+- **NOT VERIFIED list**:
+  - 24-hour soak
+  - two-network IP test
+  - restart key-persistence test
+  - Docker memory test
