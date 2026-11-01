@@ -228,7 +228,7 @@ python-multipart==0.0.32
     #   fastapi
 pyyaml==6.0.3
     # via uvicorn
-reportlab==4.5.1
+reportlab==5.1.0
     # via app (pyproject.toml)
 requests==2.34.2
     # via
